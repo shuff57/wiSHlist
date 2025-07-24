@@ -1,8 +1,22 @@
 import React from 'react';
-import TeacherWishlist from './components/TeacherWishlist';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { LoginView } from './components/auth/LoginView';
+import { WishlistView } from './components/wishlist/WishlistView';
+import { AdminDashboard } from './components/admin/AdminDashboard';
+import PrivateRoute from './components/auth/PrivateRoute';
 
 const App: React.FC = () => {
-  return <TeacherWishlist />;
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<LoginView />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="/" element={<WishlistView />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Route>
+      </Routes>
+    </Router>
+  );
 };
 
 export default App;

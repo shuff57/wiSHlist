@@ -1,37 +1,76 @@
-import React from 'react';
-import { WishlistItem } from '../../types';
-import { Heart, ExternalLink, CheckCircle, Gift, Settings } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { WishlistItem, CustomRequest, CustomWishForm } from '../../types';
+import { Heart, ExternalLink, CheckCircle, Gift } from 'lucide-react';
+import { INITIAL_WISHLIST_ITEMS, INITIAL_CUSTOM_REQUESTS } from '../../constants';
+import { account } from '../../appwriteConfig';
+import { useNavigate } from 'react-router-dom';
+import { Models } from 'appwrite';
 
-interface WishlistViewProps {
-  user: { name: string; role: string };
-  items: WishlistItem[];
-  teacherName: string;
-  onLogout: () => void;
-  onAdminView: () => void;
-  onMarkContribution: (itemId: number) => void;
-  customWishForm: {
-    itemName: string;
-    description: string;
-    storeLink: string;
-    estimatedCost: string;
+export const WishlistView: React.FC = () => {
+  const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>(INITIAL_WISHLIST_ITEMS);
+  const [customRequests, setCustomRequests] = useState<CustomRequest[]>(INITIAL_CUSTOM_REQUESTS);
+  const [teacherName, setTeacherName] = useState("Ms. Johnson");
+  const [customWishForm, setCustomWishForm] = useState<CustomWishForm>({ 
+    itemName: '', 
+    description: '', 
+    storeLink: '', 
+    estimatedCost: '' 
+  });
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const loggedInUser = await account.get();
+        setUser(loggedInUser);
+      } catch (error) {
+        navigate('/login');
+      }
+    };
+    checkUser();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await account.deleteSession('current');
+      navigate('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
-  onCustomWishFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onSubmitCustomWish: (e: React.FormEvent) => void;
-  onUpdateTeacherName: (newName: string) => void;
-}
 
-export const WishlistView: React.FC<WishlistViewProps> = ({
-  user,
-  items,
-  teacherName,
-  onLogout,
-  onAdminView,
-  onMarkContribution,
-  customWishForm,
-  onCustomWishFormChange,
-  onSubmitCustomWish,
-  onUpdateTeacherName
-}) => {
+  const handleCustomWishFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setCustomWishForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const submitCustomWish = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newRequest: CustomRequest = {
+      id: customRequests.length + 1,
+      ...customWishForm,
+      status: 'pending',
+      requestedBy: user?.name || 'Anonymous'
+    };
+    setCustomRequests([...customRequests, newRequest]);
+    setCustomWishForm({ itemName: '', description: '', storeLink: '', estimatedCost: '' });
+  };
+
+  const markContribution = (itemId: number) => {
+    setWishlistItems(items => 
+      items.map(item => 
+        item.id === itemId 
+          ? { ...item, contributions: item.contributions + 1 }
+          : item
+      )
+    );
+  };
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b">
@@ -40,23 +79,15 @@ export const WishlistView: React.FC<WishlistViewProps> = ({
             <div className="flex items-center space-x-3">
               <Heart className="w-8 h-8 text-red-500" />
               <div>
-                <input type="text" value={teacherName} onChange={(e) => onUpdateTeacherName(e.target.value)} onDoubleClick={(e) => (e.target as HTMLInputElement).select()} className="text-xl font-bold text-gray-800 bg-transparent" />
+                <input type="text" value={teacherName} onChange={(e) => setTeacherName(e.target.value)} onDoubleClick={(e) => (e.target as HTMLInputElement).select()} className="text-xl font-bold text-gray-800 bg-transparent" />
                 <p className="text-sm text-gray-600">3rd Grade Supply Wishlist</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              {user.role === 'admin' && (
-                <button
-                  onClick={onAdminView}
-                  className="text-blue-600 hover:text-blue-800 font-medium flex items-center"
-                >
-                  <Settings className="w-4 h-4 mr-1" />
-                  Admin
-                </button>
-              )}
+              {/* Add admin check here if needed */}
               <span className="text-gray-600">Welcome, {user.name}</span>
               <button
-                onClick={onLogout}
+                onClick={handleLogout}
                 className="text-red-600 hover:text-red-800 font-medium"
               >
                 Logout
@@ -74,7 +105,7 @@ export const WishlistView: React.FC<WishlistViewProps> = ({
 
         {/* Wishlist Items */}
         <div className="space-y-4 mb-8">
-          {items.map(item => (
+          {wishlistItems.map(item => (
             <div key={item.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -98,7 +129,7 @@ export const WishlistView: React.FC<WishlistViewProps> = ({
                     Purchase <ExternalLink className="w-4 h-4 ml-2" />
                   </a>
                   <button
-                    onClick={() => onMarkContribution(item.id)}
+                    onClick={() => markContribution(item.id)}
                     className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200 flex items-center text-sm font-medium"
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
@@ -115,14 +146,14 @@ export const WishlistView: React.FC<WishlistViewProps> = ({
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Suggest a New Item</h3>
           <p className="text-gray-600 mb-4">Have an idea for something our classroom could use? Submit your suggestion!</p>
           
-          <div className="space-y-4">
+          <form onSubmit={submitCustomWish} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 type="text"
                 name="itemName"
                 placeholder="Item name"
                 value={customWishForm.itemName}
-                onChange={onCustomWishFormChange}
+                onChange={handleCustomWishFormChange}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -131,7 +162,7 @@ export const WishlistView: React.FC<WishlistViewProps> = ({
                 name="estimatedCost"
                 placeholder="Estimated cost (e.g., $15.99)"
                 value={customWishForm.estimatedCost}
-                onChange={onCustomWishFormChange}
+                onChange={handleCustomWishFormChange}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -140,7 +171,7 @@ export const WishlistView: React.FC<WishlistViewProps> = ({
               name="description"
               placeholder="Description - why would this be helpful for the classroom?"
               value={customWishForm.description}
-              onChange={onCustomWishFormChange}
+              onChange={handleCustomWishFormChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
               required
@@ -150,16 +181,16 @@ export const WishlistView: React.FC<WishlistViewProps> = ({
               name="storeLink"
               placeholder="Link to store (optional)"
               value={customWishForm.storeLink}
-              onChange={onCustomWishFormChange}
+              onChange={handleCustomWishFormChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <button
-              onClick={onSubmitCustomWish}
+              type="submit"
               className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition duration-200 font-medium"
             >
               Submit Suggestion
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </div>

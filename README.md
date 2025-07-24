@@ -1,0 +1,100 @@
+# wiSHlist
+
+This is a wishlist application built with React and TypeScript.
+
+## Getting Started
+
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+
+### Prerequisites
+
+You need to have Node.js and npm installed on your machine.
+
+### Installation
+
+1.  Clone the repo
+    ```sh
+    git clone https://github.com/your_username/wiSHlist.git
+    ```
+2.  Install NPM packages
+    ```sh
+    npm install
+    ```
+
+## Available Scripts
+
+In the project directory, you can run:
+
+### `npm start` or `npm run dev`
+
+Runs the app in the development mode.<br />
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+The page will reload if you make edits.<br />
+You will also see any lint errors in the console.
+
+### `npm test`
+
+Launches the test runner in the interactive watch mode.<br />
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+
+### `npm run build`
+
+Builds the app for production to the `build` folder.<br />
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+The build is minified and the filenames include the hashes.<br />
+Your app is ready to be deployed!
+
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `npm run eject`
+
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+
+## Project Structure
+
+```
+src
+├── App.tsx
+├── index.css
+├── index.tsx
+├── components
+│   ├── TeacherWishlist.tsx
+│   ├── admin
+│   │   └── AdminDashboard.tsx
+│   ├── auth
+│   │   └── LoginView.tsx
+│   └── wishlist
+│       └── WishlistView.tsx
+├── constants
+│   └── index.ts
+├── types
+│   └── index.ts
+└── utils
+    └── auth.ts
+```
+
+## Dependencies
+
+-   [@types/node](https://www.npmjs.com/package/@types/node)
+-   [@types/react](https://www.npmjs.com/package/@types/react)
+-   [@types/react-dom](https://www.npmjs.com/package/@types/react-dom)
+-   [lucide-react](https://www.npmjs.com/package/lucide-react)
+-   [react](https://www.npmjs.com/package/react)
+-   [react-dom](https://www.npmjs.com/package/react-dom)
+-   [typescript](https://www.npmjs.com/package/typescript)
+
+## Dev Dependencies
+
+-   [@types/jest](https://www.npmjs.com/package/@types/jest)
+-   [autoprefixer](https://www.npmjs.com/package/autoprefixer)
+-   [postcss](https://www.npmjs.com/package/postcss)
+-   [react-scripts](https://www.npmjs.com/package/react-scripts)
+-   [tailwindcss](https://npmjs.com/package/tailwindcss)

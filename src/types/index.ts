@@ -1,9 +1,3 @@
-export interface User {
-  name: string;
-  email: string;
-  role: 'admin' | 'supporter';
-}
-
 export interface WishlistItem {
   id: number;
   name: string;

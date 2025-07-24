@@ -1,48 +1,92 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, Plus, Clock, User, ExternalLink } from 'lucide-react';
-import { CustomRequest } from '../../types';
-import { LINK_EXPIRY_OPTIONS } from '../../constants';
+import { CustomRequest, AdminForm, WishlistItem } from '../../types';
+import { LINK_EXPIRY_OPTIONS, INITIAL_CUSTOM_REQUESTS, INITIAL_WISHLIST_ITEMS } from '../../constants';
+import { account } from '../../appwriteConfig';
+import { useNavigate } from 'react-router-dom';
+import { Models } from 'appwrite';
+import { generateRegistrationToken } from '../../utils/auth';
 
-interface AdminDashboardProps {
-  user: { name: string };
-  adminForm: {
-    itemName: string;
-    description: string;
-    storeLink: string;
-    cost: string;
+export const AdminDashboard: React.FC = () => {
+  const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
+  const [adminForm, setAdminForm] = useState<AdminForm>({ 
+    itemName: '', 
+    description: '', 
+    storeLink: '', 
+    cost: '' 
+  });
+  const [linkExpiry, setLinkExpiry] = useState('24');
+  const [registrationLink, setRegistrationLink] = useState('');
+  const [customRequests, setCustomRequests] = useState<CustomRequest[]>(INITIAL_CUSTOM_REQUESTS);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>(INITIAL_WISHLIST_ITEMS);
+  const [teacherName, setTeacherName] = useState("Ms. Johnson");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const loggedInUser = await account.get();
+        setUser(loggedInUser);
+      } catch (error) {
+        navigate('/login');
+      }
+    };
+    checkUser();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await account.deleteSession('current');
+      navigate('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
-  linkExpiry: string;
-  registrationLink: string;
-  customRequests: CustomRequest[];
-  onAdminFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onAddNewItem: (e: React.FormEvent) => void;
-  onLinkExpiryChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  onGenerateLink: () => void;
-  onCopyLink: () => void;
-  onApproveRequest: (id: number) => void;
-  onDeclineRequest: (id: number) => void;
-  onViewWishlist: () => void;
-  onLogout: () => void;
-  onUpdateName: (newName: string) => void;
-}
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  user,
-  adminForm,
-  linkExpiry,
-  registrationLink,
-  customRequests,
-  onAdminFormChange,
-  onAddNewItem,
-  onLinkExpiryChange,
-  onGenerateLink,
-  onCopyLink,
-  onApproveRequest,
-  onDeclineRequest,
-  onViewWishlist,
-  onLogout,
-  onUpdateName
-}) => {
+  const handleAdminFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setAdminForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const addNewItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newItem: WishlistItem = {
+      id: wishlistItems.length + 1,
+      name: adminForm.itemName,
+      description: adminForm.description,
+      storeLink: adminForm.storeLink,
+      cost: adminForm.cost,
+      contributions: 0
+    };
+    setWishlistItems([...wishlistItems, newItem]);
+    setAdminForm({ itemName: '', description: '', storeLink: '', cost: '' });
+  };
+
+  const generateLink = () => {
+    const link = generateRegistrationToken(linkExpiry);
+    setRegistrationLink(link);
+  };
+
+  const approveCustomRequest = (requestId: number) => {
+    const request = customRequests.find(r => r.id === requestId);
+    if (request) {
+      const newItem: WishlistItem = {
+        id: wishlistItems.length + 1,
+        name: request.itemName,
+        description: request.description,
+        storeLink: request.storeLink,
+        cost: request.estimatedCost,
+        contributions: 0
+      };
+      setWishlistItems([...wishlistItems, newItem]);
+      setCustomRequests(customRequests.filter(r => r.id !== requestId));
+    }
+  };
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b">
@@ -54,14 +98,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
             <div className="flex items-center space-x-4">
               <button
-                onClick={onViewWishlist}
+                onClick={() => navigate('/')}
                 className="text-blue-600 hover:text-blue-800 font-medium"
               >
                 View Wishlist
               </button>
               <span className="text-gray-600">Welcome, {user.name}</span>
               <button
-                onClick={onLogout}
+                onClick={handleLogout}
                 className="text-red-600 hover:text-red-800 font-medium"
               >
                 Logout
@@ -79,13 +123,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <Plus className="w-5 h-5 mr-2" />
               Add New Item
             </h2>
-            <div className="space-y-4">
+            <form onSubmit={addNewItem} className="space-y-4">
               <input
                 type="text"
                 name="itemName"
                 placeholder="Item name"
                 value={adminForm.itemName}
-                onChange={onAdminFormChange}
+                onChange={handleAdminFormChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -93,7 +137,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 name="description"
                 placeholder="Description"
                 value={adminForm.description}
-                onChange={onAdminFormChange}
+                onChange={handleAdminFormChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows={3}
                 required
@@ -103,7 +147,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 name="storeLink"
                 placeholder="Store link"
                 value={adminForm.storeLink}
-                onChange={onAdminFormChange}
+                onChange={handleAdminFormChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -112,17 +156,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 name="cost"
                 placeholder="Cost (e.g., $12.99)"
                 value={adminForm.cost}
-                onChange={onAdminFormChange}
+                onChange={handleAdminFormChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
               <button
-                onClick={onAddNewItem}
+                type="submit"
                 className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200"
               >
                 Add to Wishlist
               </button>
-            </div>
+            </form>
           </div>
 
           {/* Generate Registration Link */}
@@ -138,7 +182,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </label>
                 <select
                   value={linkExpiry}
-                  onChange={onLinkExpiryChange}
+                  onChange={(e) => setLinkExpiry(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   {LINK_EXPIRY_OPTIONS.map(option => (
@@ -149,7 +193,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </select>
               </div>
               <button
-                onClick={onGenerateLink}
+                onClick={generateLink}
                 className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
               >
                 Generate Link
@@ -165,7 +209,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded bg-white"
                     />
                     <button
-                      onClick={onCopyLink}
+                      onClick={() => navigator.clipboard.writeText(registrationLink)}
                       className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
                     >
                       Copy
@@ -184,8 +228,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <input
                 type="text"
                 placeholder="Teacher Name"
-                defaultValue={user.name}
-                onBlur={(e) => onUpdateName(e.target.value)}
+                defaultValue={teacherName}
+                onBlur={(e) => setTeacherName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -225,13 +269,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </div>
                     <div className="flex space-x-2 ml-4">
                       <button
-                        onClick={() => onApproveRequest(request.id)}
+                        onClick={() => approveCustomRequest(request.id)}
                         className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
                       >
                         Approve
                       </button>
                       <button
-                        onClick={() => onDeclineRequest(request.id)}
+                        onClick={() => setCustomRequests(reqs => reqs.filter(r => r.id !== request.id))}
                         className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700"
                       >
                         Decline
