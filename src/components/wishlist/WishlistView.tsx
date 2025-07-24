@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { WishlistItem, CustomRequest, CustomWishForm } from '../../types';
-import { Heart, ExternalLink, CheckCircle, Gift } from 'lucide-react';
+import { Heart, ExternalLink, CheckCircle, Gift, Settings } from 'lucide-react';
 import { INITIAL_WISHLIST_ITEMS, INITIAL_CUSTOM_REQUESTS } from '../../constants';
 import { account } from '../../appwriteConfig';
 import { useNavigate } from 'react-router-dom';
@@ -84,7 +84,13 @@ export const WishlistView: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              {/* Add admin check here if needed */}
+              <button
+                onClick={() => navigate('/admin')}
+                className="text-gray-600 hover:text-gray-800"
+                title="Admin"
+              >
+                <Settings className="w-6 h-6" />
+              </button>
               <span className="text-gray-600">Welcome, {user.name}</span>
               <button
                 onClick={handleLogout}

@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Heart, Plus, Clock, User, ExternalLink } from 'lucide-react';
 import { CustomRequest, AdminForm, WishlistItem } from '../../types';
 import { LINK_EXPIRY_OPTIONS, INITIAL_CUSTOM_REQUESTS, INITIAL_WISHLIST_ITEMS } from '../../constants';
-import { account } from '../../appwriteConfig';
+import { account, databases, databaseId, invitesCollectionId } from '../../appwriteConfig';
 import { useNavigate } from 'react-router-dom';
-import { Models } from 'appwrite';
-import { generateRegistrationToken } from '../../utils/auth';
+import { Models, ID } from 'appwrite';
 
 export const AdminDashboard: React.FC = () => {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
@@ -62,9 +61,23 @@ export const AdminDashboard: React.FC = () => {
     setAdminForm({ itemName: '', description: '', storeLink: '', cost: '' });
   };
 
-  const generateLink = () => {
-    const link = generateRegistrationToken(linkExpiry);
-    setRegistrationLink(link);
+  const generateLink = async () => {
+    try {
+      const token = ID.unique();
+      const expiryTime = new Date(Date.now() + parseInt(linkExpiry, 10) * 60 * 60 * 1000);
+      
+      await databases.createDocument(databaseId, invitesCollectionId, token, {
+        token: token,
+        expiresAt: expiryTime.toISOString(),
+        usedBy: ''
+      });
+
+      const link = `${window.location.origin}/register?token=${token}`;
+      setRegistrationLink(link);
+    } catch (error) {
+      console.error("Error generating registration link:", error);
+      alert("Could not generate registration link. See console for details.");
+    }
   };
 
   const approveCustomRequest = (requestId: number) => {

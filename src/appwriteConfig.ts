@@ -1,11 +1,14 @@
-import { Client, Account } from 'appwrite';
+import { Client, Account, Databases } from 'appwrite';
 
-const client = new Client();
+export const client = new Client();
 
 client
-    .setEndpoint(process.env.REACT_APP_APPWRITE_ENDPOINT as string) // Your Appwrite Endpoint
-    .setProject(process.env.REACT_APP_APPWRITE_PROJECT_ID as string); // Your project ID
+    .setEndpoint(process.env.REACT_APP_APPWRITE_ENDPOINT as string)
+    .setProject(process.env.REACT_APP_APPWRITE_PROJECT_ID as string);
 
-const account = new Account(client);
+export const account = new Account(client);
+export const databases = new Databases(client);
 
-export { client, account };
+export const databaseId = '68817565002be84bc837';
+export const invitesCollectionId = '688175940034cb25f71c';
+export const usersCollectionId = '68818ebb000d555b5a94';
