@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { account, databases, databaseId, usersCollectionId } from '../../appwriteConfig';
-import { AppwriteException, OAuthProvider, Query } from 'appwrite';
+import { account } from '../../appwriteConfig';
+import { AppwriteException, OAuthProvider } from 'appwrite';
 
 export const LoginView: React.FC = () => {
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -27,15 +27,7 @@ export const LoginView: React.FC = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      await account.createOAuth2Session(OAuthProvider.Google, 'http://localhost:3000/', 'http://localhost:3000/login');
-      const user = await account.get();
-      const userDocs = await databases.listDocuments(databaseId, usersCollectionId, [Query.equal('email', user.email)]);
-      if (userDocs.total === 0) {
-        await account.deleteSession('current');
-        setLoginError('User not registered. Please register first.');
-      } else {
-        navigate('/');
-      }
+      await account.createOAuth2Session(OAuthProvider.Google, 'http://localhost:3000/dashboard', 'http://localhost:3000/login');
     } catch (error) {
       if (error instanceof AppwriteException) {
         setLoginError(error.message);

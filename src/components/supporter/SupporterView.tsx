@@ -1,0 +1,223 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
+import { Models, Query, ID } from 'appwrite';
+import { Heart, ExternalLink, Gift, CheckCircle } from 'lucide-react';
+
+interface WishlistDoc {
+  teacher_name: string;
+  wishlist_name?: string;
+  contact_info?: string;
+}
+
+interface ItemDoc {
+  name: string;
+  description?: string;
+  store_link?: string;
+  cost?: string;
+  contributions: number;
+}
+
+interface SuggestionForm {
+  itemName: string;
+  description: string;
+  storeLink: string;
+  estimatedCost: string;
+}
+
+export const SupporterView: React.FC = () => {
+  const { wishlistKey } = useParams<{ wishlistKey: string }>();
+  const [wishlist, setWishlist] = useState<Models.Document & WishlistDoc | null>(null);
+  const [items, setItems] = useState<(Models.Document & ItemDoc)[]>([]);
+  const [suggestionForm, setSuggestionForm] = useState<SuggestionForm>({ itemName: '', description: '', storeLink: '', estimatedCost: '' });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const fetchWishlistData = useCallback(async (key: string) => {
+    try {
+      const response = await databases.listDocuments(
+        databaseId,
+        wishlistsCollectionId,
+        [Query.equal('wishlist_key', key)]
+      );
+
+      if (response.documents.length > 0) {
+        const foundWishlist = response.documents[0] as Models.Document & WishlistDoc;
+        setWishlist(foundWishlist);
+
+        const itemsResponse = await databases.listDocuments(
+          databaseId,
+          itemsCollectionId,
+          [Query.equal('wishlist_id', foundWishlist.$id)]
+        );
+        setItems(itemsResponse.documents as (Models.Document & ItemDoc)[]);
+      } else {
+        setError('No wishlist found with that key.');
+      }
+    } catch (err) {
+      setError('Failed to fetch wishlist. Please try again.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!wishlistKey) {
+      navigate('/');
+      return;
+    }
+    fetchWishlistData(wishlistKey);
+  }, [wishlistKey, navigate, fetchWishlistData]);
+
+  const handleMarkContribution = async (item: Models.Document & ItemDoc) => {
+    try {
+      const newContributions = item.contributions + 1;
+      await databases.updateDocument(
+        databaseId,
+        itemsCollectionId,
+        item.$id,
+        { contributions: newContributions }
+      );
+      setItems(prevItems => 
+        prevItems.map(i => 
+          i.$id === item.$id ? { ...i, contributions: newContributions } : i
+        )
+      );
+    } catch (error) {
+      console.error("Error marking contribution:", error);
+      alert("Could not mark contribution. Please try again.");
+    }
+  };
+
+  const handleSuggestionFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setSuggestionForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSuggestionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!wishlist) return;
+
+    try {
+      await databases.createDocument(
+        databaseId,
+        suggestionsCollectionId,
+        ID.unique(),
+        {
+          wishlist_id: wishlist.$id,
+          ...suggestionForm,
+          status: 'pending',
+          requestedBy: 'Anonymous'
+        }
+      );
+      alert('Suggestion submitted! The teacher will review it soon.');
+      setSuggestionForm({ itemName: '', description: '', storeLink: '', estimatedCost: '' });
+    } catch (error) {
+      console.error("Error submitting suggestion:", error);
+      alert("Could not submit suggestion. Please try again.");
+    }
+  };
+
+  if (loading) {
+    return <div className="text-center p-10">Loading...</div>;
+  }
+
+  if (error) {
+    return (
+       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center text-center p-4">
+        <h1 className="text-2xl font-bold text-red-600">Error</h1>
+        <p className="text-gray-700 mt-4">{error}</p>
+        <button onClick={() => navigate('/')} className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+          Back to Home
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow-sm border-b">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-3">
+              <Heart className="w-8 h-8 text-red-500" />
+              <div>
+                <h1 className="text-xl font-bold text-gray-800">{wishlist?.wishlist_name || `${wishlist?.teacher_name}'s Wishlist`}</h1>
+              </div>
+            </div>
+             <button onClick={() => navigate('/')} className="text-blue-600 hover:underline">Find another list</button>
+          </div>
+        </div>
+      </nav>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Help {wishlist?.teacher_name}'s Students Learn & Grow</h2>
+          <p className="text-gray-600">Your contributions make a real difference in our classroom. Thank you for supporting education!</p>
+          {wishlist?.contact_info && (
+            <p className="mt-2 text-sm text-gray-500">
+              <strong>Contact:</strong> {wishlist.contact_info}
+            </p>
+          )}
+        </div>
+        
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {items.length > 0 ? items.map(item => (
+              <div key={item.$id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">{item.name}</h3>
+                  <p className="text-gray-600 mb-3 text-sm">{item.description}</p>
+                </div>
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-4">
+                    {item.cost && <span className="text-green-600 font-medium">{item.cost}</span>}
+                    <span className="text-blue-600 flex items-center text-sm">
+                      <Gift className="w-4 h-4 mr-1" />
+                      {item.contributions} contributions
+                    </span>
+                  </div>
+                  <div className="flex flex-col space-y-2">
+                    {item.store_link && (
+                      <a
+                        href={item.store_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center text-sm font-medium"
+                      >
+                        Purchase <ExternalLink className="w-4 h-4 ml-2" />
+                      </a>
+                    )}
+                    <button
+                      onClick={() => handleMarkContribution(item)}
+                      className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm font-medium"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      I bought this
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <div className="md:col-span-2 text-center py-10 bg-white rounded-lg shadow">
+                <p className="text-gray-600">This wishlist is empty!</p>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Suggest a New Item</h3>
+            <form onSubmit={handleSuggestionSubmit} className="space-y-4">
+              <input type="text" name="itemName" placeholder="Item Name" value={suggestionForm.itemName} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded" required />
+              <textarea name="description" placeholder="Description" value={suggestionForm.description} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded" />
+              <input type="url" name="storeLink" placeholder="Store Link (optional)" value={suggestionForm.storeLink} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded" />
+              <input type="text" name="estimatedCost" placeholder="Estimated Cost (e.g., $15.00)" value={suggestionForm.estimatedCost} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded" />
+              <button type="submit" className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700">Submit Suggestion</button>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
