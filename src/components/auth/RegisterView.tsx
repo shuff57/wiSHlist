@@ -1,22 +1,37 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { account, databases, databaseId, invitesCollectionId } from '../../appwriteConfig';
+import { account, databases, databaseId, invitesCollectionId, usersCollectionId } from '../../appwriteConfig';
 import { AppwriteException, ID, OAuthProvider } from 'appwrite';
 import { Heart } from 'lucide-react';
+
+interface InviteDoc {
+  isRecommender: boolean;
+  isAdmin: boolean;
+  expiresAt: string;
+}
 
 export const RegisterView: React.FC = () => {
   const [registerForm, setRegisterForm] = useState({ name: '', email: '', password: '' });
   const [status, setStatus] = useState<'loading' | 'valid' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const [token, setToken] = useState<string | null>(null);
+  const [invite, setInvite] = useState<InviteDoc | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const completeOAuthRegistration = useCallback(async (urlToken: string) => {
+  const completeOAuthRegistration = useCallback(async (urlToken: string, inviteDoc: InviteDoc) => {
     try {
-      // The user is created in Auth by the OAuth process, so we just delete the invite.
+      const user = await account.get();
+      await databases.createDocument(databaseId, usersCollectionId, user.$id, {
+        name: user.name,
+        email: user.email,
+        role: 'teacher',
+        isRecommender: inviteDoc.isRecommender,
+        isAdmin: inviteDoc.isAdmin,
+        name_lowercase: user.name.toLowerCase()
+      });
       await databases.deleteDocument(databaseId, invitesCollectionId, urlToken);
-      navigate('/dashboard'); // Redirect to the teacher dashboard
+      navigate('/dashboard');
     } catch (error) {
       setStatus('error');
       if (error instanceof AppwriteException) {
@@ -39,23 +54,25 @@ export const RegisterView: React.FC = () => {
 
     const processRegistration = async () => {
       try {
-        await account.get();
-        completeOAuthRegistration(urlToken);
-      } catch (error) {
-        try {
-          const inviteDoc = await databases.getDocument(databaseId, invitesCollectionId, urlToken);
-          const expires = inviteDoc.expiresAt as string;
-          if (new Date() > new Date(expires)) {
-            setStatus('error');
-            setErrorMessage('Registration link has expired.');
-          } else {
-            setToken(urlToken);
-            setStatus('valid');
-          }
-        } catch (e) {
+        const inviteDoc = await databases.getDocument(databaseId, invitesCollectionId, urlToken) as unknown as InviteDoc;
+        if (new Date() > new Date(inviteDoc.expiresAt)) {
           setStatus('error');
-          setErrorMessage('Invalid or expired registration link.');
+          setErrorMessage('Registration link has expired.');
+          return;
         }
+        
+        setInvite(inviteDoc);
+        setToken(urlToken);
+
+        try {
+          await account.get();
+          completeOAuthRegistration(urlToken, inviteDoc);
+        } catch (error) {
+          setStatus('valid');
+        }
+      } catch (e) {
+        setStatus('error');
+        setErrorMessage('Invalid or expired registration link.');
       }
     };
 
@@ -64,16 +81,24 @@ export const RegisterView: React.FC = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) {
+    if (!token || !invite) {
       setErrorMessage('Registration token is not valid.');
       return;
     }
     setErrorMessage('');
     try {
-      await account.create(ID.unique(), registerForm.email, registerForm.password, registerForm.name);
+      const newUser = await account.create(ID.unique(), registerForm.email, registerForm.password, registerForm.name);
+      await databases.createDocument(databaseId, usersCollectionId, newUser.$id, {
+        name: registerForm.name,
+        email: registerForm.email,
+        role: 'teacher',
+        isRecommender: invite.isRecommender,
+        isAdmin: invite.isAdmin,
+        name_lowercase: registerForm.name.toLowerCase()
+      });
       await account.createEmailPasswordSession(registerForm.email, registerForm.password);
       await databases.deleteDocument(databaseId, invitesCollectionId, token);
-      navigate('/dashboard'); // Redirect to the teacher dashboard
+      navigate('/dashboard');
     } catch (error) {
       if (error instanceof AppwriteException) {
         setErrorMessage(error.message);
@@ -84,18 +109,11 @@ export const RegisterView: React.FC = () => {
   };
 
   const handleGoogleRegister = async () => {
-    if (!token) {
-      setErrorMessage('Registration token is not valid.');
-      return;
-    }
+    if (!token) return;
     try {
       account.createOAuth2Session(OAuthProvider.Google, `${window.location.origin}/register?token=${token}`, `${window.location.origin}/dashboard`);
     } catch (error) {
-      if (error instanceof AppwriteException) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage('An unexpected error occurred during Google registration.');
-      }
+      setErrorMessage('Could not start Google registration.');
     }
   };
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, ID, Query } from 'appwrite';
-import { Heart, Plus, Trash2, Save, ArrowLeft, Check, X } from 'lucide-react';
+import { Heart, Trash2, ArrowLeft, Check, X } from 'lucide-react';
 
 interface WishlistDoc {
   wishlist_name?: string;
@@ -34,7 +34,14 @@ export const WishlistEditView: React.FC = () => {
   const [formData, setFormData] = useState({ wishlist_name: '', contact_info: '' });
   const [newItem, setNewItem] = useState({ name: '', description: '', store_link: '', cost: '' });
   const [loading, setLoading] = useState(true);
+  const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const handleCopy = (textToCopy: string, type: 'key' | 'link') => {
+    navigator.clipboard.writeText(textToCopy);
+    setCopiedItem(type);
+    setTimeout(() => setCopiedItem(null), 2000);
+  };
 
   const fetchWishlistData = useCallback(async (id: string) => {
     try {
@@ -248,14 +255,24 @@ export const WishlistEditView: React.FC = () => {
               <h4 className="text-sm font-medium text-gray-700">Share Key</h4>
               <div className="mt-1 flex items-center space-x-2">
                 <input type="text" readOnly value={wishlist?.wishlist_key || ''} className="w-full text-sm bg-gray-100 p-1 border rounded" />
-                <button onClick={() => navigator.clipboard.writeText(wishlist?.wishlist_key || '')} className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">Copy</button>
+                <button 
+                  onClick={() => handleCopy(wishlist?.wishlist_key || '', 'key')}
+                  className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'key' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                >
+                  {copiedItem === 'key' ? <Check className="w-4 h-4" /> : 'Copy'}
+                </button>
               </div>
             </div>
             <div className="mt-4">
               <h4 className="text-sm font-medium text-gray-700">Share Link</h4>
               <div className="mt-1 flex items-center space-x-2">
                 <input type="text" readOnly value={`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`} className="w-full text-sm bg-gray-100 p-1 border rounded" />
-                <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`)} className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">Copy</button>
+                <button 
+                  onClick={() => handleCopy(`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`, 'link')}
+                  className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'link' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                >
+                  {copiedItem === 'link' ? <Check className="w-4 h-4" /> : 'Copy'}
+                </button>
               </div>
             </div>
           </div>
