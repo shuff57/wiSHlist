@@ -50,10 +50,13 @@ export const AdminDashboard: React.FC = () => {
     const checkUser = async () => {
       try {
         const loggedInUser = await account.get();
-        if (loggedInUser.$id !== '68817300de763e596523') {
+        const userDoc = await databases.getDocument(databaseId, usersCollectionId, loggedInUser.$id);
+        
+        if (!(userDoc as any).isAdmin) {
           navigate('/dashboard');
           return;
         }
+        
         setUser(loggedInUser);
         fetchPrivilegedUsers();
       } catch (error) {

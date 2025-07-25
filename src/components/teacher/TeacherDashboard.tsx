@@ -31,37 +31,27 @@ export const TeacherDashboard: React.FC = () => {
 
   const fetchUserData = useCallback(async (userId: string, userName: string) => {
     try {
-      // Try to get the user document
       const userDocument = await databases.getDocument(databaseId, usersCollectionId, userId);
       setUserDoc(userDocument as Models.Document & UserDoc);
     } catch (error: any) {
-      // If the document doesn't exist (error code 404), create it
-      if (error.code === 404) {
+      if (error.code === 404) { // Document not found
         try {
           const newUserDoc = await databases.createDocument(
             databaseId,
             usersCollectionId,
             userId,
-            {
-              name: userName,
-              isRecommender: false,
-              isAdmin: false,
-            }
+            { name: userName, isRecommender: false, isAdmin: false }
           );
           setUserDoc(newUserDoc as Models.Document & UserDoc);
         } catch (creationError) {
           console.error("Failed to create user document:", creationError);
-          navigate('/login'); // Redirect if creation fails
         }
       } else {
-        // For any other errors, log it and redirect
         console.error("Failed to fetch user data:", error);
-        navigate('/login');
       }
     }
 
     try {
-      // Fetch wishlists regardless of user doc status initially
       const response = await databases.listDocuments(
         databaseId,
         wishlistsCollectionId,
@@ -71,14 +61,13 @@ export const TeacherDashboard: React.FC = () => {
     } catch (error) {
       console.error("Failed to fetch wishlists:", error);
     }
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const loggedInUser = await account.get();
         setUser(loggedInUser);
-        // Pass both ID and name to fetchUserData
         await fetchUserData(loggedInUser.$id, loggedInUser.name);
       } catch (error) {
         navigate('/login');

@@ -14,45 +14,23 @@ export const RegisterView: React.FC = () => {
   const [registerForm, setRegisterForm] = useState({ name: '', email: '', password: '' });
   const [status, setStatus] = useState<'loading' | 'valid' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [invite, setInvite] = useState<InviteDoc | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const completeOAuthRegistration = useCallback(async (urlToken: string, inviteDoc: InviteDoc) => {
-    try {
-      const user = await account.get();
-      await databases.createDocument(databaseId, usersCollectionId, user.$id, {
-        name: user.name,
-        email: user.email,
-        role: 'teacher',
-        isRecommender: inviteDoc.isRecommender,
-        isAdmin: inviteDoc.isAdmin,
-        name_lowercase: user.name.toLowerCase()
-      });
-      await databases.deleteDocument(databaseId, invitesCollectionId, urlToken);
-      navigate('/dashboard');
-    } catch (error) {
-      setStatus('error');
-      if (error instanceof AppwriteException) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage('An unexpected error occurred during OAuth completion.');
-      }
-    }
-  }, [navigate]);
-
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const urlToken = params.get('token');
+    const validateToken = async () => {
+      const params = new URLSearchParams(location.search);
+      const urlToken = params.get('token');
 
-    if (!urlToken) {
-      setStatus('error');
-      setErrorMessage('Invalid registration link: No token provided.');
-      return;
-    }
+      if (!urlToken) {
+        setStatus('error');
+        setErrorMessage('Invalid registration link: No token provided.');
+        return;
+      }
 
-    const processRegistration = async () => {
       try {
         const inviteDoc = await databases.getDocument(databaseId, invitesCollectionId, urlToken) as unknown as InviteDoc;
         if (new Date() > new Date(inviteDoc.expiresAt)) {
@@ -63,21 +41,15 @@ export const RegisterView: React.FC = () => {
         
         setInvite(inviteDoc);
         setToken(urlToken);
-
-        try {
-          await account.get();
-          completeOAuthRegistration(urlToken, inviteDoc);
-        } catch (error) {
-          setStatus('valid');
-        }
+        setStatus('valid');
       } catch (e) {
         setStatus('error');
         setErrorMessage('Invalid or expired registration link.');
       }
     };
 
-    processRegistration();
-  }, [location.search, completeOAuthRegistration]);
+    validateToken();
+  }, [location.search]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +58,11 @@ export const RegisterView: React.FC = () => {
       return;
     }
     setErrorMessage('');
+    setLoading(true);
     try {
+      // Ensure no active session
+      try { await account.deleteSession('current'); } catch {}
+
       const newUser = await account.create(ID.unique(), registerForm.email, registerForm.password, registerForm.name);
       await databases.createDocument(databaseId, usersCollectionId, newUser.$id, {
         name: registerForm.name,
@@ -105,15 +81,23 @@ export const RegisterView: React.FC = () => {
       } else {
         setErrorMessage('An unexpected error occurred.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleRegister = async () => {
     if (!token) return;
+    setLoading(true);
     try {
-      account.createOAuth2Session(OAuthProvider.Google, `${window.location.origin}/register?token=${token}`, `${window.location.origin}/dashboard`);
+      // Ensure no active session
+      try { await account.deleteSession('current'); } catch {}
+      
+      account.createOAuth2Session(OAuthProvider.Google, `${window.location.origin}/dashboard`, `${window.location.origin}/login`);
     } catch (error) {
       setErrorMessage('Could not start Google registration.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -168,6 +152,7 @@ export const RegisterView: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 placeholder="Your Name"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -181,6 +166,7 @@ export const RegisterView: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 placeholder="your-email@example.com"
                 required
+                disabled={loading}
               />
             </div>
             
@@ -194,14 +180,16 @@ export const RegisterView: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 placeholder="••••••••"
                 required
+                disabled={loading}
               />
             </div>
             
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
+              disabled={loading}
             >
-              Register
+              {loading ? 'Registering...' : 'Register'}
             </button>
           </div>
         </form>
@@ -219,9 +207,10 @@ export const RegisterView: React.FC = () => {
           <div className="mt-6">
             <button
               onClick={handleGoogleRegister}
-              className="w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50"
+              className="w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 disabled:bg-gray-200"
+              disabled={loading}
             >
-              Register with Google
+              {loading ? 'Processing...' : 'Register with Google'}
             </button>
           </div>
         </div>
