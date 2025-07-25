@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Eye, EyeOff, Heart } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { account } from '../../appwriteConfig';
 import { AppwriteException, OAuthProvider } from 'appwrite';
 
@@ -9,35 +9,13 @@ export const LoginView: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const params = new URLSearchParams(location.search);
-        const secret = params.get('secret');
-        const userId = params.get('userId');
-
-        if (secret && userId) {
-          await account.createSession(userId, secret);
-          navigate('/dashboard', { replace: true });
-        } else {
-          await account.get();
-          navigate('/dashboard', { replace: true });
-        }
-      } catch (error) {
-        // No session, stay on login page
-      }
-    };
-    checkSession();
-  }, [navigate, location.search]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
     try {
       await account.createEmailPasswordSession(loginForm.email, loginForm.password);
-      navigate('/dashboard');
+      navigate('/');
     } catch (error) {
       if (error instanceof AppwriteException) {
         setLoginError(error.message);
@@ -47,9 +25,9 @@ export const LoginView: React.FC = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     try {
-      account.createOAuth2Session(OAuthProvider.Google, `${window.location.origin}/login`, `${window.location.origin}/login`);
+      await account.createOAuth2Session(OAuthProvider.Google, 'http://localhost:3000/dashboard', 'http://localhost:3000/login');
     } catch (error) {
       if (error instanceof AppwriteException) {
         setLoginError(error.message);

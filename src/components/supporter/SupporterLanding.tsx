@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 
 export const SupporterLanding: React.FC = () => {
@@ -38,7 +38,7 @@ export const SupporterLanding: React.FC = () => {
         </form>
         
         <div className="mt-8 text-sm text-gray-500">
-          <p>Are you a teacher? <a href="/login" className="text-blue-600 hover:underline">Login here</a></p>
+          <p>Are you a teacher? <Link to="/login" className="text-blue-600 hover:underline">Login here</Link></p>
         </div>
       </div>
     </div>

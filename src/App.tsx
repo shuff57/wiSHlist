@@ -15,10 +15,11 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         {/* Supporter Flow */}
-        <Route path="/" element={<SupporterLanding />} />
+        <Route path="/find" element={<SupporterLanding />} />
         <Route path="/wishlist/:wishlistKey" element={<SupporterView />} />
 
         {/* Teacher Authentication */}
+        <Route path="/" element={<LoginView />} />
         <Route path="/login" element={<LoginView />} />
         <Route path="/register" element={<RegisterView />} />
 
