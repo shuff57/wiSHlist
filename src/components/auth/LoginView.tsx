@@ -1,33 +1,11 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { account } from '../../appwriteConfig';
 import { AppwriteException, OAuthProvider } from 'appwrite';
-import { useAuth } from '../../context/AuthContext';
 
 export const LoginView: React.FC = () => {
-  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError('');
-    setLoading(true);
-    try {
-      await login(loginForm.email, loginForm.password);
-      // Navigation is now handled automatically by PublicRoute
-    } catch (error) {
-      if (error instanceof AppwriteException) {
-        setLoginError(error.message);
-      } else {
-        setLoginError('An unexpected error occurred.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleGoogleLogin = async () => {
     setLoading(true);
@@ -43,11 +21,6 @@ export const LoginView: React.FC = () => {
     }
   };
 
-  const handleLoginFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setLoginForm(prev => ({ ...prev, [name]: value }));
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
@@ -57,69 +30,19 @@ export const LoginView: React.FC = () => {
           <p className="text-gray-600 mt-2">Supporting Ms. Johnson's 3rd Grade Class</p>
         </div>
         
-        <form onSubmit={handleLogin}>
-          <div className="space-y-4">
-            {loginError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {loginError}
-              </div>
-            )}
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={loginForm.email}
-                onChange={handleLoginFormChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="your-email@example.com"
-                required
-                disabled={loading}
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={loginForm.password}
-                  onChange={handleLoginFormChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
-                  placeholder="••••••••"
-                  required
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  disabled={loading}
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
-                </button>
-              </div>
-            </div>
-            
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 font-medium disabled:bg-blue-400"
-              disabled={loading}
-            >
-              {loading ? 'Signing In...' : 'Sign In'}
-            </button>
+        {loginError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+            {loginError}
           </div>
-        </form>
-        
+        )}
+
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              <span className="px-2 bg-white text-gray-500">Please sign in to continue</span>
             </div>
           </div>
           
