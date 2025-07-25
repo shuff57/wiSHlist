@@ -15,7 +15,7 @@ export const LoginView: React.FC = () => {
     setLoginError('');
     try {
       await account.createEmailPasswordSession(loginForm.email, loginForm.password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (error) {
       if (error instanceof AppwriteException) {
         setLoginError(error.message);

@@ -14,7 +14,7 @@ interface UserDoc {
 
 export const AdminDashboard: React.FC = () => {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
-  const [recommenders, setRecommenders] = useState<(Models.Document & UserDoc)[]>([]);
+  const [privilegedUsers, setPrivilegedUsers] = useState<(Models.Document & UserDoc)[]>([]);
   const [linkExpiry, setLinkExpiry] = useState('24');
   const [isRecommenderInvite, setIsRecommenderInvite] = useState(false);
   const [isAdminInvite, setIsAdminInvite] = useState(false);
@@ -31,16 +31,18 @@ export const AdminDashboard: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const fetchRecommenders = useCallback(async () => {
+  const fetchPrivilegedUsers = useCallback(async () => {
     try {
-      const response = await databases.listDocuments(
-        databaseId,
-        usersCollectionId,
-        [Query.equal('isRecommender', true)]
-      );
-      setRecommenders(response.documents as (Models.Document & UserDoc)[]);
+      const [recommenders, admins] = await Promise.all([
+        databases.listDocuments(databaseId, usersCollectionId, [Query.equal('isRecommender', true)]),
+        databases.listDocuments(databaseId, usersCollectionId, [Query.equal('isAdmin', true)])
+      ]);
+      
+      const combined = [...recommenders.documents, ...admins.documents];
+      const uniqueUsers = Array.from(new Set(combined.map(u => u.$id))).map(id => combined.find(u => u.$id === id));
+      setPrivilegedUsers(uniqueUsers as (Models.Document & UserDoc)[]);
     } catch (error) {
-      console.error("Failed to fetch recommenders:", error);
+      console.error("Failed to fetch privileged users:", error);
     }
   }, []);
 
@@ -48,18 +50,21 @@ export const AdminDashboard: React.FC = () => {
     const checkUser = async () => {
       try {
         const loggedInUser = await account.get();
-        if (loggedInUser.$id !== '68817300de763e596523') {
+        const userDoc = await databases.getDocument(databaseId, usersCollectionId, loggedInUser.$id);
+        
+        if (!(userDoc as any).isAdmin) {
           navigate('/dashboard');
           return;
         }
+        
         setUser(loggedInUser);
-        fetchRecommenders();
+        fetchPrivilegedUsers();
       } catch (error) {
         navigate('/login');
       }
     };
     checkUser();
-  }, [navigate, fetchRecommenders]);
+  }, [navigate, fetchPrivilegedUsers]);
 
   useEffect(() => {
     const searchUsers = async () => {
@@ -119,9 +124,7 @@ export const AdminDashboard: React.FC = () => {
       setSearchResults(prev => 
         prev.map(u => u.$id === targetUser.$id ? updatedUser as Models.Document & UserDoc : u)
       );
-      if (field === 'isRecommender') {
-        fetchRecommenders();
-      }
+      fetchPrivilegedUsers();
     } catch (error) {
       console.error("Failed to update user:", error);
     }
@@ -139,6 +142,8 @@ export const AdminDashboard: React.FC = () => {
   if (!user) {
     return <div>Loading...</div>;
   }
+
+  const usersToDisplay = searchQuery.trim() ? searchResults : privilegedUsers;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -220,7 +225,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="mt-4">
             {loadingSearch && <p>Searching...</p>}
             <div className="space-y-4">
-              {searchResults.map(foundUser => (
+              {usersToDisplay.map(foundUser => (
                 <div key={foundUser.$id} className="p-4 border rounded-md">
                   <div>
                     <p className="font-semibold">{foundUser.name}</p>
@@ -245,31 +250,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <User className="w-5 h-5 mr-2" />
-            Current Recommenders
-          </h2>
-          <div className="space-y-4">
-            {recommenders.map(rec => (
-              <div key={rec.$id} className="p-4 border rounded-md flex justify-between items-center">
-                <div>
-                  <p className="font-semibold">{rec.name}</p>
-                  <p className="text-sm text-gray-500">{rec.email}</p>
-                </div>
-                <button 
-                  onClick={() => toggleUserStatus(rec, 'isRecommender')}
-                  className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
-                >
-                  Revoke
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
       </main>
     </div>
   );
 };
-
