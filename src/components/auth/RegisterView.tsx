@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { account, databases, databaseId, invitesCollectionId, usersCollectionId } from '../../appwriteConfig';
 import { AppwriteException, ID, OAuthProvider } from 'appwrite';

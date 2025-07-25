@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, Query, ID } from 'appwrite';
 import { Heart, ExternalLink, Gift, CheckCircle } from 'lucide-react';
+import { Tooltip } from '../common/Tooltip';
 
 interface WishlistDoc {
   teacher_name: string;
@@ -180,22 +181,26 @@ export const SupporterView: React.FC = () => {
                   </div>
                   <div className="flex flex-col space-y-2">
                     {item.store_link && (
-                      <a
-                        href={item.store_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center text-sm font-medium"
-                      >
-                        Purchase <ExternalLink className="w-4 h-4 ml-2" />
-                      </a>
+                      <Tooltip text="Opens in a new tab">
+                        <a
+                          href={item.store_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center text-sm font-medium"
+                        >
+                          Purchase <ExternalLink className="w-4 h-4 ml-2" />
+                        </a>
+                      </Tooltip>
                     )}
-                    <button
-                      onClick={() => handleMarkContribution(item)}
-                      className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm font-medium"
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      I bought this
-                    </button>
+                    <Tooltip text="Let the teacher know you've purchased this item">
+                      <button
+                        onClick={() => handleMarkContribution(item)}
+                        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm font-medium"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        I bought this
+                      </button>
+                    </Tooltip>
                   </div>
                 </div>
               </div>

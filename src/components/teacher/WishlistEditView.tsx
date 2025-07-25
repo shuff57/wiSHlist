@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, ID, Query } from 'appwrite';
 import { Heart, Trash2, ArrowLeft, Check, X } from 'lucide-react';
+import { Tooltip } from '../common/Tooltip';
 
 interface WishlistDoc {
   wishlist_name?: string;
@@ -203,8 +204,12 @@ export const WishlistEditView: React.FC = () => {
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <button onClick={() => handleApproveSuggestion(suggestion)} className="p-2 text-green-600 hover:text-green-800 bg-green-100 rounded-full"><Check size={20} /></button>
-                        <button onClick={() => handleDeclineSuggestion(suggestion.$id)} className="p-2 text-red-600 hover:text-red-800 bg-red-100 rounded-full"><X size={20} /></button>
+                        <Tooltip text="Approve Suggestion">
+                          <button onClick={() => handleApproveSuggestion(suggestion)} className="p-2 text-green-600 hover:text-green-800 bg-green-100 rounded-full"><Check size={20} /></button>
+                        </Tooltip>
+                        <Tooltip text="Decline Suggestion">
+                          <button onClick={() => handleDeclineSuggestion(suggestion.$id)} className="p-2 text-red-600 hover:text-red-800 bg-red-100 rounded-full"><X size={20} /></button>
+                        </Tooltip>
                       </div>
                     </div>
                   </div>
@@ -227,9 +232,11 @@ export const WishlistEditView: React.FC = () => {
                       {item.cost && <span className="text-green-600 font-medium">{item.cost}</span>}
                       {item.store_link && <a href={item.store_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Item</a>}
                     </div>
-                    <button onClick={() => handleDeleteItem(item.$id)} className="mt-4 w-full text-red-500 hover:text-red-700 text-sm flex items-center justify-center">
-                      <Trash2 className="w-4 h-4 mr-1" /> Delete
-                    </button>
+                    <Tooltip text="Permanently delete this item">
+                      <button onClick={() => handleDeleteItem(item.$id)} className="mt-4 w-full text-red-500 hover:text-red-700 text-sm flex items-center justify-center">
+                        <Trash2 className="w-4 h-4 mr-1" /> Delete
+                      </button>
+                    </Tooltip>
                   </div>
                 </div>
               ))}
@@ -249,30 +256,36 @@ export const WishlistEditView: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700">Contact Info</label>
                 <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 border rounded" />
               </div>
-              <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Save Settings</button>
+              <Tooltip text="Save changes to your wishlist settings">
+                <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Save Settings</button>
+              </Tooltip>
             </form>
             <div className="mt-6">
               <h4 className="text-sm font-medium text-gray-700">Share Key</h4>
               <div className="mt-1 flex items-center space-x-2">
                 <input type="text" readOnly value={wishlist?.wishlist_key || ''} className="w-full text-sm bg-gray-100 p-1 border rounded" />
-                <button 
-                  onClick={() => handleCopy(wishlist?.wishlist_key || '', 'key')}
-                  className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'key' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                >
-                  {copiedItem === 'key' ? <Check className="w-4 h-4" /> : 'Copy'}
-                </button>
+                <Tooltip text="Copy share key">
+                  <button 
+                    onClick={() => handleCopy(wishlist?.wishlist_key || '', 'key')}
+                    className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'key' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  >
+                    {copiedItem === 'key' ? <Check className="w-4 h-4" /> : 'Copy'}
+                  </button>
+                </Tooltip>
               </div>
             </div>
             <div className="mt-4">
               <h4 className="text-sm font-medium text-gray-700">Share Link</h4>
               <div className="mt-1 flex items-center space-x-2">
                 <input type="text" readOnly value={`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`} className="w-full text-sm bg-gray-100 p-1 border rounded" />
-                <button 
-                  onClick={() => handleCopy(`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`, 'link')}
-                  className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'link' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
-                >
-                  {copiedItem === 'link' ? <Check className="w-4 h-4" /> : 'Copy'}
-                </button>
+                <Tooltip text="Copy share link">
+                  <button 
+                    onClick={() => handleCopy(`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`, 'link')}
+                    className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'link' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                  >
+                    {copiedItem === 'link' ? <Check className="w-4 h-4" /> : 'Copy'}
+                  </button>
+                </Tooltip>
               </div>
             </div>
           </div>
