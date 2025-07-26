@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, Query, ID } from 'appwrite';
-import { Heart, ExternalLink, Gift, CheckCircle } from 'lucide-react';
+import { ExternalLink, Gift, CheckCircle } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
+import { Header } from '../layout/Header';
 
 interface WishlistDoc {
   teacher_name: string;
@@ -36,17 +37,17 @@ export const SupporterView: React.FC = () => {
   const navigate = useNavigate();
 
   const fetchWishlistData = useCallback(async (key: string) => {
+    const processedKey = key.trim(); // Normalize the key
+    setError(''); // Clear any previous errors
     try {
       const response = await databases.listDocuments(
         databaseId,
         wishlistsCollectionId,
-        [Query.equal('wishlist_key', key)]
+        [Query.equal('wishlist_key', processedKey)]
       );
-
       if (response.documents.length > 0) {
         const foundWishlist = response.documents[0] as Models.Document & WishlistDoc;
         setWishlist(foundWishlist);
-
         const itemsResponse = await databases.listDocuments(
           databaseId,
           itemsCollectionId,
@@ -56,9 +57,9 @@ export const SupporterView: React.FC = () => {
       } else {
         setError('No wishlist found with that key.');
       }
-    } catch (err) {
-      setError('Failed to fetch wishlist. Please try again.');
-      console.error(err);
+    } catch (err: any) {
+      setError(`Failed to fetch wishlist: ${err.message || 'Unknown error'}. Please try again.`);
+      console.error("Error fetching wishlist:", err);
     } finally {
       setLoading(false);
     }
@@ -127,9 +128,9 @@ export const SupporterView: React.FC = () => {
 
   if (error) {
     return (
-       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center text-center p-4">
+       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col items-center justify-center text-center p-4">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
-        <p className="text-gray-700 mt-4">{error}</p>
+        <p className="text-gray-700 dark:text-gray-300 mt-4">{error}</p>
         <button onClick={() => navigate('/')} className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
           Back to Home
         </button>
@@ -138,26 +139,14 @@ export const SupporterView: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-3">
-              <Heart className="w-8 h-8 text-red-500" />
-              <div>
-                <h1 className="text-xl font-bold text-gray-800">{wishlist?.wishlist_name || `${wishlist?.teacher_name}'s Wishlist`}</h1>
-              </div>
-            </div>
-             <button onClick={() => navigate('/')} className="text-blue-600 hover:underline">Find another list</button>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Header title="Wishlist" showSettingsButton={false} showSignoutButton={false} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Help {wishlist?.teacher_name}'s Students Learn & Grow</h2>
-          <p className="text-gray-600">Your contributions make a real difference in our classroom. Thank you for supporting education!</p>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Help {wishlist?.teacher_name}'s Students Learn & Grow</h2>
+          <p className="text-gray-600 dark:text-gray-400">Your contributions make a real difference in our classroom. Thank you for supporting education!</p>
           {wishlist?.contact_info && (
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
               <strong>Contact:</strong> {wishlist.contact_info}
             </p>
           )}
@@ -166,15 +155,15 @@ export const SupporterView: React.FC = () => {
         <div className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {items.length > 0 ? items.map(item => (
-              <div key={item.$id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between">
+              <div key={item.$id} className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">{item.name}</h3>
-                  <p className="text-gray-600 mb-3 text-sm">{item.description}</p>
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">{item.name}</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-3 text-sm">{item.description}</p>
                 </div>
                 <div className="mt-4">
                   <div className="flex items-center justify-between mb-4">
-                    {item.cost && <span className="text-green-600 font-medium">{item.cost}</span>}
-                    <span className="text-blue-600 flex items-center text-sm">
+                    {item.cost && <span className="text-green-600 dark:text-green-400 font-medium">{item.cost}</span>}
+                    <span className="text-blue-600 dark:text-blue-400 flex items-center text-sm">
                       <Gift className="w-4 h-4 mr-1" />
                       {item.contributions} contributions
                     </span>
@@ -205,19 +194,19 @@ export const SupporterView: React.FC = () => {
                 </div>
               </div>
             )) : (
-              <div className="md:col-span-2 text-center py-10 bg-white rounded-lg shadow">
-                <p className="text-gray-600">This wishlist is empty!</p>
+              <div className="md:col-span-2 text-center py-10 bg-white dark:bg-gray-800 rounded-lg shadow">
+                <p className="text-gray-600 dark:text-gray-400">This wishlist is empty!</p>
               </div>
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Suggest a New Item</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Suggest a New Item</h3>
             <form onSubmit={handleSuggestionSubmit} className="space-y-4">
-              <input type="text" name="itemName" placeholder="Item Name" value={suggestionForm.itemName} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded" required />
-              <textarea name="description" placeholder="Description" value={suggestionForm.description} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded" />
-              <input type="url" name="storeLink" placeholder="Store Link (optional)" value={suggestionForm.storeLink} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded" />
-              <input type="text" name="estimatedCost" placeholder="Estimated Cost (e.g., $15.00)" value={suggestionForm.estimatedCost} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded" />
+              <input type="text" name="itemName" placeholder="Item Name" value={suggestionForm.itemName} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200" required />
+              <textarea name="description" placeholder="Description" value={suggestionForm.description} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200" />
+              <input type="url" name="storeLink" placeholder="Store Link (optional)" value={suggestionForm.storeLink} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200" />
+              <input type="text" name="estimatedCost" placeholder="Estimated Cost (e.g., $15.00)" value={suggestionForm.estimatedCost} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200" />
               <button type="submit" className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700">Submit Suggestion</button>
             </form>
           </div>

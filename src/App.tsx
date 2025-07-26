@@ -18,14 +18,12 @@ const App: React.FC = () => {
       <AuthProvider>
         <Router>
           <Routes>
-            {/* Supporter Flow */}
-            <Route path="/" element={<SupporterLanding />} />
-            <Route path="/wishlist/:wishlistKey" element={<SupporterView />} />
-
-            {/* Teacher Authentication */}
+            {/* Public Routes */}
             <Route element={<PublicRoute />}>
-              <Route path="/login" element={<LoginView />} />
+              <Route path="/" element={<LoginView />} /> {/* Default landing page */}
               <Route path="/register" element={<RegisterView />} />
+              <Route path="/supporter" element={<SupporterLanding />} /> {/* Supporter landing page */}
+              <Route path="/wishlist/:wishlistKey" element={<SupporterView />} />
             </Route>
 
             {/* Protected Routes */}

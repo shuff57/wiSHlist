@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { account, databases, databaseId, invitesCollectionId, usersCollectionId } from '../../appwriteConfig';
 import { AppwriteException, ID, OAuthProvider } from 'appwrite';
 import { Heart } from 'lucide-react';
+import { Header } from '../layout/Header';
 
 interface InviteDoc {
   isRecommender: boolean;
@@ -93,7 +94,7 @@ export const RegisterView: React.FC = () => {
       // Ensure no active session
       try { await account.deleteSession('current'); } catch {}
       
-      account.createOAuth2Session(OAuthProvider.Google, `${window.location.origin}/dashboard`, `${window.location.origin}/login`);
+      account.createOAuth2Session(OAuthProvider.Google, `${window.location.origin}/dashboard`, `${window.location.origin}/`);
     } catch (error) {
       setErrorMessage('Could not start Google registration.');
     } finally {
@@ -108,9 +109,9 @@ export const RegisterView: React.FC = () => {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md text-center">
-          <h1 className="text-2xl font-bold text-gray-800">Validating Invitation...</h1>
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md text-center">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Validating Invitation...</h1>
         </div>
       </div>
     );
@@ -118,100 +119,103 @@ export const RegisterView: React.FC = () => {
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md text-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md text-center">
           <h1 className="text-2xl font-bold text-red-600">Error</h1>
-          <p className="text-gray-700 mt-4">{errorMessage}</p>
+          <p className="text-gray-700 dark:text-gray-300 mt-4">{errorMessage}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
-        <div className="text-center mb-6">
-          <Heart className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-gray-800">Teacher Registration</h1>
-        </div>
-        
-        <form onSubmit={handleRegister}>
-          <div className="space-y-4">
-            {errorMessage && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {errorMessage}
-              </div>
-            )}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-              <input
-                type="text"
-                name="name"
-                value={registerForm.name}
-                onChange={handleRegisterFormChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                placeholder="Your Name"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={registerForm.email}
-                onChange={handleRegisterFormChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                placeholder="your-email@example.com"
-                required
-                disabled={loading}
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={registerForm.password}
-                onChange={handleRegisterFormChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                placeholder="••••••••"
-                required
-                disabled={loading}
-              />
-            </div>
-            
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
-              disabled={loading}
-            >
-              {loading ? 'Registering...' : 'Register'}
-            </button>
-          </div>
-        </form>
-        
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or</span>
-            </div>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Header title="Register" showSettingsButton={false} showSignoutButton={false} />
+      <div className="flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md">
+          <div className="text-center mb-6">
+            <Heart className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Teacher Registration</h1>
           </div>
           
+          <form onSubmit={handleRegister}>
+            <div className="space-y-4">
+              {errorMessage && (
+                <div className="bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg text-sm">
+                  {errorMessage}
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={registerForm.name}
+                  onChange={handleRegisterFormChange}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                  placeholder="Your Name"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={registerForm.email}
+                  onChange={handleRegisterFormChange}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                  placeholder="your-email@example.com"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={registerForm.password}
+                  onChange={handleRegisterFormChange}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                  placeholder="••••••••"
+                  required
+                  disabled={loading}
+                />
+              </div>
+              
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
+                disabled={loading}
+              >
+                {loading ? 'Registering...' : 'Register'}
+              </button>
+            </div>
+          </form>
+          
           <div className="mt-6">
-            <button
-              onClick={handleGoogleRegister}
-              className="w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 disabled:bg-gray-200"
-              disabled={loading}
-            >
-              {loading ? 'Processing...' : 'Register with Google'}
-            </button>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or</span>
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              <button
+                onClick={handleGoogleRegister}
+                className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:bg-gray-200 dark:disabled:bg-gray-500"
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : 'Register with Google'}
+              </button>
+            </div>
           </div>
         </div>
       </div>

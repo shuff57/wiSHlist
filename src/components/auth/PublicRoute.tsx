@@ -9,7 +9,14 @@ const PublicRoute: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  return user ? <Navigate to="/dashboard" /> : <Outlet />;
+  if (user) {
+    // If user is logged in, only redirect if they are trying to access the login or register page
+    if (window.location.pathname === '/' || window.location.pathname === '/register') {
+      return <Navigate to="/dashboard" />;
+    }
+  }
+
+  return <Outlet />;
 };
 
 export default PublicRoute;

@@ -10,16 +10,17 @@ interface HeaderProps {
   title: string;
   showBackButton?: boolean;
   showSettingsButton?: boolean;
+  showSignoutButton?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, showSettingsButton = true }) => {
+export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, showSettingsButton = true, showSignoutButton = true }) => {
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useTheme();
   const { logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
@@ -50,11 +51,13 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
                 {darkMode ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-600" />}
               </button>
             </Tooltip>
-            <Tooltip text="Logout" position="bottom">
-              <button onClick={handleLogout} className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700">
-                <LogOut className="w-5 h-5 text-red-600" />
-              </button>
-            </Tooltip>
+            {showSignoutButton && (
+              <Tooltip text="Logout" position="bottom">
+                <button onClick={handleLogout} className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700">
+                  <LogOut className="w-5 h-5 text-red-600" />
+                </button>
+              </Tooltip>
+            )}
           </div>
         </div>
       </div>
