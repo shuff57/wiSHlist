@@ -197,55 +197,55 @@ export const TeacherDashboard: React.FC = () => {
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 transition-transform duration-200 hover:scale-[1.02] group"
+                          className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 cursor-pointer transition-colors duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-700 group"
                         >
                           <div className="flex items-center">
-                            <div {...provided.dragHandleProps} className="p-2 cursor-grab">
-                              <GripVertical className="w-5 h-5 text-gray-400" />
-                            </div>
-                            <div className="flex-grow flex justify-between items-center ml-2">
-                              {editingWishlistId === wishlist.$id ? (
-                                <div className="flex-grow flex items-center space-x-2">
-                                  <input 
-                                    type="text"
-                                    value={newWishlistName}
-                                    onChange={(e) => setNewWishlistName(e.target.value)}
-                                    className="flex-grow p-1 border rounded bg-white dark:bg-neutral-700"
-                                  />
-                                  <button onClick={() => handleUpdateWishlistName(wishlist.$id)} className="p-2 text-green-600 hover:bg-green-100 rounded-full"><Check /></button>
-                                  <button onClick={handleCancelEdit} className="p-2 text-red-600 hover:bg-red-100 rounded-full"><X /></button>
-                                </div>
-                              ) : (
-                                <div 
-                                  className="flex-grow flex items-center space-x-2 cursor-pointer"
-                                  onClick={() => navigate(`/wishlist/${wishlist.$id}/edit`)}
-                                >
-                                  <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-200">{wishlist.wishlist_name}</h3>
-                                  <button 
-                                    onClick={(e) => { e.stopPropagation(); handleEditClick(wishlist); }}
-                                    className="p-1 text-gray-500 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <Pencil className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              )}
-                              <div className="flex items-center space-x-2">
+                          <div {...provided.dragHandleProps} className="p-2 cursor-grab">
+                            <GripVertical className="w-5 h-5 text-gray-400" />
+                          </div>
+                          <div className="flex-grow flex justify-between items-center ml-2">
+                            {editingWishlistId === wishlist.$id ? (
+                              <div className="flex-grow flex items-center space-x-2 mr-2">
+                                <input 
+                                  type="text"
+                                  value={newWishlistName}
+                                  onChange={(e) => setNewWishlistName(e.target.value)}
+                                  className="flex-grow p-1 border rounded bg-white dark:bg-neutral-700 w-full"
+                                />
+                                <button onClick={() => handleUpdateWishlistName(wishlist.$id)} className="p-2 text-green-600 hover:bg-green-100 rounded-full"><Check /></button>
+                                <button onClick={handleCancelEdit} className="p-2 text-red-600 hover:bg-red-100 rounded-full"><X /></button>
+                              </div>
+                            ) : (
+                              <div 
+                                className="flex-grow flex items-center space-x-2 cursor-pointer"
+                                onClick={() => navigate(`/wishlist/${wishlist.$id}/edit`)}
+                              >
+                                <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-200">{wishlist.wishlist_name}</h3>
                                 <button 
-                                  onClick={(e) => { e.stopPropagation(); handleCopy(wishlist.wishlist_key); }} 
-                                  className={`px-3 py-1 text-sm rounded transition-colors flex items-center ${copiedKey === wishlist.wishlist_key ? 'bg-lime-700 text-white' : 'bg-sky-700 text-white hover:bg-sky-800'}`}
+                                  onClick={(e) => { e.stopPropagation(); handleEditClick(wishlist); }}
+                                  className="p-1 text-gray-500 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
-                                  {copiedKey === wishlist.wishlist_key ? <Check className="w-4 h-4 mr-1" /> : <Share2 className="w-4 h-4 mr-1" />}
-                                  {copiedKey === wishlist.wishlist_key ? 'Copied!' : 'Share List'}
-                                </button>
-                                <button 
-                                  onClick={(e) => { e.stopPropagation(); handleDeleteWishlist(wishlist.$id); }}
-                                  className="p-2 text-red-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full"
-                                >
-                                  <Trash2 className="w-5 h-5" />
+                                  <Pencil className="w-4 h-4" />
                                 </button>
                               </div>
+                            )}
+                            <div className="flex items-center space-x-2">
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleCopy(wishlist.wishlist_key); }} 
+                                className={`px-3 py-1 text-sm rounded transition-colors flex items-center ${copiedKey === wishlist.wishlist_key ? 'bg-lime-700 text-white' : 'bg-sky-700 text-white hover:bg-sky-800'}`}
+                              >
+                                {copiedKey === wishlist.wishlist_key ? <Check className="w-4 h-4 mr-1" /> : <Share2 className="w-4 h-4 mr-1" />}
+                                {copiedKey === wishlist.wishlist_key ? 'Copied!' : 'Share List'}
+                              </button>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleDeleteWishlist(wishlist.$id); }}
+                                className="p-2 text-red-600 hover:bg-white dark:hover:bg-neutral-800 rounded-full"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
                             </div>
                           </div>
+                        </div>
                         </div>
                       )}
                     </Draggable>

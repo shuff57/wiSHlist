@@ -173,26 +173,25 @@ export const Settings: React.FC = () => {
           <div className="space-y-6">
             <form onSubmit={handleSaveChanges} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium">Display Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm bg-white dark:bg-neutral-700"
-                />
-              </div>
-              <div className="text-right">
-                <Tooltip text="Save your new display name">
-                  <button
-                    type="submit"
-                    disabled={saving || name === user?.name}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    {saving ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </Tooltip>
+                <label className="block text-sm font-medium mb-1">Display Name</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    name="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="flex-grow block w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm bg-white dark:bg-neutral-700 h-10"
+                  />
+                  <Tooltip text="Save your new display name">
+                    <button
+                      type="submit"
+                      disabled={saving || name === user?.name}
+                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-700 hover:bg-sky-800 disabled:bg-gray-400 h-10"
+                    >
+                      <Save className="w-5 h-5" />
+                    </button>
+                  </Tooltip>
+                </div>
               </div>
             </form>
           </div>
@@ -215,24 +214,22 @@ export const Settings: React.FC = () => {
                 </select>
               </div>
               {userDoc?.isAdmin && (
-                <>
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Make this user a recommender?</label>
-                  <button onClick={() => setIsRecommenderInvite(!isRecommenderInvite)} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isRecommenderInvite ? 'bg-blue-600' : 'bg-gray-300'}`}>
-                    <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isRecommenderInvite ? 'translate-x-6' : 'translate-x-1'}`}/>
-                  </button>
+                <div className="flex justify-around items-center pt-4">
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm font-medium">Recommender:</label>
+                    <button onClick={() => setIsRecommenderInvite(!isRecommenderInvite)} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isRecommenderInvite ? 'bg-sky-700' : 'bg-gray-300'}`}>
+                      <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isRecommenderInvite ? 'translate-x-6' : 'translate-x-1'}`}/>
+                    </button>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm font-medium">Admin:</label>
+                    <button onClick={() => setIsAdminInvite(!isAdminInvite)} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isAdminInvite ? 'bg-sky-700' : 'bg-gray-300'}`}>
+                      <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isAdminInvite ? 'translate-x-6' : 'translate-x-1'}`}/>
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Make this user an admin?</label>
-                  <button onClick={() => setIsAdminInvite(!isAdminInvite)} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isAdminInvite ? 'bg-blue-600' : 'bg-gray-300'}`}>
-                    <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isAdminInvite ? 'translate-x-6' : 'translate-x-1'}`}/>
-                  </button>
-                </div>
-                </>
               )}
-              <Tooltip text="Generate a new, single-use registration link">
-                <button onClick={generateLink} className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Generate Link</button>
-              </Tooltip>
+              <button onClick={generateLink} className="w-full bg-sky-700 text-white py-2 px-4 rounded-lg hover:bg-sky-800">Generate Link</button>
               {registrationLink && (
                 <div className="mt-4 p-3 bg-neutral-100 dark:bg-neutral-700 rounded-lg">
                   <p className="text-sm mb-2">Share this link with a new teacher:</p>
@@ -241,7 +238,7 @@ export const Settings: React.FC = () => {
                     <Tooltip text="Copy to clipboard">
                       <button 
                         onClick={() => handleCopy(registrationLink)} 
-                        className={`px-3 py-1 text-sm rounded transition-colors ${copied ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                        className={`px-3 py-1 text-sm rounded transition-colors ${copied ? 'bg-lime-700 text-white' : 'bg-sky-700 text-white hover:bg-sky-800'}`}
                       >
                         {copied ? <Check className="w-4 h-4" /> : 'Copy'}
                       </button>
@@ -273,27 +270,27 @@ export const Settings: React.FC = () => {
               {loadingSearch && <p>Searching...</p>}
               <div className="space-y-4">
                 {usersToDisplay.map(foundUser => (
-                  <div key={foundUser.$id} className="p-4 border dark:border-neutral-700 rounded-md">
-                    <div>
-                      <p className="font-semibold">{foundUser.name}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{foundUser.email}</p>
+                <div key={foundUser.$id} className="p-4 border dark:border-neutral-700 rounded-md flex justify-between items-center">
+                  <div>
+                    <p className="font-semibold">{foundUser.name}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{foundUser.email}</p>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm font-medium">Recommender:</label>
+                      <button onClick={() => toggleUserStatus(foundUser, 'isRecommender')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isRecommender ? 'bg-sky-700' : 'bg-gray-300'}`}>
+                        <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${foundUser.isRecommender ? 'translate-x-6' : 'translate-x-1'}`}/>
+                      </button>
                     </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center space-x-2">
-                        <label className="text-sm">Recommender:</label>
-                        <button onClick={() => toggleUserStatus(foundUser, 'isRecommender')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isRecommender ? 'bg-blue-600' : 'bg-gray-300'}`}>
-                          <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${foundUser.isRecommender ? 'translate-x-6' : 'translate-x-1'}`}/>
-                        </button>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <label className="text-sm">Admin:</label>
-                        <button onClick={() => toggleUserStatus(foundUser, 'isAdmin')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isAdmin ? 'bg-blue-600' : 'bg-gray-300'}`}>
-                          <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${foundUser.isAdmin ? 'translate-x-6' : 'translate-x-1'}`}/>
-                        </button>
-                      </div>
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm font-medium">Admin:</label>
+                      <button onClick={() => toggleUserStatus(foundUser, 'isAdmin')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isAdmin ? 'bg-sky-700' : 'bg-gray-300'}`}>
+                        <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${foundUser.isAdmin ? 'translate-x-6' : 'translate-x-1'}`}/>
+                      </button>
                     </div>
                   </div>
-                ))}
+                </div>
+              ))}
               </div>
             </div>
           </div>

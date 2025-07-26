@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, ID, Query } from 'appwrite';
-import { Heart, Trash2, ArrowLeft, Check, X } from 'lucide-react';
+import { Trash2, Check, X } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
+import { Header } from '../layout/Header';
 
 interface WishlistDoc {
   wishlist_name?: string;
@@ -159,45 +160,31 @@ export const WishlistEditView: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-3">
-              <Heart className="w-8 h-8 text-red-500" />
-              <h1 className="text-xl font-bold text-gray-800">Manage Wishlist</h1>
-            </div>
-            <button onClick={() => navigate('/dashboard')} className="text-blue-600 hover:underline flex items-center">
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Back to Dashboard
-            </button>
-          </div>
-        </div>
-      </nav>
-
+    <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
+      <Header title="Manage Wishlist" showBackButton={true} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Add New Item</h3>
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Add New Item</h3>
             <form onSubmit={handleAddItem} className="space-y-4">
-              <input type="text" name="name" placeholder="Item Name" value={newItem.name} onChange={handleItemFormChange} className="w-full p-2 border rounded" required />
-              <textarea name="description" placeholder="Description" value={newItem.description} onChange={handleItemFormChange} className="w-full p-2 border rounded" />
-              <input type="url" name="store_link" placeholder="Store Link (optional)" value={newItem.store_link} onChange={handleItemFormChange} className="w-full p-2 border rounded" />
-              <input type="text" name="cost" placeholder="Cost (e.g., $12.99)" value={newItem.cost} onChange={handleItemFormChange} className="w-full p-2 border rounded" />
+              <input type="text" name="name" placeholder="Item Name" value={newItem.name} onChange={handleItemFormChange} className="w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" required />
+              <textarea name="description" placeholder="Description" value={newItem.description} onChange={handleItemFormChange} className="w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" />
+              <input type="url" name="store_link" placeholder="Store Link (optional)" value={newItem.store_link} onChange={handleItemFormChange} className="w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" />
+              <input type="text" name="cost" placeholder="Cost (e.g., $12.99)" value={newItem.cost} onChange={handleItemFormChange} className="w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" />
               <button type="submit" className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700">Add to Wishlist</button>
             </form>
           </div>
 
           {suggestions.length > 0 && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Pending Suggestions ({suggestions.length})</h3>
+            <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Pending Suggestions ({suggestions.length})</h3>
               <div className="space-y-4">
                 {suggestions.map(suggestion => (
-                  <div key={suggestion.$id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div key={suggestion.$id} className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900/30 rounded-lg p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-semibold text-gray-900">{suggestion.itemName}</h4>
-                        {suggestion.description && <p className="text-gray-600 text-sm mt-1">{suggestion.description}</p>}
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-200">{suggestion.itemName}</h4>
+                        {suggestion.description && <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{suggestion.description}</p>}
                         <div className="flex items-center space-x-4 text-sm mt-2">
                           {suggestion.estimatedCost && <span className="text-green-600 font-medium">{suggestion.estimatedCost}</span>}
                           {suggestion.storeLink && <a href={suggestion.storeLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Item</a>}
@@ -205,10 +192,10 @@ export const WishlistEditView: React.FC = () => {
                       </div>
                       <div className="flex space-x-2">
                         <Tooltip text="Approve Suggestion">
-                          <button onClick={() => handleApproveSuggestion(suggestion)} className="p-2 text-green-600 hover:text-green-800 bg-green-100 rounded-full"><Check size={20} /></button>
+                          <button onClick={() => handleApproveSuggestion(suggestion)} className="p-2 text-green-600 hover:text-green-800 bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 rounded-full"><Check size={20} /></button>
                         </Tooltip>
                         <Tooltip text="Decline Suggestion">
-                          <button onClick={() => handleDeclineSuggestion(suggestion.$id)} className="p-2 text-red-600 hover:text-red-800 bg-red-100 rounded-full"><X size={20} /></button>
+                          <button onClick={() => handleDeclineSuggestion(suggestion.$id)} className="p-2 text-red-600 hover:text-red-800 bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50 rounded-full"><X size={20} /></button>
                         </Tooltip>
                       </div>
                     </div>
@@ -219,13 +206,13 @@ export const WishlistEditView: React.FC = () => {
           )}
 
           <div>
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Your Items ({items.length})</h3>
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Your Items ({items.length})</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {items.map(item => (
-                <div key={item.$id} className="bg-white rounded-lg shadow p-4 flex flex-col justify-between">
+                <div key={item.$id} className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 flex flex-col justify-between">
                   <div>
-                    <h4 className="font-semibold text-gray-900">{item.name}</h4>
-                    <p className="text-gray-600 text-sm mt-1">{item.description}</p>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-200">{item.name}</h4>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{item.description}</p>
                   </div>
                   <div className="mt-4">
                     <div className="flex items-center justify-between text-sm">
@@ -245,25 +232,25 @@ export const WishlistEditView: React.FC = () => {
         </div>
 
         <div className="md:col-span-1">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Wishlist Settings</h3>
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Wishlist Settings</h3>
             <form onSubmit={handleSettingsSave} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Wishlist Name</label>
-                <input type="text" value={formData.wishlist_name} onChange={e => setFormData({...formData, wishlist_name: e.target.value})} className="mt-1 w-full p-2 border rounded" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Wishlist Name</label>
+                <input type="text" value={formData.wishlist_name} onChange={e => setFormData({...formData, wishlist_name: e.target.value})} className="mt-1 w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Contact Info</label>
-                <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 border rounded" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Info</label>
+                <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" />
               </div>
               <Tooltip text="Save changes to your wishlist settings">
                 <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Save Settings</button>
               </Tooltip>
             </form>
             <div className="mt-6">
-              <h4 className="text-sm font-medium text-gray-700">Share Key</h4>
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Key</h4>
               <div className="mt-1 flex items-center space-x-2">
-                <input type="text" readOnly value={wishlist?.wishlist_key || ''} className="w-full text-sm bg-gray-100 p-1 border rounded" />
+                <input type="text" readOnly value={wishlist?.wishlist_key || ''} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 border rounded dark:border-neutral-600" />
                 <Tooltip text="Copy share key">
                   <button 
                     onClick={() => handleCopy(wishlist?.wishlist_key || '', 'key')}
@@ -275,9 +262,9 @@ export const WishlistEditView: React.FC = () => {
               </div>
             </div>
             <div className="mt-4">
-              <h4 className="text-sm font-medium text-gray-700">Share Link</h4>
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Link</h4>
               <div className="mt-1 flex items-center space-x-2">
-                <input type="text" readOnly value={`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`} className="w-full text-sm bg-gray-100 p-1 border rounded" />
+                <input type="text" readOnly value={`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 border rounded dark:border-neutral-600" />
                 <Tooltip text="Copy share link">
                   <button 
                     onClick={() => handleCopy(`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`, 'link')}
