@@ -180,7 +180,7 @@ export const TeacherDashboard: React.FC = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Your wiSHlists</h2>
-          <button onClick={createWishlist} className="bg-lime-700 text-white py-2 px-4 rounded-lg hover:bg-lime-800 flex items-center">
+          <button onClick={createWishlist} className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-800 flex items-center">
             <Plus className="w-5 h-5 mr-2" />
             Create New wiSHlist
           </button>
@@ -197,7 +197,7 @@ export const TeacherDashboard: React.FC = () => {
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 cursor-pointer transition-colors duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-700 group"
+                          className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 cursor-pointer transition-colors duration-200 hover:bg-neutral-200 dark:hover:bg-neutral-700 group"
                         >
                           <div className="flex items-center">
                           <div {...provided.dragHandleProps} className="p-2 cursor-grab">
@@ -212,8 +212,8 @@ export const TeacherDashboard: React.FC = () => {
                                   onChange={(e) => setNewWishlistName(e.target.value)}
                                   className="flex-grow p-1 border rounded bg-white dark:bg-neutral-700 w-full"
                                 />
-                                <button onClick={() => handleUpdateWishlistName(wishlist.$id)} className="p-2 text-green-600 hover:bg-green-100 rounded-full"><Check /></button>
-                                <button onClick={handleCancelEdit} className="p-2 text-red-600 hover:bg-red-100 rounded-full"><X /></button>
+                                <button onClick={() => handleUpdateWishlistName(wishlist.$id)} className="p-2 text-green-600 hover:bg-green-800 rounded-full"><Check /></button>
+                                <button onClick={handleCancelEdit} className="p-2 text-red-600 hover:bg-red-800 rounded-full"><X /></button>
                               </div>
                             ) : (
                               <div 
@@ -223,7 +223,7 @@ export const TeacherDashboard: React.FC = () => {
                                 <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-200">{wishlist.wishlist_name}</h3>
                                 <button 
                                   onClick={(e) => { e.stopPropagation(); handleEditClick(wishlist); }}
-                                  className="p-1 text-gray-500 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="p-1 text-gray-500 hover:text-sky-800 opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                   <Pencil className="w-4 h-4" />
                                 </button>
@@ -232,7 +232,7 @@ export const TeacherDashboard: React.FC = () => {
                             <div className="flex items-center space-x-2">
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleCopy(wishlist.wishlist_key); }} 
-                                className={`px-3 py-1 text-sm rounded transition-colors flex items-center ${copiedKey === wishlist.wishlist_key ? 'bg-lime-700 text-white' : 'bg-sky-700 text-white hover:bg-sky-800'}`}
+                                className={`px-3 py-1 text-sm rounded transition-colors flex items-center ${copiedKey === wishlist.wishlist_key ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800'}`}
                               >
                                 {copiedKey === wishlist.wishlist_key ? <Check className="w-4 h-4 mr-1" /> : <Share2 className="w-4 h-4 mr-1" />}
                                 {copiedKey === wishlist.wishlist_key ? 'Copied!' : 'Share List'}

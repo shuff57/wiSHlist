@@ -167,11 +167,11 @@ export const WishlistEditView: React.FC = () => {
           <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Add New Item</h3>
             <form onSubmit={handleAddItem} className="space-y-4">
-              <input type="text" name="name" placeholder="Item Name" value={newItem.name} onChange={handleItemFormChange} className="w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" required />
-              <textarea name="description" placeholder="Description" value={newItem.description} onChange={handleItemFormChange} className="w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" />
-              <input type="url" name="store_link" placeholder="Store Link (optional)" value={newItem.store_link} onChange={handleItemFormChange} className="w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" />
-              <input type="text" name="cost" placeholder="Cost (e.g., $12.99)" value={newItem.cost} onChange={handleItemFormChange} className="w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" />
-              <button type="submit" className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700">Add to Wishlist</button>
+              <input type="text" name="name" placeholder="Item Name" value={newItem.name} onChange={handleItemFormChange} className="w-full p-2 rounded dark:bg-neutral-700 dark:border-neutral-600 focus:outline-none" required />
+              <textarea name="description" placeholder="Description" value={newItem.description} onChange={handleItemFormChange} className="w-full p-2 rounded dark:bg-neutral-700 dark:border-neutral-600 focus:outline-none" />
+              <input type="url" name="store_link" placeholder="Store Link (optional)" value={newItem.store_link} onChange={handleItemFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              <input type="text" name="cost" placeholder="Cost (e.g., $12.99)" value={newItem.cost} onChange={handleItemFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              <button type="submit" className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 dark:hover:bg-green-900">Add to Wishlist</button>
             </form>
           </div>
 
@@ -180,7 +180,7 @@ export const WishlistEditView: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Pending Suggestions ({suggestions.length})</h3>
               <div className="space-y-4">
                 {suggestions.map(suggestion => (
-                  <div key={suggestion.$id} className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900/30 rounded-lg p-4">
+                  <div key={suggestion.$id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-semibold text-gray-900 dark:text-gray-200">{suggestion.itemName}</h4>
@@ -192,10 +192,10 @@ export const WishlistEditView: React.FC = () => {
                       </div>
                       <div className="flex space-x-2">
                         <Tooltip text="Approve Suggestion">
-                          <button onClick={() => handleApproveSuggestion(suggestion)} className="p-2 text-green-600 hover:text-green-800 bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 rounded-full"><Check size={20} /></button>
+                          <button onClick={() => handleApproveSuggestion(suggestion)} className="p-2 text-green-600 hover:text-green-800 bg-green-200 dark:bg-green-700 dark:hover:bg-green-800 rounded-full"><Check size={20} /></button>
                         </Tooltip>
                         <Tooltip text="Decline Suggestion">
-                          <button onClick={() => handleDeclineSuggestion(suggestion.$id)} className="p-2 text-red-600 hover:text-red-800 bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50 rounded-full"><X size={20} /></button>
+                          <button onClick={() => handleDeclineSuggestion(suggestion.$id)} className="p-2 text-red-600 hover:text-red-800 bg-red-200 dark:bg-red-700 dark:hover:bg-red-800 rounded-full"><X size={20} /></button>
                         </Tooltip>
                       </div>
                     </div>
@@ -220,7 +220,7 @@ export const WishlistEditView: React.FC = () => {
                       {item.store_link && <a href={item.store_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Item</a>}
                     </div>
                     <Tooltip text="Permanently delete this item">
-                      <button onClick={() => handleDeleteItem(item.$id)} className="mt-4 w-full text-red-500 hover:text-red-700 text-sm flex items-center justify-center">
+                      <button onClick={() => handleDeleteItem(item.$id)} className="mt-4 w-full text-red-500 hover:text-red-700 dark:hover:text-red-400 text-sm flex items-center justify-center">
                         <Trash2 className="w-4 h-4 mr-1" /> Delete
                       </button>
                     </Tooltip>
@@ -237,24 +237,24 @@ export const WishlistEditView: React.FC = () => {
             <form onSubmit={handleSettingsSave} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Wishlist Name</label>
-                <input type="text" value={formData.wishlist_name} onChange={e => setFormData({...formData, wishlist_name: e.target.value})} className="mt-1 w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" />
+                                                                                                <input type="text" value={formData.wishlist_name} onChange={e => setFormData({...formData, wishlist_name: e.target.value})} className="mt-1 w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Info</label>
-                <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 border rounded dark:bg-neutral-700 dark:border-neutral-600" />
+                <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
               </div>
               <Tooltip text="Save changes to your wishlist settings">
-                <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Save Settings</button>
+                <button type="submit" className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 dark:hover:bg-sky-800">Save Settings</button>
               </Tooltip>
             </form>
             <div className="mt-6">
               <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Key</h4>
               <div className="mt-1 flex items-center space-x-2">
-                <input type="text" readOnly value={wishlist?.wishlist_key || ''} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 border rounded dark:border-neutral-600" />
+                <input type="text" readOnly value={wishlist?.wishlist_key || ''} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 rounded text-gray-900 dark:text-gray-200 focus:outline-none" />
                 <Tooltip text="Copy share key">
                   <button 
                     onClick={() => handleCopy(wishlist?.wishlist_key || '', 'key')}
-                    className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'key' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'key' ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800'}`}
                   >
                     {copiedItem === 'key' ? <Check className="w-4 h-4" /> : 'Copy'}
                   </button>
@@ -264,11 +264,11 @@ export const WishlistEditView: React.FC = () => {
             <div className="mt-4">
               <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Link</h4>
               <div className="mt-1 flex items-center space-x-2">
-                <input type="text" readOnly value={`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 border rounded dark:border-neutral-600" />
+                                <input type="text" readOnly value={`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 rounded text-gray-900 dark:text-gray-200 focus:outline-none" />
                 <Tooltip text="Copy share link">
                   <button 
                     onClick={() => handleCopy(`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`, 'link')}
-                    className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'link' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                    className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'link' ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800'}`}
                   >
                     {copiedItem === 'link' ? <Check className="w-4 h-4" /> : 'Copy'}
                   </button>

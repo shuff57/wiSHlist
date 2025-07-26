@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void; // Make onConfirm optional
   title: string;
   children: ReactNode;
 }
@@ -21,16 +21,18 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, title,
         <div className="flex justify-end space-x-4">
           <button 
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-neutral-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-neutral-600"
+            className="px-4 py-2 rounded-lg bg-gray-200 bg-neutral-700 text-gray-800 dark:text-gray-200 hover:bg-gray-400"
           >
             Cancel
           </button>
-          <button 
-            onClick={onConfirm}
-            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
-          >
-            Confirm Delete
-          </button>
+          {onConfirm && ( // Only render confirm button if onConfirm is provided
+            <button 
+              onClick={onConfirm}
+              className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-800 hover:bg-red-800"
+            >
+              Confirm Delete
+            </button>
+          )}
         </div>
       </div>
     </div>

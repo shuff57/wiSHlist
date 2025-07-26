@@ -52,7 +52,7 @@ export const LoginView: React.FC = () => {
             <div className="mt-6">
               <button
                 onClick={handleGoogleLogin}
-                className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-200 font-medium flex items-center justify-center space-x-2 disabled:bg-gray-200 dark:disabled:bg-gray-500"
+                className="w-full bg-white bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-200 font-medium flex items-center justify-center space-x-2 disabled:bg-gray-200 dark:disabled:bg-gray-500"
                 disabled={loading}
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">

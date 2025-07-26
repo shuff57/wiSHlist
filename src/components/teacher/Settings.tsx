@@ -169,7 +169,7 @@ export const Settings: React.FC = () => {
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
       <Header title="Profile Settings" showBackButton={true} showSettingsButton={false} />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-8">
+        <div className="bg-white rounded-lg shadow p-8">
           <div className="space-y-6">
             <form onSubmit={handleSaveChanges} className="space-y-6">
               <div>
@@ -186,7 +186,7 @@ export const Settings: React.FC = () => {
                     <button
                       type="submit"
                       disabled={saving || name === user?.name}
-                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-700 hover:bg-sky-800 disabled:bg-gray-400 h-10"
+                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-800 disabled:bg-gray-400 h-10"
                     >
                       <Save className="w-5 h-5" />
                     </button>
@@ -217,28 +217,28 @@ export const Settings: React.FC = () => {
                 <div className="flex justify-around items-center pt-4">
                   <div className="flex items-center space-x-2">
                     <label className="text-sm font-medium">Recommender:</label>
-                    <button onClick={() => setIsRecommenderInvite(!isRecommenderInvite)} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isRecommenderInvite ? 'bg-sky-700' : 'bg-gray-300'}`}>
+                    <button onClick={() => setIsRecommenderInvite(!isRecommenderInvite)} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isRecommenderInvite ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
                       <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isRecommenderInvite ? 'translate-x-6' : 'translate-x-1'}`}/>
                     </button>
                   </div>
                   <div className="flex items-center space-x-2">
                     <label className="text-sm font-medium">Admin:</label>
-                    <button onClick={() => setIsAdminInvite(!isAdminInvite)} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isAdminInvite ? 'bg-sky-700' : 'bg-gray-300'}`}>
+                    <button onClick={() => setIsAdminInvite(!isAdminInvite)} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isAdminInvite ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
                       <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isAdminInvite ? 'translate-x-6' : 'translate-x-1'}`}/>
                     </button>
                   </div>
                 </div>
               )}
-              <button onClick={generateLink} className="w-full bg-sky-700 text-white py-2 px-4 rounded-lg hover:bg-sky-800">Generate Link</button>
+              <button onClick={generateLink} className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800">Generate Link</button>
               {registrationLink && (
                 <div className="mt-4 p-3 bg-neutral-100 dark:bg-neutral-700 rounded-lg">
                   <p className="text-sm mb-2">Share this link with a new teacher:</p>
                   <div className="flex items-center space-x-2">
-                    <input type="text" value={registrationLink} readOnly className="flex-1 px-2 py-1 text-sm border border-neutral-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-600" />
+                    <input type="text" value={registrationLink} readOnly className="flex-1 px-2 py-1 text-sm rounded bg-white dark:bg-neutral-600" />
                     <Tooltip text="Copy to clipboard">
                       <button 
                         onClick={() => handleCopy(registrationLink)} 
-                        className={`px-3 py-1 text-sm rounded transition-colors ${copied ? 'bg-lime-700 text-white' : 'bg-sky-700 text-white hover:bg-sky-800'}`}
+                                                className={`px-3 py-1 text-sm rounded transition-colors ${copied ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800'}`}
                       >
                         {copied ? <Check className="w-4 h-4" /> : 'Copy'}
                       </button>
@@ -262,15 +262,14 @@ export const Settings: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for a teacher by name..."
-                className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700"
-              />
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg bg-white" />
               <Search className="absolute right-3 top-2.5 text-gray-400" />
             </div>
             <div className="mt-4">
               {loadingSearch && <p>Searching...</p>}
               <div className="space-y-4">
                 {usersToDisplay.map(foundUser => (
-                <div key={foundUser.$id} className="p-4 border dark:border-neutral-700 rounded-md flex justify-between items-center">
+                <div key={foundUser.$id} className="p-4 border rounded-md flex justify-between items-center">
                   <div>
                     <p className="font-semibold">{foundUser.name}</p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">{foundUser.email}</p>
@@ -278,13 +277,13 @@ export const Settings: React.FC = () => {
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
                       <label className="text-sm font-medium">Recommender:</label>
-                      <button onClick={() => toggleUserStatus(foundUser, 'isRecommender')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isRecommender ? 'bg-sky-700' : 'bg-gray-300'}`}>
+                      <button onClick={() => toggleUserStatus(foundUser, 'isRecommender')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isRecommender ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
                         <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${foundUser.isRecommender ? 'translate-x-6' : 'translate-x-1'}`}/>
                       </button>
                     </div>
                     <div className="flex items-center space-x-2">
                       <label className="text-sm font-medium">Admin:</label>
-                      <button onClick={() => toggleUserStatus(foundUser, 'isAdmin')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isAdmin ? 'bg-sky-700' : 'bg-gray-300'}`}>
+                      <button onClick={() => toggleUserStatus(foundUser, 'isAdmin')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isAdmin ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
                         <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${foundUser.isAdmin ? 'translate-x-6' : 'translate-x-1'}`}/>
                       </button>
                     </div>

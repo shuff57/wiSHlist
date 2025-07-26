@@ -152,7 +152,7 @@ export const RegisterView: React.FC = () => {
                   name="name"
                   value={registerForm.name}
                   onChange={handleRegisterFormChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                  className="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none"
                   placeholder="Your Name"
                   required
                   disabled={loading}
@@ -166,7 +166,7 @@ export const RegisterView: React.FC = () => {
                   name="email"
                   value={registerForm.email}
                   onChange={handleRegisterFormChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                  className="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none"
                   placeholder="your-email@example.com"
                   required
                   disabled={loading}
@@ -180,7 +180,7 @@ export const RegisterView: React.FC = () => {
                   name="password"
                   value={registerForm.password}
                   onChange={handleRegisterFormChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                  className="w-full px-4 py-2 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none"
                   placeholder="••••••••"
                   required
                   disabled={loading}
@@ -189,7 +189,7 @@ export const RegisterView: React.FC = () => {
               
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
+                className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 disabled:bg-sky-400"
                 disabled={loading}
               >
                 {loading ? 'Registering...' : 'Register'}
@@ -210,7 +210,7 @@ export const RegisterView: React.FC = () => {
             <div className="mt-6">
               <button
                 onClick={handleGoogleRegister}
-                className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:bg-gray-200 dark:disabled:bg-gray-500"
+                className="w-full bg-white bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-lg hover:bg-gray-200 disabled:bg-gray-200 dark:disabled:bg-gray-500"
                 disabled={loading}
               >
                 {loading ? 'Processing...' : 'Register with Google'}

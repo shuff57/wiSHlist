@@ -131,7 +131,7 @@ export const SupporterView: React.FC = () => {
        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col items-center justify-center text-center p-4">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
         <p className="text-gray-700 dark:text-gray-300 mt-4">{error}</p>
-        <button onClick={() => navigate('/')} className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+        <button onClick={() => navigate('/')} className="mt-6 bg-sky-700 text-white px-6 py-2 rounded-lg hover:bg-sky-900">
           Back to Home
         </button>
       </div>
@@ -140,7 +140,7 @@ export const SupporterView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Header title="Wishlist" showSettingsButton={false} showSignoutButton={false} />
+      <Header title="Wishlist" showSettingsButton={false} showSignoutButton={false} showSearch={true} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Help {wishlist?.teacher_name}'s Students Learn & Grow</h2>
@@ -175,7 +175,7 @@ export const SupporterView: React.FC = () => {
                           href={item.store_link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center text-sm font-medium"
+                          className="bg-sky-600 text-white px-6 py-2 rounded-lg hover:bg-sky-800 hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
                         >
                           Purchase <ExternalLink className="w-4 h-4 ml-2" />
                         </a>
@@ -184,7 +184,7 @@ export const SupporterView: React.FC = () => {
                     <Tooltip text="Let the teacher know you've purchased this item">
                       <button
                         onClick={() => handleMarkContribution(item)}
-                        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition duration-200 flex items-center justify-center text-sm font-medium"
+                        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition duration-200 flex items-center justify-center text-sm font-medium"
                       >
                         <CheckCircle className="w-4 h-4 mr-2" />
                         I bought this
@@ -203,11 +203,11 @@ export const SupporterView: React.FC = () => {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Suggest a New Item</h3>
             <form onSubmit={handleSuggestionSubmit} className="space-y-4">
-              <input type="text" name="itemName" placeholder="Item Name" value={suggestionForm.itemName} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200" required />
-              <textarea name="description" placeholder="Description" value={suggestionForm.description} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200" />
-              <input type="url" name="storeLink" placeholder="Store Link (optional)" value={suggestionForm.storeLink} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200" />
-              <input type="text" name="estimatedCost" placeholder="Estimated Cost (e.g., $15.00)" value={suggestionForm.estimatedCost} onChange={handleSuggestionFormChange} className="w-full p-2 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200" />
-              <button type="submit" className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700">Submit Suggestion</button>
+              <input type="text" name="itemName" placeholder="Item Name" value={suggestionForm.itemName} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none" required />
+              <textarea name="description" placeholder="Description" value={suggestionForm.description} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              <input type="url" name="storeLink" placeholder="Store Link (optional)" value={suggestionForm.storeLink} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              <input type="text" name="estimatedCost" placeholder="Estimated Cost (e.g., $15.00)" value={suggestionForm.estimatedCost} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              <button type="submit" className="w-full bg-purple-700 text-white py-2 px-4 rounded-lg hover:bg-purple-900">Submit Suggestion</button>
             </form>
           </div>
         </div>

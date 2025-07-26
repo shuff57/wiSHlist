@@ -28,20 +28,20 @@ export const SupporterLanding: React.FC = () => {
               type="text"
               value={key}
               onChange={(e) => setKey(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-center text-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+              className="w-full px-4 py-3 rounded-lg text-center text-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none"
               placeholder="Enter Wishlist Key"
               required
             />
             <button
               type="submit"
-              className="mt-4 w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-medium"
+              className="mt-4 w-full bg-sky-600 text-white py-3 px-4 rounded-lg hover:bg-sky-800 font-medium"
             >
               Find Wishlist
             </button>
           </form>
           
           <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">
-            <p>Are you a teacher? <Link to="/" className="text-blue-600 hover:underline">Login here</Link></p>
+            <p>Are you a teacher? <Link to="/" className="text-sky-600 hover:underline">Login here</Link></p>
           </div>
         </div>
       </div>
