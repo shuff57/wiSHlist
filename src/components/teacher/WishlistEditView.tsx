@@ -274,7 +274,7 @@ export const WishlistEditView: React.FC = () => {
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
-                              className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 flex flex-col justify-between cursor-pointer transition-colors duration-200 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                              className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 flex flex-col justify-between transition-colors duration-200 group pointer-events-none"
                             >
                               {editingItemId === item.$id ? (
                                 <form onSubmit={handleUpdateItem} className="space-y-4">
@@ -290,7 +290,7 @@ export const WishlistEditView: React.FC = () => {
                               ) : (
                                 <>
                                   <div className="flex items-center">
-                                    <div {...provided.dragHandleProps} className="p-2 cursor-grab active:cursor-grabbing">
+                                    <div {...provided.dragHandleProps} className="p-2 cursor-grab active:cursor-grabbing pointer-events-auto">
                                       <GripVertical className="w-5 h-5 text-black dark:text-white" />
                                     </div>
                                     <div className="flex-grow">
@@ -305,19 +305,19 @@ export const WishlistEditView: React.FC = () => {
                                             href={item.store_link}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="p-2 rounded-full hover:bg-white dark:hover:bg-neutral-800 focus:outline-none transition-colors flex items-center"
+                                            className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer pointer-events-auto"
                                           >
                                             <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                                           </a>
                                         </Tooltip>
                                       )}
                                       <Tooltip text="Edit this item">
-                                        <button onClick={() => handleEditItem(item)} className="p-2 rounded-full hover:bg-white dark:hover:bg-neutral-800 focus:outline-none transition-colors flex items-center">
+                                        <button onClick={() => handleEditItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer pointer-events-auto">
                                           <Pencil className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                                         </button>
                                       </Tooltip>
-                                      <Tooltip text="Permanently delete this item">
-                                        <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full hover:bg-white dark:hover:bg-neutral-800 focus:outline-none transition-colors flex items-center">
+                                      <Tooltip text="Delete this item">
+                                        <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer pointer-events-auto">
                                           <Trash2 className="w-5 h-5 text-red-600" />
                                         </button>
                                       </Tooltip>
