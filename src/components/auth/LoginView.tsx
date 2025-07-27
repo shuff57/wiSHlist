@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Heart } from 'lucide-react';
 import { account } from '../../appwriteConfig';
 import { AppwriteException, OAuthProvider } from 'appwrite';
 import { Header } from '../layout/Header';
@@ -11,7 +10,19 @@ export const LoginView: React.FC = () => {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      await account.createOAuth2Session(OAuthProvider.Google, `${window.location.origin}/dashboard`, `${window.location.origin}/`);
+      // First, try to delete any existing session
+      try {
+        await account.deleteSession('current');
+      } catch (e) {
+        // Ignore error if no session exists
+      }
+      
+      // Now create new OAuth session with unique success URL to force new flow
+      await account.createOAuth2Session(
+        OAuthProvider.Google,
+        `${window.location.origin}/dashboard?auth_time=${Date.now()}`,
+        `${window.location.origin}/`
+      );
     } catch (error) {
       if (error instanceof AppwriteException) {
         setLoginError(error.message);
