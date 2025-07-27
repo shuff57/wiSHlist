@@ -140,7 +140,7 @@ export const SupporterView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Header title="Wishlist" showSettingsButton={false} showSignoutButton={false} showSearch={true} />
+      <Header title="wiSHlist" showSettingsButton={false} showSignoutButton={false} showSearch={true} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Help {wishlist?.teacher_name}'s Students Learn & Grow</h2>
@@ -195,7 +195,7 @@ export const SupporterView: React.FC = () => {
               </div>
             )) : (
               <div className="md:col-span-2 text-center py-10 bg-white dark:bg-gray-800 rounded-lg shadow">
-                <p className="text-gray-600 dark:text-gray-400">This wishlist is empty!</p>
+                <p className="text-gray-600 dark:text-gray-400">This wiSHlist is empty!</p>
               </div>
             )}
           </div>

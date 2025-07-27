@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { databases, databaseId, wishlistsCollectionId } from '../../appwriteConfig';
 import { Header } from '../layout/Header';
 
 export const SupporterLanding: React.FC = () => {
@@ -19,9 +19,8 @@ export const SupporterLanding: React.FC = () => {
       <Header title="Supporter" showSettingsButton={false} showSignoutButton={false} />
       <div className="flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md text-center">
-          <Heart className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Classroom Wishlist</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2 mb-6">Enter a teacher's wishlist key to view their list.</p>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">Classroom wiSHlist</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Enter a teacher's wiSHlist key to view their list.</p>
           
           <form onSubmit={handleSubmit}>
             <input
@@ -29,14 +28,14 @@ export const SupporterLanding: React.FC = () => {
               value={key}
               onChange={(e) => setKey(e.target.value)}
               className="w-full px-4 py-3 rounded-lg text-center text-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none"
-              placeholder="Enter Wishlist Key"
+              placeholder="Enter wiSHlist Key"
               required
             />
             <button
               type="submit"
               className="mt-4 w-full bg-sky-600 text-white py-3 px-4 rounded-lg hover:bg-sky-800 font-medium"
             >
-              Find Wishlist
+              Find wiSHlist
             </button>
           </form>
           

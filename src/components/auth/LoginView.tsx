@@ -28,9 +28,8 @@ export const LoginView: React.FC = () => {
       <div className="flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md">
           <div className="text-center mb-6">
-            <Heart className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Classroom Wishlist</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">Supporting Ms. Johnson's 3rd Grade Class</p>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Classroom wiSHlist</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Supporting your student's favorite teacher</p>
           </div>
           
           {loginError && (
@@ -52,7 +51,7 @@ export const LoginView: React.FC = () => {
             <div className="mt-6">
               <button
                 onClick={handleGoogleLogin}
-                className="w-full bg-white bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-200 font-medium flex items-center justify-center space-x-2 disabled:bg-gray-200 dark:disabled:bg-gray-500"
+                className="w-full bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-200 font-medium flex items-center justify-center space-x-2 disabled:bg-gray-200 dark:disabled:bg-gray-500"
                 disabled={loading}
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -64,7 +63,7 @@ export const LoginView: React.FC = () => {
                 <span>{loading ? 'Processing...' : 'Sign in with Google'}</span>
               </button>
               <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                Are you a supporter? <Link to="/supporter" className="text-blue-600 hover:underline">Find a wiSHlist</Link>
+                Are you a supporter? <Link to="/supporter" className="text-sky-600 hover:underline">Find a wiSHlist</Link>
               </div>
             </div>
           </div>

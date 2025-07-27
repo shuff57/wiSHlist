@@ -217,7 +217,7 @@ export const WishlistEditView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
-      <Header title="Manage Wishlist" showBackButton={true} />
+      <Header title="Manage wiSHlist" showBackButton={true} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
           <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
@@ -227,7 +227,7 @@ export const WishlistEditView: React.FC = () => {
               <textarea name="description" placeholder="Description" value={newItem.description} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" />
               <input type="url" name="store_link" placeholder="Store Link (optional)" value={newItem.store_link} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
               <input type="text" name="cost" placeholder="Cost (e.g., $12.99)" value={newItem.cost} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-              <button type="submit" className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 dark:hover:bg-green-900">Add to Wishlist</button>
+              <button type="submit" className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 dark:hover:bg-green-900">Add to wiSHlist</button>
             </form>
           </div>
 
@@ -340,10 +340,10 @@ export const WishlistEditView: React.FC = () => {
 
         <div className="md:col-span-1">
           <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Wishlist Settings</h3>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">wiSHlist Settings</h3>
             <form onSubmit={handleSettingsSave} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Wishlist Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">wiSHlist Name</label>
               <input type="text" value={formData.wishlist_name} onChange={e => setFormData({...formData, wishlist_name: e.target.value})} className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
               </div>
               <div>
