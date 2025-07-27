@@ -2,9 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, ID, Query } from 'appwrite';
-import { Trash2, Check, X } from 'lucide-react';
+import { Trash2, Check, X, GripVertical, Pencil } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { useStrictDroppable } from '../../hooks/useStrictDroppable';
 
 interface WishlistDoc {
   wishlist_name?: string;
@@ -18,6 +21,7 @@ interface ItemDoc {
   store_link?: string;
   cost?: string;
   contributions: number;
+  position: number;
 }
 
 interface SuggestionDoc {
@@ -37,6 +41,9 @@ export const WishlistEditView: React.FC = () => {
   const [newItem, setNewItem] = useState({ name: '', description: '', store_link: '', cost: '' });
   const [loading, setLoading] = useState(true);
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
+  const [editedItemData, setEditedItemData] = useState<ItemDoc | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [enabled] = useStrictDroppable(loading);
   const navigate = useNavigate();
 
   const handleCopy = (textToCopy: string, type: 'key' | 'link') => {
@@ -46,6 +53,7 @@ export const WishlistEditView: React.FC = () => {
   };
 
   const fetchWishlistData = useCallback(async (id: string) => {
+    console.log('Fetching wishlist data for ID:', id);
     try {
       const wishlistDoc = await databases.getDocument(databaseId, wishlistsCollectionId, id);
       setWishlist(wishlistDoc as Models.Document & WishlistDoc);
@@ -68,6 +76,7 @@ export const WishlistEditView: React.FC = () => {
 
   useEffect(() => {
     if (!wishlistId) {
+      console.log('No wishlistId found in URL, redirecting to dashboard.');
       navigate('/dashboard');
       return;
     }
@@ -76,6 +85,7 @@ export const WishlistEditView: React.FC = () => {
         await account.get();
         await fetchWishlistData(wishlistId);
       } catch (error) {
+        console.error('Authentication check failed:', error);
         navigate('/login');
       } finally {
         setLoading(false);
@@ -118,6 +128,38 @@ export const WishlistEditView: React.FC = () => {
     }
   };
 
+  const handleEditItem = (item: Models.Document & ItemDoc) => {
+    setEditingItemId(item.$id);
+    setEditedItemData(item);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingItemId(null);
+    setEditedItemData(null);
+  };
+
+  const handleUpdateItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editedItemData || !editingItemId) return;
+    try {
+      const updatedItem = await databases.updateDocument(
+        databaseId,
+        itemsCollectionId,
+        editingItemId,
+        {
+          name: editedItemData.name,
+          description: editedItemData.description,
+          store_link: editedItemData.store_link,
+          cost: editedItemData.cost,
+        }
+      );
+      setItems(prev => prev.map(i => i.$id === editingItemId ? updatedItem as Models.Document & ItemDoc : i));
+      handleCancelEdit();
+    } catch (error) {
+      console.error("Error updating item:", error);
+    }
+  };
+
   const handleDeleteItem = async (itemId: string) => {
     try {
       await databases.deleteDocument(databaseId, itemsCollectionId, itemId);
@@ -155,6 +197,20 @@ export const WishlistEditView: React.FC = () => {
     }
   };
 
+  const onDragEnd = (result: DropResult) => {
+    const { destination, source } = result;
+    if (!destination) return;
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+
+    const reorderedItems = Array.from(items);
+    const [removed] = reorderedItems.splice(source.index, 1);
+    reorderedItems.splice(destination.index, 0, removed);
+
+    setItems(reorderedItems);
+
+    // Optionally, update the order in your database if you add a position field in the future
+  };
+
   if (loading) {
     return <div className="text-center p-10">Loading...</div>;
   }
@@ -167,10 +223,10 @@ export const WishlistEditView: React.FC = () => {
           <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Add New Item</h3>
             <form onSubmit={handleAddItem} className="space-y-4">
-              <input type="text" name="name" placeholder="Item Name" value={newItem.name} onChange={handleItemFormChange} className="w-full p-2 rounded dark:bg-neutral-700 dark:border-neutral-600 focus:outline-none" required />
-              <textarea name="description" placeholder="Description" value={newItem.description} onChange={handleItemFormChange} className="w-full p-2 rounded dark:bg-neutral-700 dark:border-neutral-600 focus:outline-none" />
-              <input type="url" name="store_link" placeholder="Store Link (optional)" value={newItem.store_link} onChange={handleItemFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-              <input type="text" name="cost" placeholder="Cost (e.g., $12.99)" value={newItem.cost} onChange={handleItemFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              <input type="text" name="name" placeholder="Item Name" value={newItem.name} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" required />
+              <textarea name="description" placeholder="Description" value={newItem.description} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              <input type="url" name="store_link" placeholder="Store Link (optional)" value={newItem.store_link} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              <input type="text" name="cost" placeholder="Cost (e.g., $12.99)" value={newItem.cost} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
               <button type="submit" className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 dark:hover:bg-green-900">Add to Wishlist</button>
             </form>
           </div>
@@ -207,27 +263,78 @@ export const WishlistEditView: React.FC = () => {
 
           <div>
             <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Your Items ({items.length})</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {items.map(item => (
-                <div key={item.$id} className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 flex flex-col justify-between">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-200">{item.name}</h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{item.description}</p>
-                  </div>
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between text-sm">
-                      {item.cost && <span className="text-green-600 font-medium">{item.cost}</span>}
-                      {item.store_link && <a href={item.store_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Item</a>}
+            <DragDropContext onDragEnd={onDragEnd}>
+              {enabled && (
+                <Droppable droppableId="wishlist-items">
+                  {(provided) => (
+                    <div {...provided.droppableProps} ref={provided.innerRef} className="grid grid-cols-1 gap-6">
+                      {items.map((item, index) => (
+                        <Draggable key={item.$id} draggableId={item.$id} index={index}>
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 flex flex-col justify-between cursor-pointer transition-colors duration-200 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                            >
+                              {editingItemId === item.$id ? (
+                                <form onSubmit={handleUpdateItem} className="space-y-4">
+                                  <input type="text" name="name" value={editedItemData?.name || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, name: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" required />
+                                  <textarea name="description" value={editedItemData?.description || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, description: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                                  <input type="url" name="store_link" value={editedItemData?.store_link || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, store_link: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                                  <input type="text" name="cost" value={editedItemData?.cost || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, cost: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                                  <div className="flex space-x-2">
+                                    <button type="submit" className="flex-grow bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 dark:hover:bg-green-900">Save</button>
+                                    <button type="button" onClick={handleCancelEdit} className="flex-grow bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">Cancel</button>
+                                  </div>
+                                </form>
+                              ) : (
+                                <>
+                                  <div className="flex items-center">
+                                    <div {...provided.dragHandleProps} className="p-2 cursor-grab active:cursor-grabbing">
+                                      <GripVertical className="w-5 h-5 text-black dark:text-white" />
+                                    </div>
+                                    <div className="flex-grow">
+                                      <h4 className="font-semibold text-gray-900 dark:text-gray-200">{item.name}</h4>
+                                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{item.description}</p>
+                                      {item.cost && <span className="text-green-600 font-medium text-sm">{item.cost}</span>}
+                                    </div>
+                                    <div className="flex flex-col items-end space-y-2 ml-4">
+                                      {item.store_link && (
+                                        <Tooltip text="View this item">
+                                          <a
+                                            href={item.store_link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-2 rounded-full hover:bg-white dark:hover:bg-neutral-800 focus:outline-none transition-colors flex items-center"
+                                          >
+                                            <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                          </a>
+                                        </Tooltip>
+                                      )}
+                                      <Tooltip text="Edit this item">
+                                        <button onClick={() => handleEditItem(item)} className="p-2 rounded-full hover:bg-white dark:hover:bg-neutral-800 focus:outline-none transition-colors flex items-center">
+                                          <Pencil className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                        </button>
+                                      </Tooltip>
+                                      <Tooltip text="Permanently delete this item">
+                                        <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full hover:bg-white dark:hover:bg-neutral-800 focus:outline-none transition-colors flex items-center">
+                                          <Trash2 className="w-5 h-5 text-red-600" />
+                                        </button>
+                                      </Tooltip>
+                                    </div>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
                     </div>
-                    <Tooltip text="Permanently delete this item">
-                      <button onClick={() => handleDeleteItem(item.$id)} className="mt-4 w-full text-red-500 hover:text-red-700 dark:hover:text-red-400 text-sm flex items-center justify-center">
-                        <Trash2 className="w-4 h-4 mr-1" /> Delete
-                      </button>
-                    </Tooltip>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  )}
+                </Droppable>
+              )}
+            </DragDropContext>
           </div>
         </div>
 
@@ -237,11 +344,11 @@ export const WishlistEditView: React.FC = () => {
             <form onSubmit={handleSettingsSave} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Wishlist Name</label>
-                                                                                                <input type="text" value={formData.wishlist_name} onChange={e => setFormData({...formData, wishlist_name: e.target.value})} className="mt-1 w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              <input type="text" value={formData.wishlist_name} onChange={e => setFormData({...formData, wishlist_name: e.target.value})} className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Info</label>
-                <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
               </div>
               <Tooltip text="Save changes to your wishlist settings">
                 <button type="submit" className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 dark:hover:bg-sky-800">Save Settings</button>

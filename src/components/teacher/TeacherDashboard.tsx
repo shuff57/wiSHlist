@@ -218,7 +218,10 @@ export const TeacherDashboard: React.FC = () => {
                             ) : (
                               <div 
                                 className="flex-grow flex items-center space-x-2 cursor-pointer"
-                                onClick={() => navigate(`/wishlist/${wishlist.$id}/edit`)}
+                                onClick={() => {
+                                  console.log('Navigating to wishlist edit for ID:', wishlist.$id);
+                                  navigate(`/wishlist/${wishlist.$id}/edit`);
+                                }}
                               >
                                 <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-200">{wishlist.wishlist_name}</h3>
                                 <button 
