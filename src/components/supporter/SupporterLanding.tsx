@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { databases, databaseId, wishlistsCollectionId } from '../../appwriteConfig';
 import { Header } from '../layout/Header';
 
 export const SupporterLanding: React.FC = () => {

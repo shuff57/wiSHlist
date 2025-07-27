@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { databases, databaseId, wishlistsCollectionId, usersCollectionId, itemsCollectionId } from '../../appwriteConfig';
 import { useNavigate } from 'react-router-dom';
 import { Models, ID, Query } from 'appwrite';
@@ -31,37 +31,104 @@ export const TeacherDashboard: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [wishlistToDelete, setWishlistToDelete] = useState<string | null>(null);
   const [enabled] = useStrictDroppable(loading || authLoading);
+  const [isInitializing, setIsInitializing] = useState(false); // Prevent duplicate calls
+  const [rateLimited, setRateLimited] = useState(false); // Track rate limit status
+  const initializationRef = useRef<string | null>(null); // Track which user is being initialized
   const navigate = useNavigate();
 
+  // Function to wait and retry when rate limited
+  const retryAfterRateLimit = async (retryFn: () => Promise<any>, delayMs: number = 5000) => {
+    console.log(`Rate limited. Waiting ${delayMs}ms before retry...`);
+    setRateLimited(true);
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+    setRateLimited(false);
+    return await retryFn();
+  };
+
   const fetchUserData = useCallback(async (userId: string, userName: string, userEmail: string) => {
+    console.log("fetchUserData called with:", { userId, userName, userEmail });
     let doc = null;
+    
     try {
+        // First, try to get the existing document using user ID as document ID
+        console.log("Attempting to fetch existing user document for ID:", userId);
         doc = await databases.getDocument(databaseId, usersCollectionId, userId);
+        console.log("Found existing user document:", doc);
     } catch (e: any) {
+        console.log("Error fetching user document:", e.code, e.message);
         if (e.code === 404) {
+            // Document doesn't exist, try to create it
+            console.log("User document not found, creating new one for:", userId, userName, userEmail);
+            
+            const userDocData = { 
+                name: userName || 'Unknown User', 
+                email: userEmail || 'unknown@email.com', 
+                role: 'teacher', 
+                isRecommender: false, 
+                isAdmin: false 
+            };
+            console.log("Creating user document with data:", userDocData);
+            
             try {
                 doc = await databases.createDocument(
-                    databaseId, usersCollectionId, userId,
-                    { name: userName, email: userEmail, role: 'teacher', isRecommender: false, isAdmin: false }
+                    databaseId, 
+                    usersCollectionId, 
+                    userId, // Use user ID as document ID
+                    userDocData
                 );
+                console.log("Successfully created user document:", doc);
             } catch (createError: any) {
+                console.error("Failed to create user document:", createError.code, createError.message);
+                
                 if (createError.code === 409) {
+                    // Document was created by another process (likely React StrictMode), try to fetch it
+                    console.log("Race condition detected (409), document already exists. Fetching existing document...");
                     try {
-                        await new Promise(res => setTimeout(res, 250));
-                        doc = await databases.getDocument(databaseId, usersCollectionId, userId);
-                    } catch (refetchError) {
-                        console.error("Failed to refetch user document after race condition:", refetchError);
+                        // Try multiple times with increasing delays
+                        for (let attempt = 1; attempt <= 3; attempt++) {
+                            console.log(`Fetch attempt ${attempt}/3...`);
+                            await new Promise(res => setTimeout(res, attempt * 500)); // Increasing delay
+                            try {
+                                doc = await databases.getDocument(databaseId, usersCollectionId, userId);
+                                console.log(`Successfully fetched existing user document on attempt ${attempt}:`, doc);
+                                break; // Success, exit the retry loop
+                            } catch (fetchError: any) {
+                                console.log(`Fetch attempt ${attempt} failed:`, fetchError.code, fetchError.message);
+                                if (attempt === 3) {
+                                    console.error("Failed to fetch user document after all retry attempts");
+                                }
+                            }
+                        }
+                    } catch (retryError) {
+                        console.error("Error in retry logic:", retryError);
+                    }
+                } else if (createError.code === 429) {
+                    // Rate limit exceeded - wait and retry once
+                    console.log("Rate limit exceeded. Waiting before retry...");
+                    try {
+                        doc = await retryAfterRateLimit(async () => {
+                            return await databases.createDocument(
+                                databaseId, 
+                                usersCollectionId, 
+                                userId,
+                                userDocData
+                            );
+                        });
+                        console.log("Successfully created user document after rate limit retry:", doc);
+                    } catch (retryError: any) {
+                        console.error("Failed to create user document even after rate limit retry:", retryError);
                     }
                 } else {
-                    console.error("Failed to create user document:", createError);
+                    console.error("Non-409/429 error creating user document:", createError);
                 }
             }
         } else {
-            console.error("Failed to get user document:", e);
+            console.error("Non-404 error fetching user document:", e);
         }
     }
 
     if (doc) {
+        console.log("Setting user document:", doc);
         setUserDoc(doc as Models.Document & UserDoc);
         try {
             const response = await databases.listDocuments(
@@ -71,12 +138,54 @@ export const TeacherDashboard: React.FC = () => {
         } catch (error) {
             console.error("Failed to fetch wishlists:", error);
         }
+    } else {
+        console.log("No user document available, but continuing with basic functionality");
+        // Set a minimal user doc so the UI can function
+        setUserDoc({
+            $id: 'temp',
+            $createdAt: new Date().toISOString(),
+            $updatedAt: new Date().toISOString(),
+            $permissions: [],
+            $collectionId: usersCollectionId,
+            $databaseId: databaseId,
+            isRecommender: false,
+            isAdmin: false
+        } as Models.Document & UserDoc);
+        
+        // Still try to fetch wishlists
+        try {
+            const response = await databases.listDocuments(
+                databaseId, wishlistsCollectionId, [Query.equal('teacher_id', userId)]
+            );
+            setWishlists(response.documents as (Models.Document & WishlistDoc)[]);
+        } catch (error) {
+            console.error("Failed to fetch wishlists:", error);
+            setWishlists([]);
+        }
     }
   }, []);
 
   useEffect(() => {
-    if (!authLoading && user) {
-      fetchUserData(user.$id, user.name, user.email).finally(() => setLoading(false));
+    if (!authLoading && user && !isInitializing) {
+      // Prevent duplicate initialization for the same user
+      if (initializationRef.current === user.$id) {
+        console.log("Already initializing for user:", user.$id);
+        return;
+      }
+      
+      console.log("User object from auth:", user);
+      console.log("User ID:", user.$id);
+      console.log("User name:", user.name);
+      console.log("User email:", user.email);
+      
+      setIsInitializing(true);
+      initializationRef.current = user.$id;
+      
+      fetchUserData(user.$id, user.name, user.email).finally(() => {
+        setLoading(false);
+        setIsInitializing(false);
+        // Keep the ref set to prevent re-initialization
+      });
     } else if (!authLoading && !user) {
       navigate('/login');
     }
@@ -170,8 +279,24 @@ export const TeacherDashboard: React.FC = () => {
     // Here you would typically update the order in your database
   };
 
-  if (authLoading || loading || !user || !userDoc) {
-    return <div className="text-center p-10">Loading...</div>;
+  if (authLoading || loading || !user) {
+    return (
+      <div className="text-center p-10">
+        {rateLimited ? (
+          <div>
+            <p className="text-lg mb-2">⏳ Rate limited by server</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Waiting before retry... Please be patient.</p>
+          </div>
+        ) : (
+          <p>Loading...</p>
+        )}
+      </div>
+    );
+  }
+
+  // If no userDoc but we have a user, show a message but continue
+  if (!userDoc) {
+    console.log("No user document available, but continuing with limited functionality");
   }
 
   return (

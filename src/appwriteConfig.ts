@@ -2,9 +2,26 @@ import { Client, Account, Databases } from 'appwrite';
 
 export const client = new Client();
 
-client
-    .setEndpoint(process.env.REACT_APP_APPWRITE_ENDPOINT as string)
-    .setProject(process.env.REACT_APP_APPWRITE_PROJECT_ID as string);
+const endpoint = process.env.REACT_APP_APPWRITE_ENDPOINT;
+const projectId = process.env.REACT_APP_APPWRITE_PROJECT_ID;
+
+console.log('Appwrite Configuration:');
+console.log('Endpoint:', endpoint);
+console.log('Project ID:', projectId);
+
+if (!endpoint || !projectId) {
+    throw new Error('Missing Appwrite configuration. Please check your .env file and ensure REACT_APP_APPWRITE_ENDPOINT and REACT_APP_APPWRITE_PROJECT_ID are set.');
+}
+
+try {
+    client
+        .setEndpoint(endpoint)
+        .setProject(projectId);
+    console.log('Appwrite client configured successfully');
+} catch (error) {
+    console.error('Error configuring Appwrite client:', error);
+    throw error;
+}
 
 export const account = new Account(client);
 export const databases = new Databases(client);

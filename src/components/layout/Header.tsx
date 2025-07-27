@@ -41,10 +41,11 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
       if (wishlistKeyInput.trim()) {
         setIsSearching(true);
         try {
+          // Use exact match instead of fulltext search since no index exists
           const response = await databases.listDocuments(
             databaseId,
             wishlistsCollectionId,
-            [Query.search('wishlist_key', wishlistKeyInput.trim())]
+            [Query.equal('wishlist_key', wishlistKeyInput.trim())]
           );
           setSearchResults(response.documents as WishlistDoc[]);
         } catch (error) {

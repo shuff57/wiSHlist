@@ -39,12 +39,14 @@ export const SupporterView: React.FC = () => {
   const fetchWishlistData = useCallback(async (key: string) => {
     const processedKey = key.trim(); // Normalize the key
     setError(''); // Clear any previous errors
+    
     try {
       const response = await databases.listDocuments(
         databaseId,
         wishlistsCollectionId,
         [Query.equal('wishlist_key', processedKey)]
       );
+      
       if (response.documents.length > 0) {
         const foundWishlist = response.documents[0] as Models.Document & WishlistDoc;
         setWishlist(foundWishlist);
@@ -55,11 +57,11 @@ export const SupporterView: React.FC = () => {
         );
         setItems(itemsResponse.documents as (Models.Document & ItemDoc)[]);
       } else {
-        setError('No wishlist found with that key.');
+        setError('No wishlist found with that key. Please check the key and try again.');
       }
     } catch (err: any) {
-      setError(`Failed to fetch wishlist: ${err.message || 'Unknown error'}. Please try again.`);
       console.error("Error fetching wishlist:", err);
+      setError(`Failed to fetch wishlist: ${err.message || 'Unknown error'}. Please try again.`);
     } finally {
       setLoading(false);
     }
