@@ -301,6 +301,26 @@ export const Settings: React.FC = () => {
     try {
       console.log(`🔄 Toggling ${field} for user:`, targetUser.name, "Current value:", targetUser[field]);
       
+      // Calculate new values with admin->recommender logic
+      let newIsAdmin = targetUser.isAdmin;
+      let newIsRecommender = targetUser.isRecommender;
+      
+      if (field === 'isAdmin') {
+        newIsAdmin = !targetUser.isAdmin;
+        // If granting admin privileges, automatically grant recommender too
+        if (newIsAdmin && !newIsRecommender) {
+          newIsRecommender = true;
+          console.log("👑 Granting admin privileges - automatically enabling recommender as well");
+        }
+      } else if (field === 'isRecommender') {
+        newIsRecommender = !targetUser.isRecommender;
+        // If removing recommender privileges and user is admin, remove admin too (since admin requires recommender)
+        if (!newIsRecommender && newIsAdmin) {
+          newIsAdmin = false;
+          console.log("⬇️ Removing recommender privileges - automatically removing admin as well");
+        }
+      }
+      
       let updatedUser: Models.Document & UserDoc;
       try {
         // Try to update the existing document
@@ -308,9 +328,13 @@ export const Settings: React.FC = () => {
           databaseId,
           usersCollectionId,
           targetUser.$id,
-          { [field]: !targetUser[field] }
+          { 
+            isAdmin: newIsAdmin,
+            isRecommender: newIsRecommender
+          }
         ) as Models.Document & UserDoc;
-        console.log(`✅ Updated ${field} for user:`, targetUser.name, "New value:", updatedUser[field]);
+        console.log(`✅ Updated privileges for user:`, targetUser.name, 
+          `Admin: ${targetUser.isAdmin} -> ${newIsAdmin}, Recommender: ${targetUser.isRecommender} -> ${newIsRecommender}`);
       } catch (updateError) {
         console.log(`❌ Failed to update user document, trying to create it:`, updateError);
         
@@ -324,13 +348,14 @@ export const Settings: React.FC = () => {
               name: targetUser.name,
               email: targetUser.email,
               role: 'teacher',
-              isRecommender: field === 'isRecommender' ? !targetUser[field] : (targetUser.isRecommender || false),
-              isAdmin: field === 'isAdmin' ? !targetUser[field] : (targetUser.isAdmin || false),
+              isRecommender: newIsRecommender,
+              isAdmin: newIsAdmin,
               name_lowercase: targetUser.name.toLowerCase(),
               userID: user?.$id // Track who created this user
             }
           ) as Models.Document & UserDoc;
-          console.log(`✅ Created user document with ${field}:`, targetUser.name, "New value:", updatedUser[field]);
+          console.log(`✅ Created user document with privileges:`, targetUser.name, 
+            `Admin: ${newIsAdmin}, Recommender: ${newIsRecommender}`);
         } catch (createError) {
           console.error(`❌ Failed to create user document:`, createError);
           throw createError;
@@ -420,13 +445,27 @@ export const Settings: React.FC = () => {
                 <div className="flex justify-around items-center pt-4">
                   <div className="flex items-center space-x-2">
                     <label className="text-sm font-medium">Recommender:</label>
-                    <button onClick={() => setIsRecommenderInvite(!isRecommenderInvite)} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isRecommenderInvite ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
+                    <button onClick={() => {
+                      const newRecommender = !isRecommenderInvite;
+                      setIsRecommenderInvite(newRecommender);
+                      // If removing recommender, also remove admin (since admin requires recommender)
+                      if (!newRecommender && isAdminInvite) {
+                        setIsAdminInvite(false);
+                      }
+                    }} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isRecommenderInvite ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
                       <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isRecommenderInvite ? 'translate-x-6' : 'translate-x-1'}`}/>
                     </button>
                   </div>
                   <div className="flex items-center space-x-2">
                     <label className="text-sm font-medium">Admin:</label>
-                    <button onClick={() => setIsAdminInvite(!isAdminInvite)} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isAdminInvite ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
+                    <button onClick={() => {
+                      const newAdmin = !isAdminInvite;
+                      setIsAdminInvite(newAdmin);
+                      // If granting admin, also grant recommender (since admin requires recommender)
+                      if (newAdmin && !isRecommenderInvite) {
+                        setIsRecommenderInvite(true);
+                      }
+                    }} className={`relative inline-flex items-center h-6 rounded-full w-11 ${isAdminInvite ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
                       <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isAdminInvite ? 'translate-x-6' : 'translate-x-1'}`}/>
                     </button>
                   </div>
