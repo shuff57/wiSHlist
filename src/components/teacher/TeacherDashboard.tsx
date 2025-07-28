@@ -292,15 +292,34 @@ export const TeacherDashboard: React.FC = () => {
 
   if (authLoading || loading || !user) {
     return (
-      <div className="text-center p-10">
-        {rateLimited ? (
-          <div>
-            <p className="text-lg mb-2">⏳ Rate limited by server</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Waiting before retry... Please be patient.</p>
-          </div>
-        ) : (
-          <p>Loading...</p>
-        )}
+      <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
+        <Header title="Dashboard" isLoading={true} />
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {rateLimited ? (
+            <div className="text-center py-16">
+              <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-8 max-w-md mx-auto">
+                <p className="text-lg mb-2">⏳ Rate limited by server</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Waiting before retry... Please be patient.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Skeleton for dashboard content */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 animate-pulse">
+                    <div className="h-4 bg-gray-200 dark:bg-neutral-700 rounded w-3/4 mb-3"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-neutral-700 rounded w-1/2 mb-2"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-neutral-700 rounded w-2/3"></div>
+                  </div>
+                ))}
+              </div>
+              <div className="text-center text-gray-600 dark:text-gray-400">
+                Loading your wishlists...
+              </div>
+            </div>
+          )}
+        </main>
       </div>
     );
   }
@@ -312,7 +331,7 @@ export const TeacherDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
-      <Header title="Teacher Dashboard" showSettingsButton={true} />
+      <Header title="Teacher Dashboard" showSettingsButton={true} isLoading={false} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Your wiSHlists</h2>

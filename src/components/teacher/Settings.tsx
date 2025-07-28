@@ -376,10 +376,6 @@ export const Settings: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <div className="text-center p-10">Loading...</div>;
-  }
-
   // Filter out the current user from the display list
   const filteredSearchResults = searchResults.filter(u => u.$id !== user?.$id);
 
@@ -392,7 +388,7 @@ export const Settings: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
-      <Header title="Profile Settings" showBackButton={true} showSettingsButton={false} />
+      <Header title="Profile Settings" showBackButton={true} showSettingsButton={false} isLoading={loading || loadingSearch} />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         {/* Display Name Section - Always visible */}
@@ -548,8 +544,6 @@ export const Settings: React.FC = () => {
               <Search className="absolute right-3 top-2.5 text-gray-400" />
             </div>
             <div className="mt-4">
-              {loadingSearch && <p>Loading...</p>}
-              
               {/* User Results - Show all invited users when searching, or only privileged users when not searching */}
               {!loadingSearch && (
                 <div className="space-y-4">

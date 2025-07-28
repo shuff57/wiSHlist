@@ -211,13 +211,9 @@ export const WishlistEditView: React.FC = () => {
     // Optionally, update the order in your database if you add a position field in the future
   };
 
-  if (loading) {
-    return <div className="text-center p-10">Loading...</div>;
-  }
-
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
-      <Header title="Manage wiSHlist" showBackButton={true} />
+      <Header title="Manage wiSHlist" showBackButton={true} isLoading={loading} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
           <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">

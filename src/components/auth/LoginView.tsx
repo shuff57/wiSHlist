@@ -71,10 +71,10 @@ export const LoginView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Header title="Login" showSettingsButton={false} showSignoutButton={false} />
+    <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
+      <Header title="Login" showSettingsButton={false} showSignoutButton={false} isLoading={loading} />
       <div className="flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md">
+        <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Classroom wiSHlist</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">Supporting your student's favorite teacher</p>
@@ -96,7 +96,7 @@ export const LoginView: React.FC = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200"
                 placeholder="Enter your email"
                 required
                 disabled={loading}
@@ -112,7 +112,7 @@ export const LoginView: React.FC = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200"
                 placeholder="Enter your password"
                 required
                 disabled={loading}
@@ -133,14 +133,14 @@ export const LoginView: React.FC = () => {
               <div className="w-full border-t border-gray-300 dark:border-gray-600" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">or</span>
+              <span className="px-2 bg-white dark:bg-neutral-800 text-gray-500 dark:text-gray-400">or</span>
             </div>
           </div>
           
           <div className="mt-6">
             <button
               onClick={handleGoogleLogin}
-              className="w-full bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-200 font-medium flex items-center justify-center space-x-2 disabled:bg-gray-200 dark:disabled:bg-gray-500"
+              className="w-full bg-gray-200 dark:bg-neutral-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-neutral-600 transition duration-200 font-medium flex items-center justify-center space-x-2 disabled:bg-gray-200 dark:disabled:bg-gray-500"
               disabled={loading}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

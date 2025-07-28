@@ -4,6 +4,7 @@ import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search } from 'lucid
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Tooltip } from '../common/Tooltip';
+import { LoadingBar } from '../common/LoadingBar';
 import logo from '../../assets/logo.png';
 import { databases, databaseId, wishlistsCollectionId } from '../../appwriteConfig';
 import { Models, Query } from 'appwrite';
@@ -19,10 +20,11 @@ interface HeaderProps {
   showBackButton?: boolean;
   showSettingsButton?: boolean;
   showSignoutButton?: boolean;
-  showSearch?: boolean; // New prop
+  showSearch?: boolean;
+  isLoading?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, showSettingsButton = true, showSignoutButton = true, showSearch = false }) => {
+export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, showSettingsButton = true, showSignoutButton = true, showSearch = false, isLoading = false }) => {
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useTheme();
   const { logout } = useAuth();
@@ -31,8 +33,14 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
   const [isSearching, setIsSearching] = useState(false);
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/');
+    try {
+      await logout();
+    } catch (error) {
+      console.log("Logout error (ignoring):", error);
+    } finally {
+      // Always navigate to home regardless of logout success/failure
+      navigate('/');
+    }
   };
 
   // Debounced search effect
@@ -84,9 +92,11 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
   };
 
   return (
-    <nav className="bg-white dark:bg-neutral-800 shadow-sm border-b border-neutral-200 dark:border-neutral-700">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
+    <>
+      <LoadingBar isLoading={isLoading} />
+      <nav className="bg-white dark:bg-neutral-800 shadow-sm border-b border-neutral-200 dark:border-neutral-700">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
           <div className="flex items-center space-x-3">
             <img src={logo} alt="wiSHlist Logo" className="w-8 h-8 rounded-lg" />
             <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
@@ -160,5 +170,6 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
         </div>
       </div>
     </nav>
+    </>
   );
 };

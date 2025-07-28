@@ -35,7 +35,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const currentUser = await account.get();
         setUser(currentUser);
-      } catch (error) {
+      } catch (error: any) {
+        // Session expired or invalid - clear user state
+        console.log("No valid session found:", error.message);
         setUser(null);
       } finally {
         setLoading(false);
@@ -52,15 +54,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async () => {
-    await account.deleteSession('current');
-    setUser(null);
+    try {
+      await account.deleteSession('current');
+    } catch (error: any) {
+      // If the session is already invalid or user is already logged out, 
+      // we don't need to throw an error - just proceed with cleanup
+      console.log("Session already invalid or user already logged out:", error.message);
+    } finally {
+      // Always clear the user state regardless of whether deleteSession succeeded
+      setUser(null);
+    }
   };
 
   const refreshUser = async () => {
     try {
       const currentUser = await account.get();
       setUser(currentUser);
-    } catch (error) {
+    } catch (error: any) {
+      // Session expired or invalid - clear user state
+      console.log("Session expired during refresh:", error.message);
       setUser(null);
     }
   };
