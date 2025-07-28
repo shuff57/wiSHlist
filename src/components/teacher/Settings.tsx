@@ -360,8 +360,10 @@ export const Settings: React.FC = () => {
 
   console.log("🎯 Settings render - userDoc:", userDoc);
   console.log("🔐 isAdmin:", userDoc?.isAdmin, "🔗 isRecommender:", userDoc?.isRecommender);
-  console.log("� Should show registration link?", (userDoc?.isRecommender || userDoc?.isAdmin));
-  console.log("�🔍 Search results (excluding current user):", filteredSearchResults.length);
+  console.log("📝 Should show registration link?", (userDoc?.isRecommender || userDoc?.isAdmin));
+  console.log("⚙️ Should show user management?", userDoc?.isAdmin);
+  console.log("🎛️ Should show privilege toggles in invitation?", userDoc?.isAdmin);
+  console.log("🔍 Search results (excluding current user):", filteredSearchResults.length);
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
@@ -395,51 +397,6 @@ export const Settings: React.FC = () => {
                 </div>
               </div>
             </form>
-            
-            {/* Debug and Refresh Section */}
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  <p>Privileges: {userDoc?.isAdmin ? 'Admin' : ''} {userDoc?.isRecommender ? 'Recommender' : ''} {!userDoc?.isAdmin && !userDoc?.isRecommender ? 'None' : ''}</p>
-                </div>
-                <button
-                  onClick={async () => {
-                    try {
-                      console.log("🔄 Attempting to refresh user document for user ID:", user?.$id);
-                      const refreshedDoc = await databases.getDocument(databaseId, usersCollectionId, user?.$id || '');
-                      setUserDoc(refreshedDoc as Models.Document & UserDoc);
-                      console.log("✅ Refreshed user document:", refreshedDoc);
-                    } catch (error) {
-                      console.error("❌ Failed to refresh user document:", error);
-                      console.log("🆔 Attempted to fetch document with ID:", user?.$id);
-                      console.log("📚 Database ID:", databaseId);
-                      console.log("📋 Collection ID:", usersCollectionId);
-                      
-                      // If the document doesn't exist, let's try to see if we can find it by searching
-                      try {
-                        console.log("🔍 Trying to search for user by name...");
-                        const searchResults = await databases.listDocuments(
-                          databaseId,
-                          usersCollectionId,
-                          []
-                        );
-                        console.log("🔍 Search results:", searchResults.documents);
-                        if (searchResults.documents.length > 0) {
-                          const foundDoc = searchResults.documents[0];
-                          setUserDoc(foundDoc as Models.Document & UserDoc);
-                          console.log("✅ Found user document by name:", foundDoc);
-                        }
-                      } catch (searchError) {
-                        console.error("❌ Search also failed:", searchError);
-                      }
-                    }
-                  }}
-                  className="text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
-                >
-                  Refresh Privileges
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -473,6 +430,12 @@ export const Settings: React.FC = () => {
                       <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isAdminInvite ? 'translate-x-6' : 'translate-x-1'}`}/>
                     </button>
                   </div>
+                </div>
+              )}
+              {/* Show info message for recommender-only users */}
+              {userDoc?.isRecommender && !userDoc?.isAdmin && (
+                <div className="pt-4 text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                  <p>ℹ️ As a Recommender, you can invite new teachers with basic access. Only Admins can grant special privileges.</p>
                 </div>
               )}
               <button 
