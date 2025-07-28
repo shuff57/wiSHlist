@@ -21,6 +21,7 @@ const App: React.FC = () => {
             {/* Public Routes */}
             <Route element={<PublicRoute />}>
               <Route path="/" element={<LoginView />} /> {/* Default landing page */}
+              <Route path="/login" element={<LoginView />} /> {/* Explicit login route */}
               <Route path="/register" element={<RegisterView />} />
               <Route path="/supporter" element={<SupporterLanding />} /> {/* Supporter landing page */}
               <Route path="/wishlist/:wishlistKey" element={<SupporterView />} />

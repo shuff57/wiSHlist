@@ -3,8 +3,10 @@ import { account } from '../../appwriteConfig';
 import { AppwriteException, OAuthProvider } from 'appwrite';
 import { Header } from '../layout/Header';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 export const LoginView: React.FC = () => {
+  const { ensureUserDocument } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -26,6 +28,9 @@ export const LoginView: React.FC = () => {
       
       // Create email session
       await account.createEmailPasswordSession(email, password);
+      
+      // Ensure user document exists
+      await ensureUserDocument();
       
       // Redirect to dashboard
       window.location.href = '/dashboard';

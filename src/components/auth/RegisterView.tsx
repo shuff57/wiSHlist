@@ -4,11 +4,13 @@ import { account, databases, databaseId, invitesCollectionId, usersCollectionId 
 import { AppwriteException, ID, OAuthProvider } from 'appwrite';
 import { Heart } from 'lucide-react';
 import { Header } from '../layout/Header';
+import { useAuth } from '../../context/AuthContext';
 
 interface InviteDoc {
   isRecommender: boolean;
   isAdmin: boolean;
   expiresAt: string;
+  userID: string; // ID of the admin who created this invite
 }
 
 export const RegisterView: React.FC = () => {
@@ -20,6 +22,7 @@ export const RegisterView: React.FC = () => {
   const [invite, setInvite] = useState<InviteDoc | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { refreshUser } = useAuth();
 
   useEffect(() => {
     const validateToken = async () => {
@@ -71,9 +74,11 @@ export const RegisterView: React.FC = () => {
         role: 'teacher',
         isRecommender: invite.isRecommender,
         isAdmin: invite.isAdmin,
+        userID: invite.userID, // Track who invited this user
         name_lowercase: registerForm.name.toLowerCase()
       });
       await account.createEmailPasswordSession(registerForm.email, registerForm.password);
+      await refreshUser(); // Update auth context with new user session
       await databases.deleteDocument(databaseId, invitesCollectionId, token);
       navigate('/dashboard');
     } catch (error) {

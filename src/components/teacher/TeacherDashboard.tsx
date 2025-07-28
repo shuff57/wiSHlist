@@ -21,7 +21,7 @@ interface UserDoc {
 }
 
 export const TeacherDashboard: React.FC = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, ensureUserDocument } = useAuth();
   const [userDoc, setUserDoc] = useState<Models.Document & UserDoc | null>(null);
   const [wishlists, setWishlists] = useState<(Models.Document & WishlistDoc)[]>([]);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -181,15 +181,26 @@ export const TeacherDashboard: React.FC = () => {
       setIsInitializing(true);
       initializationRef.current = user.$id;
       
-      fetchUserData(user.$id, user.name, user.email).finally(() => {
-        setLoading(false);
-        setIsInitializing(false);
-        // Keep the ref set to prevent re-initialization
-      });
+      const initializeUser = async () => {
+        try {
+          // Ensure user document exists
+          await ensureUserDocument();
+          
+          // Now fetch the user data and wishlists
+          await fetchUserData(user.$id, user.name, user.email);
+        } catch (error) {
+          console.error("Failed to initialize user:", error);
+        } finally {
+          setLoading(false);
+          setIsInitializing(false);
+        }
+      };
+      
+      initializeUser();
     } else if (!authLoading && !user) {
       navigate('/login');
     }
-  }, [user, authLoading, navigate, fetchUserData]);
+  }, [user, authLoading, navigate, fetchUserData, ensureUserDocument]);
 
   const createWishlist = async () => {
     if (!user) return;
@@ -384,6 +395,20 @@ export const TeacherDashboard: React.FC = () => {
             </Droppable>
           )}
         </DragDropContext>
+        
+        {/* Empty State for New Users */}
+        {wishlists.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 max-w-md">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Welcome to wiSHlist! 🎉
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Create your first wishlist to get started. Your students and supporters will be able to see and fulfill your classroom needs.
+              </p>
+            </div>
+          </div>
+        )}
       </main>
       <Modal
         isOpen={isDeleteModalOpen}

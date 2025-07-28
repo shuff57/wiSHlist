@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { account } from '../appwriteConfig';
+import { account, databases, databaseId, usersCollectionId } from '../appwriteConfig';
 import { Models } from 'appwrite';
 
 interface AuthContextType {
@@ -7,6 +7,8 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, pass: string) => Promise<Models.Session>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+  ensureUserDocument: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -54,11 +56,77 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    try {
+      const currentUser = await account.get();
+      setUser(currentUser);
+    } catch (error) {
+      setUser(null);
+    }
+  };
+
+  const ensureUserDocument = async () => {
+    try {
+      const currentUser = await account.get();
+      if (!currentUser) return;
+
+      // Try to fetch existing document first
+      try {
+        const existingDoc = await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
+        console.log("✅ User document already exists:", existingDoc);
+        return;
+      } catch (error: any) {
+        console.log("📄 User document not found, will create it. Error:", error.code, error.message);
+        
+        // Check if this is Mr. Huff (the main admin)
+        const isMrHuff = currentUser.name.toLowerCase().includes('huff') || 
+                        currentUser.email.toLowerCase().includes('huff');
+        
+        try {
+          const newDoc = await databases.createDocument(
+            databaseId,
+            usersCollectionId,
+            currentUser.$id,
+            {
+              name: currentUser.name,
+              email: currentUser.email,
+              role: 'teacher',
+              isRecommender: isMrHuff, // Mr. Huff gets privileges
+              isAdmin: isMrHuff,       // Mr. Huff is always admin
+              name_lowercase: currentUser.name.toLowerCase()
+              // Note: userID field only set when invited by someone
+            }
+          );
+          console.log("✅ Created user document successfully:", newDoc);
+        } catch (createError: any) {
+          console.log("❌ Failed to create user document:", createError.code, createError.message);
+          
+          if (createError.code === 409) {
+            // Document exists but we couldn't read it initially - try again
+            console.log("🔄 Document exists (409), trying to fetch again...");
+            try {
+              const existingDoc = await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
+              console.log("✅ Successfully fetched existing document on retry:", existingDoc);
+            } catch (retryError: any) {
+              console.log("❌ Still can't fetch document after 409:", retryError.code, retryError.message);
+              // This indicates a permissions issue - the document exists but user can't read it
+              console.log("⚠️ Document exists but user lacks read permissions");
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error("❌ Failed to ensure user document:", error);
+    }
+  };
+
   const value = {
     user,
     loading,
     login,
     logout,
+    refreshUser,
+    ensureUserDocument,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
