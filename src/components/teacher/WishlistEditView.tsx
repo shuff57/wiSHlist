@@ -6,6 +6,7 @@ import { Trash2, Check, X, GripVertical, Pencil } from 'lucide-react';
 import { ExternalLink } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
+import { ProductThumbnail } from '../common/ProductThumbnail';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { useStrictDroppable } from '../../hooks/useStrictDroppable';
 
@@ -270,7 +271,7 @@ export const WishlistEditView: React.FC = () => {
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
-                              className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 flex flex-col justify-between transition-colors duration-200 group pointer-events-none"
+                              className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 flex flex-col justify-between transition-colors duration-200 group"
                             >
                               {editingItemId === item.$id ? (
                                 <form onSubmit={handleUpdateItem} className="space-y-4">
@@ -286,13 +287,24 @@ export const WishlistEditView: React.FC = () => {
                               ) : (
                                 <>
                                   <div className="flex items-center">
-                                    <div {...provided.dragHandleProps} className="p-2 cursor-grab active:cursor-grabbing pointer-events-auto">
+                                    <div {...provided.dragHandleProps} className="p-2 cursor-grab active:cursor-grabbing">
                                       <GripVertical className="w-5 h-5 text-black dark:text-white" />
                                     </div>
                                     <div className="flex-grow">
-                                      <h4 className="font-semibold text-gray-900 dark:text-gray-200">{item.name}</h4>
-                                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{item.description}</p>
-                                      {item.cost && <span className="text-green-600 font-medium text-sm">{item.cost}</span>}
+                                      <div className="flex gap-3 items-start">
+                                        {item.store_link && (
+                                          <ProductThumbnail 
+                                            storeLink={item.store_link} 
+                                            itemName={item.name}
+                                            className="w-12 h-12"
+                                          />
+                                        )}
+                                        <div className="flex-grow">
+                                          <h4 className="font-semibold text-gray-900 dark:text-gray-200">{item.name}</h4>
+                                          <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{item.description}</p>
+                                          {item.cost && <span className="text-green-600 font-medium text-sm">{item.cost}</span>}
+                                        </div>
+                                      </div>
                                     </div>
                                     <div className="flex flex-col items-end space-y-2 ml-4">
                                       {item.store_link && (
@@ -301,19 +313,19 @@ export const WishlistEditView: React.FC = () => {
                                             href={item.store_link}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer pointer-events-auto"
+                                            className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer"
                                           >
                                             <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                                           </a>
                                         </Tooltip>
                                       )}
                                       <Tooltip text="Edit this item">
-                                        <button onClick={() => handleEditItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer pointer-events-auto">
+                                        <button onClick={() => handleEditItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
                                           <Pencil className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                                         </button>
                                       </Tooltip>
                                       <Tooltip text="Delete this item">
-                                        <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer pointer-events-auto">
+                                        <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
                                           <Trash2 className="w-5 h-5 text-red-600" />
                                         </button>
                                       </Tooltip>
