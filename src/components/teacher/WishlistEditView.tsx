@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, ID, Query } from 'appwrite';
-import { Trash2, Check, X, GripVertical, Pencil } from 'lucide-react';
+import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save } from 'lucide-react';
 import { ExternalLink } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
@@ -44,6 +44,7 @@ export const WishlistEditView: React.FC = () => {
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const [editedItemData, setEditedItemData] = useState<ItemDoc | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [enabled] = useStrictDroppable(loading);
   const navigate = useNavigate();
 
@@ -236,10 +237,10 @@ export const WishlistEditView: React.FC = () => {
                   <div key={suggestion.$id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-semibold text-gray-900 dark:text-gray-200">{suggestion.itemName}</h4>
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{suggestion.itemName}</h4>
                         {suggestion.description && <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{suggestion.description}</p>}
                         <div className="flex items-center space-x-4 text-sm mt-2">
-                          {suggestion.estimatedCost && <span className="text-green-600 font-medium">{suggestion.estimatedCost}</span>}
+                          {suggestion.estimatedCost && <span className="text-green-600 font-medium text-lg">{suggestion.estimatedCost}</span>}
                           {suggestion.storeLink && <a href={suggestion.storeLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Item</a>}
                         </div>
                       </div>
@@ -259,12 +260,40 @@ export const WishlistEditView: React.FC = () => {
           )}
 
           <div>
-            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Your Items ({items.length})</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Your Items ({items.length})</h3>
+              <div className="flex items-center space-x-2">
+                <Tooltip text="List View">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-md transition-colors ${
+                      viewMode === 'list'
+                        ? 'bg-sky-600 text-white hover:bg-sky-800'
+                        : 'bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-neutral-500'
+                    }`}
+                  >
+                    <List className="w-5 h-5" />
+                  </button>
+                </Tooltip>
+                <Tooltip text="Grid View">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-md transition-colors ${
+                      viewMode === 'grid'
+                        ? 'bg-sky-600 text-white hover:bg-sky-800'
+                        : 'bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-neutral-500'
+                    }`}
+                  >
+                    <Grid className="w-5 h-5" />
+                  </button>
+                </Tooltip>
+              </div>
+            </div>
             <DragDropContext onDragEnd={onDragEnd}>
               {enabled && (
                 <Droppable droppableId="wishlist-items">
                   {(provided) => (
-                    <div {...provided.droppableProps} ref={provided.innerRef} className="grid grid-cols-1 gap-6">
+                    <div {...provided.droppableProps} ref={provided.innerRef} className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
                       {items.map((item, index) => (
                         <Draggable key={item.$id} draggableId={item.$id} index={index}>
                           {(provided) => (
@@ -296,13 +325,13 @@ export const WishlistEditView: React.FC = () => {
                                           <ProductThumbnail 
                                             storeLink={item.store_link} 
                                             itemName={item.name}
-                                            className="w-12 h-12"
+                                            className="w-20 h-20 flex-shrink-0"
                                           />
                                         )}
                                         <div className="flex-grow">
-                                          <h4 className="font-semibold text-gray-900 dark:text-gray-200">{item.name}</h4>
+                                          <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{item.name}</h4>
                                           <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{item.description}</p>
-                                          {item.cost && <span className="text-green-600 font-medium text-sm">{item.cost}</span>}
+                                          {item.cost && <span className="text-green-600 font-medium text-lg">{item.cost}</span>}
                                         </div>
                                       </div>
                                     </div>
@@ -358,9 +387,14 @@ export const WishlistEditView: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Info</label>
                 <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
               </div>
-              <Tooltip text="Save changes to your wishlist settings">
-                <button type="submit" className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 dark:hover:bg-sky-800">Save Settings</button>
-              </Tooltip>
+              <div>
+                <button type="submit" className="mt-1 w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 dark:hover:bg-sky-800 flex items-center justify-center">
+                  <Save className="w-4 h-4 mr-2" />
+                  <Tooltip text="Save changes to your wishlist settings">
+                    <span>Save Settings</span>
+                  </Tooltip>
+                </button>
+              </div>
             </form>
             <div className="mt-6">
               <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Key</h4>

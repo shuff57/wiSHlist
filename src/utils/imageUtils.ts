@@ -1,59 +1,56 @@
-export const extractThumbnailFromUrl = (url: string): string | null => {
+import { MultiRetailerScraper } from './multiRetailerScraper';
+
+export const extractThumbnailFromUrl = async (url: string): Promise<string | null> => {
   if (!url) return null;
+
+  console.log('Extracting thumbnail from URL:', url);
 
   try {
     const urlObj = new URL(url);
     const hostname = urlObj.hostname.toLowerCase();
+    
+    console.log('Hostname:', hostname);
 
-    // Amazon product URLs
+    // Use the multi-retailer scraper for supported sites
+    if (hostname.includes('amazon.') || 
+        hostname.includes('target.com') || 
+        hostname.includes('walmart.com') || 
+        hostname.includes('bestbuy.com')) {
+      
+      console.log('🛍️ Using multi-retailer scraper for:', hostname);
+      try {
+        const imageUrl = await MultiRetailerScraper.getProductImage(url);
+        if (imageUrl) {
+          console.log('✅ Found image via scraper:', imageUrl);
+          return imageUrl;
+        }
+      } catch (error) {
+        console.warn('❌ Scraper failed, falling back to legacy method:', error);
+      }
+    }
+
+    // Legacy Amazon fallback
     if (hostname.includes('amazon.')) {
-      // Extract ASIN from Amazon URLs
-      const asinMatch = url.match(/\/dp\/([A-Z0-9]{10})|\/gp\/product\/([A-Z0-9]{10})|asin=([A-Z0-9]{10})/i);
+      const asinMatch = url.match(/\/dp\/([A-Z0-9]{10})|\/gp\/product\/([A-Z0-9]{10})|asin=([A-Z0-9]{10})|\/([A-Z0-9]{10})(?:\/|\?|$)/i);
       if (asinMatch) {
-        const asin = asinMatch[1] || asinMatch[2] || asinMatch[3];
-        return `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.L.jpg`;
+        const asin = asinMatch[1] || asinMatch[2] || asinMatch[3] || asinMatch[4];
+        console.log('Found Amazon ASIN:', asin);
+        
+        // Try multiple Amazon image URL formats (some may work better than others)
+        const imageUrls = [
+          `https://images.amazon.com/images/P/${asin}.01.L.jpg`,
+          `https://m.media-amazon.com/images/I/${asin}._AC_SX300_SY300_.jpg`,
+          `https://images-na.ssl-images-amazon.com/images/P/${asin}.01._SX300_.jpg`
+        ];
+        
+        // For now, return the first one - we can add fallback logic later
+        console.log('Using Amazon image URL:', imageUrls[0]);
+        return imageUrls[0];
       }
     }
 
-    // Target URLs
-    if (hostname.includes('target.com')) {
-      // Extract product ID from Target URLs
-      const targetMatch = url.match(/\/A-(\d+)/);
-      if (targetMatch) {
-        const productId = targetMatch[1];
-        return `https://target.scene7.com/is/image/Target/GUEST_${productId}?wid=200&hei=200&fmt=pjpeg`;
-      }
-    }
-
-    // Walmart URLs
-    if (hostname.includes('walmart.com')) {
-      // Extract product ID from Walmart URLs
-      const walmartMatch = url.match(/\/ip\/[^\/]+\/(\d+)/);
-      if (walmartMatch) {
-        const productId = walmartMatch[1];
-        return `https://i5.walmartimages.com/asr/${productId}?odnHeight=200&odnWidth=200&odnBg=FFFFFF`;
-      }
-    }
-
-    // Best Buy URLs
-    if (hostname.includes('bestbuy.com')) {
-      const bestbuyMatch = url.match(/\/(\d{7})/);
-      if (bestbuyMatch) {
-        const sku = bestbuyMatch[1];
-        return `https://pisces.bbystatic.com/image2/BestBuy_US/images/products/${sku.substring(0, 4)}/${sku}_sd.jpg`;
-      }
-    }
-
-    // eBay URLs
-    if (hostname.includes('ebay.com')) {
-      const ebayMatch = url.match(/\/itm\/([^\/\?]+)/);
-      if (ebayMatch) {
-        // eBay doesn't have a direct API for thumbnails without authentication
-        // For now, return null - could be enhanced with eBay API integration
-        return null;
-      }
-    }
-
+    // For unsupported sites, return null
+    console.log('No supported retailer found for:', hostname);
     return null;
   } catch (error) {
     console.warn('Error extracting thumbnail from URL:', error);

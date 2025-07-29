@@ -1,6 +1,179 @@
-# wiSHlist
+# wiSHlist 🎓📝
 
-This is a wishlist application built with React and TypeScript.
+A modern, user-friendly wishlist application designed specifically for teachers to create and share classroom supply wishlists with supporters. Built with React, TypeScript, and Appwrite.
+
+## 📖 Overview
+
+wiSHlist empowers educators to create organized wishlists of classroom supplies and materials, making it easy for parents, community members, and supporters to contribute to student success. Teachers can manage their wishlists with drag-and-drop functionality, while supporters can view and purchase items through a clean, responsive interface.
+
+## ✨ Features
+
+### For Teachers
+- **📋 Wishlist Management**: Create and manage multiple wishlists with drag-and-drop reordering
+- **🎨 Customizable Items**: Add items with names, descriptions, store links, and estimated costs
+- **👥 User Management**: Invite and manage recommenders and administrators
+- **📊 Contribution Tracking**: Monitor which items have been purchased and by how many contributors
+- **🔗 Easy Sharing**: Generate shareable links and keys for public wishlist access
+- **⚙️ Settings Control**: Customize wishlist names, contact information, and privacy settings
+- **📱 Responsive Design**: Manage wishlists on desktop, tablet, or mobile devices
+
+### For Supporters
+- **🛍️ Easy Browsing**: View wishlists in list or grid layout
+- **🔍 Item Details**: See item descriptions, costs, and store links
+- **✅ Purchase Tracking**: Mark items as purchased to prevent duplicates
+- **🌐 Direct Links**: Quick access to store pages for purchasing
+- **💡 Suggestions**: Recommend new items to teachers
+- **📱 Mobile Friendly**: Browse and contribute on any device
+
+### Technical Features
+- **🌙 Dark/Light Mode**: Automatic theme switching with system preference detection
+- **🔐 Secure Authentication**: User registration and login with Appwrite
+- **📦 Real-time Updates**: Live synchronization of wishlist changes
+- **🎯 Modern UI**: Clean, intuitive interface built with Tailwind CSS
+- **♿ Accessibility**: Screen reader friendly with proper ARIA labels
+- **⚡ Performance**: Optimized loading and caching for smooth experience
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Backend**: Appwrite (Database, Authentication, Real-time)
+- **Icons**: Lucide React
+- **Drag & Drop**: React Beautiful DND
+- **Routing**: React Router DOM
+- **Build Tool**: Create React App
+
+## 🚀 Installation & Setup
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+- Appwrite account and project
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/shuff57/wiSHlist.git
+cd wiSHlist
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure Appwrite
+
+1. Create an account at [Appwrite Cloud](https://cloud.appwrite.io) or set up self-hosted Appwrite
+2. Create a new project
+3. Set up the following collections in your Appwrite database:
+   - `wishlists` - Store wishlist information
+   - `items` - Store wishlist items
+   - `suggestions` - Store item suggestions
+   - `users` - Store user profiles
+
+### 4. Environment Configuration
+
+Create a `.env` file in the root directory:
+
+```env
+# Appwrite Configuration
+REACT_APP_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
+REACT_APP_APPWRITE_PROJECT_ID=your_project_id_here
+```
+
+Replace `your_project_id_here` with your actual Appwrite project ID.
+
+### 5. Start Development Server
+
+```bash
+npm start
+```
+
+The application will open at [http://localhost:3000](http://localhost:3000)
+
+## 📦 Available Scripts
+
+### Development
+```bash
+npm start          # Start development server
+npm run dev        # Alternative dev server command
+```
+
+### Production
+```bash
+npm run build      # Build for production
+npm run preview    # Preview production build locally
+```
+
+### Testing & Quality
+```bash
+npm test           # Run test suite
+npm run lint       # Check code quality
+```
+
+## 🏗️ Project Structure
+
+```
+src/
+├── components/           # React components
+│   ├── auth/            # Authentication components
+│   ├── common/          # Reusable UI components
+│   ├── layout/          # Layout components (Header, etc.)
+│   ├── supporter/       # Supporter-facing components
+│   └── teacher/         # Teacher dashboard components
+├── context/             # React context providers
+├── hooks/               # Custom React hooks
+├── types/               # TypeScript type definitions
+├── utils/               # Utility functions
+├── constants/           # Application constants
+└── assets/              # Static assets
+```
+
+## 🚀 Deployment
+
+### Build for Production
+```bash
+npm run build
+```
+
+### Deploy to Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically on every push to main
+
+### Deploy to Netlify
+1. Build the project: `npm run build`
+2. Upload the `build` folder to Netlify
+3. Configure environment variables
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Teachers everywhere who inspire learning
+- The Appwrite team for an excellent backend platform
+- The React and TypeScript communities
+- Contributors who help improve education technology
+
+## 📞 Support
+
+For support, email support@wishlist.app or open an issue on GitHub.
+
+---
+
+**Made with ❤️ for educators and their supporters**
 
 ## Getting Started
 
