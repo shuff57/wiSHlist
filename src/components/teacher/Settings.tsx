@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { account, databases, databaseId, usersCollectionId, invitesCollectionId } from '../../appwriteConfig';
 import { useNavigate } from 'react-router-dom';
 import { Models, ID, Query } from 'appwrite';
-import { Save, User, UserPlus, Check, Search } from 'lucide-react';
+import { Save, User, UserPlus, Check, Search, Edit3 } from 'lucide-react';
 import { LINK_EXPIRY_OPTIONS } from '../../constants';
 import { Header } from '../layout/Header';
 import { Tooltip } from '../common/Tooltip';
+import { EditableAboutView } from '../auth/EditableAboutView';
 
 interface UserDoc {
   name: string;
@@ -32,6 +33,7 @@ export const Settings: React.FC = () => {
   const [loadingLink, setLoadingLink] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<(Models.Document & UserDoc)[]>([]);
+  const [showAboutEditor, setShowAboutEditor] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
   
   const navigate = useNavigate();
@@ -388,7 +390,7 @@ export const Settings: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
-      <Header title="Profile Settings" showBackButton={true} showSettingsButton={false} isLoading={loading || loadingSearch} />
+      <Header title="Profile Settings" showBackButton={true} showSettingsButton={false} showInfoButton={true} isLoading={loading || loadingSearch} />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         {/* Display Name Section - Always visible */}
@@ -596,6 +598,45 @@ export const Settings: React.FC = () => {
                       ))
                     );
                   })()}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Edit About Page Section - Only visible for admins */}
+        {userDoc?.isAdmin && (
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center">
+              <Edit3 className="w-5 h-5 mr-2" />
+              Edit About Page
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Manage the content displayed on the About page for all users.
+            </p>
+            <div className="space-y-4">
+              {!showAboutEditor ? (
+                <button 
+                  onClick={() => setShowAboutEditor(true)}
+                  className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  Open About Page Editor
+                </button>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-md font-medium">About Page Editor</h3>
+                    <button 
+                      onClick={() => setShowAboutEditor(false)}
+                      className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+                    >
+                      Close Editor
+                    </button>
+                  </div>
+                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                    <EditableAboutView />
+                  </div>
                 </div>
               )}
             </div>

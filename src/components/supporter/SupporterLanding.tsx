@@ -14,10 +14,10 @@ export const SupporterLanding: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Header title="Supporter" showSettingsButton={false} showSignoutButton={false} />
+    <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
+      <Header title="Supporter" showSettingsButton={false} showSignoutButton={false} showInfoButton={true} />
       <div className="flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md text-center">
+        <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md text-center">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">Classroom wiSHlist</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-6">Enter a teacher's wiSHlist key to view their list.</p>
           

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search } from 'lucide-react';
+import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Tooltip } from '../common/Tooltip';
@@ -21,10 +21,12 @@ interface HeaderProps {
   showSettingsButton?: boolean;
   showSignoutButton?: boolean;
   showSearch?: boolean;
+  showInfoButton?: boolean;
+  showLoginButton?: boolean;
   isLoading?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, showSettingsButton = true, showSignoutButton = true, showSearch = false, isLoading = false }) => {
+export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, showSettingsButton = true, showSignoutButton = true, showSearch = false, showInfoButton = false, showLoginButton = false, isLoading = false }) => {
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useTheme();
   const { logout } = useAuth();
@@ -151,6 +153,20 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
               <Tooltip text="Settings" position="bottom">
                 <button onClick={() => navigate('/settings')} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
                   <SettingsIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </Tooltip>
+            )}
+            {showInfoButton && (
+              <Tooltip text="About" position="bottom">
+                <button onClick={() => navigate('/about')} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
+                  <Info className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </Tooltip>
+            )}
+            {showLoginButton && (
+              <Tooltip text="Login" position="bottom">
+                <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
+                  <User className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </button>
               </Tooltip>
             )}

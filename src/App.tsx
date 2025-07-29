@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { LoginView } from './components/auth/LoginView';
 import { RegisterView } from './components/auth/RegisterView';
+import { AboutView } from './components/auth/AboutView';
 import PrivateRoute from './components/auth/PrivateRoute';
 import PublicRoute from './components/auth/PublicRoute';
 import { TeacherDashboard } from './components/teacher/TeacherDashboard';
@@ -23,6 +24,7 @@ const App: React.FC = () => {
               <Route path="/" element={<LoginView />} /> {/* Default landing page */}
               <Route path="/login" element={<LoginView />} /> {/* Explicit login route */}
               <Route path="/register" element={<RegisterView />} />
+              <Route path="/about" element={<AboutView />} /> {/* About page */}
               <Route path="/supporter" element={<SupporterLanding />} /> {/* Supporter landing page */}
               <Route path="/wishlist/:wishlistKey" element={<SupporterView />} />
             </Route>

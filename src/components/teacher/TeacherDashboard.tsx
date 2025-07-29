@@ -293,7 +293,7 @@ export const TeacherDashboard: React.FC = () => {
   if (authLoading || loading || !user) {
     return (
       <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
-        <Header title="Dashboard" isLoading={true} />
+        <Header title="Dashboard" showInfoButton={true} isLoading={true} />
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {rateLimited ? (
             <div className="text-center py-16">
@@ -331,7 +331,7 @@ export const TeacherDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
-      <Header title="Teacher Dashboard" showSettingsButton={true} isLoading={false} />
+      <Header title="Teacher Dashboard" showSettingsButton={true} showInfoButton={true} isLoading={false} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Your wiSHlists</h2>
