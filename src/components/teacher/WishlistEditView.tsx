@@ -6,7 +6,6 @@ import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save } from 'lucide
 import { ExternalLink } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
-import { ProductThumbnail } from '../common/ProductThumbnail';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { useStrictDroppable } from '../../hooks/useStrictDroppable';
 
@@ -321,13 +320,6 @@ export const WishlistEditView: React.FC = () => {
                                     </div>
                                     <div className="flex-grow">
                                       <div className="flex gap-3 items-start">
-                                        {item.store_link && (
-                                          <ProductThumbnail 
-                                            storeLink={item.store_link} 
-                                            itemName={item.name}
-                                            className="w-20 h-20 flex-shrink-0"
-                                          />
-                                        )}
                                         <div className="flex-grow">
                                           <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{item.name}</h4>
                                           <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{item.description}</p>

@@ -1,11 +1,21 @@
 import React from 'react';
 import { Header } from '../layout/Header';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 export const AboutView: React.FC = () => {
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
+
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
-      <Header title="About" showSettingsButton={false} showSignoutButton={false} showLoginButton={true} />
+      <Header 
+        title="About" 
+        showSettingsButton={false} 
+        showSignoutButton={false} 
+        showLoginButton={!isLoggedIn}
+        showBackButton={isLoggedIn}
+      />
       
       {/* Overview and Features Section */}
       <div className="max-w-4xl mx-auto px-4 pb-12 pt-8">
@@ -115,10 +125,10 @@ export const AboutView: React.FC = () => {
         <div className="text-center mt-8">
           <div className="flex gap-4 justify-center">
             <Link 
-              to="/"
+              to={isLoggedIn ? "/dashboard" : "/"}
               className="inline-flex items-center bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition duration-200 font-medium"
             >
-              ← Back to Login
+              {isLoggedIn ? "← Back to Dashboard" : "← Back to Login"}
             </Link>
           </div>
         </div>

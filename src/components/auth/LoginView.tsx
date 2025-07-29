@@ -121,7 +121,7 @@ export const LoginView: React.FC = () => {
             
             <button
               type="submit"
-              className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-700 transition duration-200 font-medium disabled:bg-gray-400"
+              className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-700 transition duration-200 font-medium disabled:bg-gray-200 dark:disabled:bg-gray-500"
               disabled={loading}
             >
               {loading ? 'Signing in...' : 'Sign in with Email'}

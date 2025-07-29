@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User } from 'lucide-react';
+import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User, ClipboardEdit } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Tooltip } from '../common/Tooltip';
 import { LoadingBar } from '../common/LoadingBar';
+import { FeedbackModal } from '../common/FeedbackModal';
 import logo from '../../assets/logo.png';
 import { databases, databaseId, wishlistsCollectionId } from '../../appwriteConfig';
 import { Models, Query } from 'appwrite';
@@ -33,6 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
   const [wishlistKeyInput, setWishlistKeyInput] = useState('');
   const [searchResults, setSearchResults] = useState<WishlistDoc[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -170,6 +172,11 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
                 </button>
               </Tooltip>
             )}
+            <Tooltip text="Send Feedback" position="bottom">
+              <button onClick={() => setShowFeedbackModal(true)} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
+                <ClipboardEdit className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              </button>
+            </Tooltip>
             <Tooltip text={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'} position="bottom">
               <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
                 {darkMode ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-600" />}
@@ -186,6 +193,10 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
         </div>
       </div>
     </nav>
+    <FeedbackModal 
+      isOpen={showFeedbackModal} 
+      onClose={() => setShowFeedbackModal(false)} 
+    />
     </>
   );
 };

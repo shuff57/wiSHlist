@@ -5,7 +5,6 @@ import { Models, Query, ID } from 'appwrite';
 import { ExternalLink, Gift, CheckCircle, Grid, List } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
-import { ProductThumbnail } from '../common/ProductThumbnail';
 
 interface WishlistDoc {
   teacher_name: string;
@@ -186,15 +185,8 @@ export const SupporterView: React.FC = () => {
             {items.length > 0 ? items.map(item => (
               <div key={item.$id} className="bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between w-full">
                 <div>
-                  <div className="flex gap-4 mb-3">
-                    {item.store_link && (
-                      <ProductThumbnail 
-                        storeLink={item.store_link} 
-                        itemName={item.name}
-                        className="w-20 h-20"
-                      />
-                    )}
-                    <div className="flex-grow">
+                  <div className="mb-3">
+                    <div>
                       <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">{item.name}</h3>
                       <p className="text-gray-600 dark:text-gray-400 text-sm">{item.description}</p>
                     </div>
