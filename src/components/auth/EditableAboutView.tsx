@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Header } from '../layout/Header';
 import { Link } from 'react-router-dom';
-import { Plus, Edit3, Save, X, Trash2, GripVertical } from 'lucide-react';
+import { Edit3, Save, X, Trash2 } from 'lucide-react';
 
 interface ContentBlock {
   id: string;
@@ -19,7 +19,7 @@ interface ColumnData {
 }
 
 export const EditableAboutView: React.FC = () => {
-  const [isEditing, setIsEditing] = useState(true); // Start in edit mode
+  const [isEditing] = useState(true); // Always in edit mode - read-only
   const [editingBlock, setEditingBlock] = useState<string | null>(null);
   const [tempContent, setTempContent] = useState('');
   const [tempTitle, setTempTitle] = useState('');
