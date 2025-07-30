@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { account, databases, databaseId, usersCollectionId, invitesCollectionId } from '../../appwriteConfig';
+import { account, databases, databaseId, usersCollectionId, invitesCollectionId, feedbackCollectionId } from '../../appwriteConfig';
 import { useNavigate } from 'react-router-dom';
 import { Models, ID, Query } from 'appwrite';
-import { Save, User, UserPlus, Check, Search, Edit3 } from 'lucide-react';
+import { Save, User, UserPlus, Check, Search, Edit3, MessageSquare, CheckCircle, X, Trash2 } from 'lucide-react';
 import { LINK_EXPIRY_OPTIONS } from '../../constants';
 import { Header } from '../layout/Header';
 import { Tooltip } from '../common/Tooltip';
@@ -35,6 +35,15 @@ export const Settings: React.FC = () => {
   const [searchResults, setSearchResults] = useState<(Models.Document & UserDoc)[]>([]);
   const [showAboutEditor, setShowAboutEditor] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
+  
+  // Feedback Manager State
+  const [feedback, setFeedback] = useState<Models.Document[]>([]);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [feedbackToDelete, setFeedbackToDelete] = useState<Models.Document | null>(null);
+  const [showFeedbackManager, setShowFeedbackManager] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   
   const navigate = useNavigate();
 
@@ -196,6 +205,64 @@ export const Settings: React.FC = () => {
 
     return () => clearTimeout(debounceTimer);
   }, [searchQuery, user]);
+
+  // Helper function to check if user is root admin (Mr. Huff)
+  const isRootAdmin = user?.name.toLowerCase().includes('huff') || user?.email.toLowerCase().includes('huff');
+
+  // Fetch feedback
+  const fetchFeedback = async () => {
+    if (!isRootAdmin) return;
+    
+    setLoadingFeedback(true);
+    try {
+      const response = await databases.listDocuments(databaseId, feedbackCollectionId);
+      setFeedback(response.documents);
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+    } finally {
+      setLoadingFeedback(false);
+    }
+  };
+
+  // Handle feedback deletion
+  const handleDeleteFeedback = async (feedbackId: string) => {
+    try {
+      await databases.deleteDocument(databaseId, feedbackCollectionId, feedbackId);
+      setFeedback(prev => prev.filter(f => f.$id !== feedbackId));
+      setShowDeleteModal(false);
+      setFeedbackToDelete(null);
+    } catch (error) {
+      console.error('Error deleting feedback:', error);
+    }
+  };
+
+  // Update feedback status
+  const handleUpdateFeedbackStatus = async (feedbackId: string, newStatus: string) => {
+    try {
+      await databases.updateDocument(databaseId, feedbackCollectionId, feedbackId, {
+        status: newStatus
+      });
+      setFeedback(prev => prev.map(f => 
+        f.$id === feedbackId ? { ...f, status: newStatus } : f
+      ));
+    } catch (error) {
+      console.error('Error updating feedback:', error);
+    }
+  };
+
+  // Filter feedback based on status and category
+  const filteredFeedback = feedback.filter(item => {
+    const statusMatch = statusFilter === 'all' || item.status === statusFilter;
+    const categoryMatch = categoryFilter === 'all' || item.category === categoryFilter;
+    return statusMatch && categoryMatch;
+  });
+
+  // Load feedback when component mounts
+  useEffect(() => {
+    if (isRootAdmin && !loading) {
+      fetchFeedback();
+    }
+  }, [isRootAdmin, loading]);
 
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -604,6 +671,195 @@ export const Settings: React.FC = () => {
           </div>
         )}
 
+        {/* Feedback Manager Section - Only visible for root admin */}
+        {isRootAdmin && (
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center">
+              <MessageSquare className="w-5 h-5 mr-2" />
+              Feedback Manager
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Manage user feedback and track resolution status for all submitted feedback.
+            </p>
+            <div className="space-y-4">
+              {!showFeedbackManager ? (
+                <button 
+                  onClick={() => setShowFeedbackManager(true)}
+                  className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Open Feedback Manager
+                </button>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-md font-medium">Feedback Manager</h3>
+                    <button 
+                      onClick={() => setShowFeedbackManager(false)}
+                      className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+                    >
+                      Close Manager
+                    </button>
+                  </div>
+                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                    {/* Combined Filters and Feedback Content */}
+                    <div className="space-y-6">
+                      {/* Filters */}
+                      <div className="flex flex-wrap gap-4 p-4 bg-white dark:bg-neutral-700 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <label className="text-sm font-medium">Status:</label>
+                          <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-neutral-800"
+                          >
+                            <option value="all">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <label className="text-sm font-medium">Category:</label>
+                          <select
+                            value={categoryFilter}
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                            className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-neutral-800"
+                          >
+                            <option value="all">All</option>
+                            <option value="bug">Bug Report</option>
+                            <option value="feature">Feature Request</option>
+                            <option value="general">General Feedback</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Feedback List */}
+                      {loadingFeedback ? (
+                        <div className="text-center py-4">Loading feedback...</div>
+                      ) : filteredFeedback.length === 0 ? (
+                        <div className="text-center py-4 text-gray-500">No feedback matches the current filters.</div>
+                      ) : (
+                        <div className="space-y-4">
+                          {filteredFeedback.map((item) => (
+                            <div key={item.$id} className="border dark:border-neutral-600 rounded-lg p-4 bg-white dark:bg-neutral-800">
+                              {/* Single combined div for all feedback content */}
+                              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md border-l-4 border-blue-400">
+                              {/* Header with user info and metadata */}
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <span className="font-medium text-sm">{item.username || 'Anonymous User'}</span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                      {new Date(item.$createdAt).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
+                                  </div>
+                                  {item.email && (
+                                    <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                                      📧 {item.email}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {item.category && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                      {item.category}
+                                    </span>
+                                  )}
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
+                                    item.status === 'resolved' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                                    item.status === 'in-progress' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                    item.status === 'closed' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' :
+                                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                  }`}>
+                                    {item.status || 'pending'}
+                                  </span>
+                                </div>
+                              </div>
+                              
+                              {/* Feedback Description */}
+                              <div className="mb-3">
+                                <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Feedback Description:</h4>
+                                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                  {item.message || item.description || 'No description provided'}
+                                </p>
+                              </div>
+                              
+                              {/* Status Update Buttons */}
+                              <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                                <button
+                                  onClick={() => handleUpdateFeedbackStatus(item.$id, 'in-progress')}
+                                  className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 ${
+                                    item.status === 'in-progress' 
+                                      ? 'bg-orange-500 text-white shadow-sm' 
+                                      : 'bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900 dark:text-orange-200 dark:hover:bg-orange-800'
+                                  }`}
+                                  title="Mark as In Progress"
+                                >
+                                  <MessageSquare className="w-3 h-3" />
+                                  In Progress
+                                </button>
+                                
+                                <button
+                                  onClick={() => handleUpdateFeedbackStatus(item.$id, 'resolved')}
+                                  className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 ${
+                                    item.status === 'resolved' 
+                                      ? 'bg-green-500 text-white shadow-sm' 
+                                      : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800'
+                                  }`}
+                                  title="Mark as Resolved"
+                                >
+                                  <CheckCircle className="w-3 h-3" />
+                                  Resolved
+                                </button>
+                                
+                                <button
+                                  onClick={() => handleUpdateFeedbackStatus(item.$id, 'closed')}
+                                  className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 ${
+                                    item.status === 'closed' 
+                                      ? 'bg-gray-500 text-white shadow-sm' 
+                                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700'
+                                  }`}
+                                  title="Mark as Closed"
+                                >
+                                  <X className="w-3 h-3" />
+                                  Closed
+                                </button>
+                                
+                                <div className="ml-auto">
+                                  <button
+                                    onClick={() => {
+                                      setFeedbackToDelete(item);
+                                      setShowDeleteModal(true);
+                                    }}
+                                    className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800 transition-all duration-200"
+                                    title="Delete Feedback"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Edit About Page Section - Only visible for admins */}
         {userDoc?.isAdmin && (
           <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
@@ -643,6 +899,35 @@ export const Settings: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && feedbackToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Delete Feedback</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Are you sure you want to delete this feedback? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setFeedbackToDelete(null);
+                }}
+                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteFeedback(feedbackToDelete.$id)}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

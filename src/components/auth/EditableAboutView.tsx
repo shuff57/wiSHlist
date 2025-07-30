@@ -19,7 +19,7 @@ interface ColumnData {
 }
 
 export const EditableAboutView: React.FC = () => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true); // Start in edit mode
   const [editingBlock, setEditingBlock] = useState<string | null>(null);
   const [tempContent, setTempContent] = useState('');
   const [tempTitle, setTempTitle] = useState('');
@@ -279,22 +279,12 @@ export const EditableAboutView: React.FC = () => {
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
       <Header title="About" showSettingsButton={false} showSignoutButton={false} showLoginButton={true} />
       
-      {/* Edit Mode Toggle */}
+      {/* About Page Editor - Always in Edit Mode */}
       <div className="max-w-4xl mx-auto px-4 pt-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
             About Page Editor
           </h1>
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              isEditing 
-                ? 'bg-red-600 text-white hover:bg-red-700' 
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-            }`}
-          >
-            {isEditing ? 'Exit Edit Mode' : 'Edit Mode'}
-          </button>
         </div>
 
         {/* Add Content Controls */}
