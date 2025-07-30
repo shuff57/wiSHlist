@@ -1,0 +1,23 @@
+{
+  "projectId": "688189ad000ad6dd9410",
+  "sites": [
+    {
+      "name": "wishlist-app",
+      "source": {
+        "type": "git",
+        "repository": "shuff57/wiSHlist",
+        "branch": "main"
+      },
+      "buildSettings": {
+        "framework": "react",
+        "outputDirectory": "build",
+        "installCommand": "npm install",
+        "buildCommand": "npm run build"
+      },
+      "environmentVariables": {
+        "REACT_APP_APPWRITE_ENDPOINT": "https://cloud.appwrite.io/v1",
+        "REACT_APP_APPWRITE_PROJECT_ID": "688189ad000ad6dd9410"
+      }
+    }
+  ]
+}
