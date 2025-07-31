@@ -200,7 +200,7 @@ export const TeacherDashboard: React.FC = () => {
     } else if (!authLoading && !user) {
       navigate('/login');
     }
-  }, [user, authLoading, navigate, fetchUserData, ensureUserDocument]);
+  }, [user, authLoading, navigate, fetchUserData, ensureUserDocument, isInitializing]);
 
   const createWishlist = async () => {
     if (!user) return;

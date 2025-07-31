@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { account, databases, databaseId, usersCollectionId, invitesCollectionId, feedbackCollectionId } from '../../appwriteConfig';
 import { useNavigate } from 'react-router-dom';
 import { Models, ID, Query } from 'appwrite';
@@ -210,7 +210,7 @@ export const Settings: React.FC = () => {
   const isRootAdmin = user?.name.toLowerCase().includes('huff') || user?.email.toLowerCase().includes('huff');
 
   // Fetch feedback
-  const fetchFeedback = async () => {
+  const fetchFeedback = useCallback(async () => {
     if (!isRootAdmin) return;
     
     setLoadingFeedback(true);
@@ -222,7 +222,7 @@ export const Settings: React.FC = () => {
     } finally {
       setLoadingFeedback(false);
     }
-  };
+  }, [isRootAdmin]);
 
   // Handle feedback deletion
   const handleDeleteFeedback = async (feedbackId: string) => {
@@ -262,7 +262,7 @@ export const Settings: React.FC = () => {
     if (isRootAdmin && !loading) {
       fetchFeedback();
     }
-  }, [isRootAdmin, loading]);
+  }, [isRootAdmin, loading, fetchFeedback]);
 
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { account, databases, databaseId, invitesCollectionId, usersCollectionId } from '../../appwriteConfig';
 import { AppwriteException, ID, OAuthProvider } from 'appwrite';
-import { Heart } from 'lucide-react';
+
 import { Header } from '../layout/Header';
 import { useAuth } from '../../context/AuthContext';
 
