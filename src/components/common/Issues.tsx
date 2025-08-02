@@ -1,17 +1,28 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { databases, databaseId, feedbackCollectionId } from '../../appwriteConfig';
 import { Models } from 'appwrite';
-import { MessageSquare, CheckCircle, X, Trash2, Search } from 'lucide-react';
+import { MessageSquare, Search } from 'lucide-react';
 import { Header } from '../layout/Header';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export const Issues: React.FC = () => {
   const [feedback, setFeedback] = useState<Models.Document[]>([]);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [feedbackToDelete, setFeedbackToDelete] = useState<Models.Document | null>(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    const lastVisitedWishlist = sessionStorage.getItem('lastVisitedWishlist');
+    if (lastVisitedWishlist) {
+      navigate(`/wishlist/${lastVisitedWishlist}`);
+    } else {
+      navigate('/supporter');
+    }
+  };
 
   // Fetch feedback
   const fetchFeedback = useCallback(async () => {
@@ -25,32 +36,6 @@ export const Issues: React.FC = () => {
       setLoadingFeedback(false);
     }
   }, []);
-
-  // Handle feedback deletion
-  const handleDeleteFeedback = async (feedbackId: string) => {
-    try {
-      await databases.deleteDocument(databaseId, feedbackCollectionId, feedbackId);
-      setFeedback(prev => prev.filter(f => f.$id !== feedbackId));
-      setShowDeleteModal(false);
-      setFeedbackToDelete(null);
-    } catch (error) {
-      console.error('Error deleting feedback:', error);
-    }
-  };
-
-  // Update feedback status
-  const handleUpdateFeedbackStatus = async (feedbackId: string, newStatus: string) => {
-    try {
-      await databases.updateDocument(databaseId, feedbackCollectionId, feedbackId, {
-        status: newStatus
-      });
-      setFeedback(prev => prev.map(f => 
-        f.$id === feedbackId ? { ...f, status: newStatus } : f
-      ));
-    } catch (error) {
-      console.error('Error updating feedback:', error);
-    }
-  };
 
   // Filter feedback based on status and category
   const filteredFeedback = feedback.filter(item => {
@@ -69,7 +54,7 @@ export const Issues: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
-      <Header title="Current Issues" showBackButton={true} showSettingsButton={true} showInfoButton={true} isLoading={loadingFeedback} hideIssuesButton={true} />
+      <Header title="Current Issues" showBackButton={!user} onBack={handleBack} showSettingsButton={!!user} showInfoButton={true} isLoading={loadingFeedback} hideIssuesButton={true} showLoginButton={true} />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center">
@@ -178,48 +163,6 @@ export const Issues: React.FC = () => {
                           {item.message || item.description || 'No description provided'}
                         </p>
                       </div>
-
-                      <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-                        <button
-                          onClick={() => handleUpdateFeedbackStatus(item.$id, 'in-progress')}
-                          className="px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
-                          title="Mark as In Progress"
-                        >
-                          <MessageSquare className="w-3 h-3" />
-                          In Progress
-                        </button>
-
-                        <button
-                          onClick={() => handleUpdateFeedbackStatus(item.$id, 'resolved')}
-                          className="px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
-                          title="Mark as Resolved"
-                        >
-                          <CheckCircle className="w-3 h-3" />
-                          Resolved
-                        </button>
-
-                        <button
-                          onClick={() => handleUpdateFeedbackStatus(item.$id, 'closed')}
-                          className="px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
-                          title="Mark as Closed"
-                        >
-                          <X className="w-3 h-3" />
-                          Closed
-                        </button>
-
-                        <div className="ml-auto">
-                          <button
-                            onClick={() => {
-                              setFeedbackToDelete(item);
-                              setShowDeleteModal(true);
-                            }}
-                            className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800 transition-all duration-200"
-                            title="Delete Feedback"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -228,34 +171,6 @@ export const Issues: React.FC = () => {
           </div>
         </div>
       </main>
-
-      {showDeleteModal && feedbackToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Delete Feedback</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Are you sure you want to delete this feedback? This action cannot be undone.
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setFeedbackToDelete(null);
-                }}
-                className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDeleteFeedback(feedbackToDelete.$id)}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

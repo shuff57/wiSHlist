@@ -59,6 +59,7 @@ export const SupporterView: React.FC = () => {
           [Query.equal('wishlist_id', foundWishlist.$id)]
         );
         setItems(itemsResponse.documents as (Models.Document & ItemDoc)[]);
+        sessionStorage.setItem('lastVisitedWishlist', processedKey);
       } else {
         setError('No wishlist found with that key. Please check the key and try again.');
       }

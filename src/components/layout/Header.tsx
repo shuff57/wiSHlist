@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User, ClipboardEdit, AlertTriangle } from 'lucide-react';
+import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User, ClipboardEdit, AlertTriangle, ScrollText } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Tooltip } from '../common/Tooltip';
@@ -19,6 +19,7 @@ interface WishlistDoc extends Models.Document {
 interface HeaderProps {
   title: string;
   showBackButton?: boolean;
+  onBack?: () => void;
   showSettingsButton?: boolean;
   showSignoutButton?: boolean;
   showSearch?: boolean;
@@ -28,10 +29,10 @@ interface HeaderProps {
   hideIssuesButton?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, showSettingsButton = true, showSignoutButton = true, showSearch = false, showInfoButton = false, showLoginButton = false, isLoading = false, hideIssuesButton = false }) => {
+export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, onBack, showSettingsButton = true, showSignoutButton = true, showSearch = false, showInfoButton = false, showLoginButton = false, isLoading = false, hideIssuesButton = false }) => {
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useTheme();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [wishlistKeyInput, setWishlistKeyInput] = useState('');
   const [searchResults, setSearchResults] = useState<WishlistDoc[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -107,10 +108,17 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
             <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
           </div>
           <div className="flex items-center space-x-4 relative"> {/* Added relative for positioning dropdown */}
-            {showBackButton && (
+            {showBackButton && user && (
               <Tooltip text="Back to Dashboard" position="bottom">
                 <button onClick={() => navigate('/dashboard')} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
                   <Home className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </Tooltip>
+            )}
+            {showBackButton && !user && (
+              <Tooltip text="Back" position="bottom">
+                <button onClick={onBack} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
+                  <ScrollText className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </button>
               </Tooltip>
             )}
@@ -152,7 +160,7 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
                 )}
               </div>
             )}
-            {showSettingsButton && (
+            {showSettingsButton && user && (
               <Tooltip text="Settings" position="bottom">
                 <button onClick={() => navigate('/settings')} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
                   <SettingsIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
@@ -166,7 +174,7 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
                 </button>
               </Tooltip>
             )}
-            {showLoginButton && (
+            {showLoginButton && !user && (
               <Tooltip text="Login" position="bottom">
                 <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
                   <User className="w-5 h-5 text-gray-600 dark:text-gray-300" />
@@ -190,7 +198,7 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
                 {darkMode ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-600" />}
               </button>
             </Tooltip>
-            {showSignoutButton && (
+            {showSignoutButton && user && (
               <Tooltip text="Logout" position="bottom">
                 <button onClick={handleLogout} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
                   <LogOut className="w-5 h-5 text-red-600" />

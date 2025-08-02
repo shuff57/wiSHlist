@@ -69,6 +69,7 @@ export const WishlistEditView: React.FC = () => {
       const suggestionsResponse = await databases.listDocuments(databaseId, suggestionsCollectionId, [Query.equal('wishlist_id', id)]);
       setSuggestions(suggestionsResponse.documents as (Models.Document & SuggestionDoc)[]);
 
+      sessionStorage.setItem('lastVisitedWishlist', wishlistDoc.wishlist_key);
     } catch (error) {
       console.error("Failed to fetch wishlist data:", error);
       navigate('/dashboard');

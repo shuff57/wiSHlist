@@ -55,6 +55,10 @@ export const Settings: React.FC = () => {
   
   const navigate = useNavigate();
 
+  const isRootAdmin = user?.name.toLowerCase().includes('huff') || user?.email.toLowerCase().includes('huff');
+
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -215,10 +219,9 @@ export const Settings: React.FC = () => {
     }, 500);
 
     return () => clearTimeout(debounceTimer);
-  }, [searchQuery, user]);
+  }, [searchQuery, user, isRootAdmin]);
 
-  // Helper function to check if user is root admin (Mr. Huff)
-  const isRootAdmin = user?.name.toLowerCase().includes('huff') || user?.email.toLowerCase().includes('huff');
+
 
   // Fetch feedback
   const fetchFeedback = useCallback(async () => {
