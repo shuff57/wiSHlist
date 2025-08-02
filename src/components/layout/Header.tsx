@@ -116,7 +116,7 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
               </Tooltip>
             )}
             {showBackButton && !user && (
-              <Tooltip text="Back" position="bottom">
+              <Tooltip text="Back to wiSHlist" position="bottom">
                 <button onClick={onBack} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
                   <ScrollText className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </button>

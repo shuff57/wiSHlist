@@ -1,20 +1,22 @@
 import React from 'react';
 import { Header } from '../layout/Header';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 export const AboutView: React.FC = () => {
   const { user } = useAuth();
   const isLoggedIn = !!user;
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
       <Header 
         title="About" 
-                showSettingsButton={true} 
+        showSettingsButton={true} 
         showSignoutButton={true} 
         showLoginButton={!isLoggedIn}
-        showBackButton={isLoggedIn}
+        showBackButton={true}
+        onBack={() => navigate(-1)}
       />
       
       {/* Overview and Features Section */}

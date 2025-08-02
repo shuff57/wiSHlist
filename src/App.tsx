@@ -21,12 +21,12 @@ const App: React.FC = () => {
         <Router>
           <Routes>
             {/* Public Routes */}
+            <Route path="/issues" element={<Issues />} /> {/* Issues page */}
             <Route element={<PublicRoute />}>
               <Route path="/" element={<LoginView />} /> {/* Default landing page */}
               <Route path="/login" element={<LoginView />} /> {/* Explicit login route */}
               <Route path="/register" element={<RegisterView />} />
               <Route path="/about" element={<AboutView />} /> {/* About page */}
-              <Route path="/issues" element={<Issues />} /> {/* Issues page */}
               <Route path="/supporter" element={<SupporterLanding />} /> {/* Supporter landing page */}
               <Route path="/wishlist/:wishlistKey" element={<SupporterView />} />
             </Route>
