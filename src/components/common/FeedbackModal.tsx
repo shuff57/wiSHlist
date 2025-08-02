@@ -95,7 +95,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-neutral-700">
           <div className="flex items-center">
-            <ClipboardEdit className="w-5 h-5 text-blue-600 mr-2" />
+            <ClipboardEdit className="w-5 h-5 text-sky-600 mr-2" />
             <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Send Feedback</h2>
           </div>
           <button
@@ -190,7 +190,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
                 <button
                   type="submit"
                   disabled={isSubmitting || !formData.category || !formData.description.trim()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+                  className="px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
                 >
                   {isSubmitting ? (
                     <>

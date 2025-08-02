@@ -54,7 +54,7 @@ export const Issues: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
-      <Header title="Current Issues" showBackButton={!user} onBack={handleBack} showSettingsButton={!!user} showInfoButton={true} isLoading={loadingFeedback} hideIssuesButton={true} showLoginButton={true} />
+      <Header title="Current Issues" showBackButton={!!user} onBack={handleBack} showSettingsButton={!!user} showInfoButton={true} isLoading={loadingFeedback} hideIssuesButton={true} showLoginButton={true} />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center">
@@ -70,7 +70,7 @@ export const Issues: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search issues by description..."
-              className="w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" />
+              className="w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" />
             <Search className="absolute right-3 top-2.5 text-gray-400" />
           </div>
           <div className="space-y-4">
