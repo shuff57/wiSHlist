@@ -12,16 +12,13 @@ const FEEDBACK_CATEGORIES = [
   { value: 'bug', label: 'Issue/Bug' },
   { value: 'feature', label: 'Feature/Enhancement' },
   { value: 'question', label: 'Question' },
-  { value: 'documentation', label: 'Documentation' },
-  { value: 'performance', label: 'Performance' },
-  { value: 'ui-ux', label: 'UI/UX Improvement' },
   { value: 'other', label: 'Other' }
 ];
 
 export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     name: '',
-    category: '',
+    category: 'bug',
     description: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,7 +44,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
     try {
       // Save feedback to Appwrite database
       const feedbackDoc = {
-        username: formData.name.trim() || 'Anonymous',
+        name: formData.name.trim() || 'Anonymous',
         category: formData.category,
         description: formData.description.trim(),
         submitted_at: new Date().toISOString(),
@@ -71,9 +68,12 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
         onClose();
       }, 2000);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting feedback:', error);
-      // You might want to show an error message to the user here
+      if (error.response) {
+        console.error('Appwrite API Error Response:', error.response);
+      }
+      alert(`Failed to submit feedback: ${error.message || 'Unknown error'}. Please check the console for details.`);
     } finally {
       setIsSubmitting(false);
     }

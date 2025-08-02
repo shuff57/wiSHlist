@@ -100,9 +100,9 @@ export const Issues: React.FC = () => {
                     className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-neutral-800"
                   >
                     <option value="all">All</option>
-                    <option value="bug">Bug Report</option>
-                    <option value="feature">Feature Request</option>
-                    <option value="general">General Feedback</option>
+                    <option value="bug">Issue/Bug</option>
+                    <option value="feature">Feature/Enhancement</option>
+                    <option value="question">Question</option>
                     <option value="other">Other</option>
                   </select>
                 </div>
