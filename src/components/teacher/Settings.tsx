@@ -576,15 +576,13 @@ export const Settings: React.FC = () => {
                   </Tooltip>
                 </div>
                 <div className="mt-4">
-                  <Tooltip text="View a demo of your wiSHlist">
-                    <button
-                      type="button"
-                      onClick={() => setShowPreview(!showPreview)}
-                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white h-10 transition-colors duration-200 bg-sky-600 hover:bg-sky-800 disabled:bg-gray-400"
-                    >
-                      View wiSHlist
-                    </button>
-                  </Tooltip>
+                  <button
+                    type="button"
+                    onClick={() => setShowPreview(!showPreview)}
+                    className="w-full flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white h-10 transition-colors duration-200 bg-sky-600 hover:bg-sky-800 disabled:bg-gray-400"
+                  >
+                    Preview wiSHlist
+                  </button>
                 </div>
               </div>
             </form>
@@ -738,7 +736,7 @@ export const Settings: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for a teacher by name..."
-                className="w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" />
+                className="w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-sky-500 focus:border-sky-500" />
               <Search className="absolute right-3 top-2.5 text-gray-400" />
             </div>
             <div className="mt-4">
