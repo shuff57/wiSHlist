@@ -7,6 +7,7 @@ import { LINK_EXPIRY_OPTIONS } from '../../constants';
 import { Header } from '../layout/Header';
 import { Tooltip } from '../common/Tooltip';
 import { EditableAboutView } from '../auth/EditableAboutView';
+import { WishlistPreview } from './WishlistPreview';
 
 interface UserDoc {
   name: string;
@@ -52,6 +53,10 @@ export const Settings: React.FC = () => {
   const [showFeedbackManager, setShowFeedbackManager] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  
+  const [showPreview, setShowPreview] = useState(false);
+  const [wishlists, setWishlists] = useState<Models.Document[]>([]);
+  const [selectedWishlist, setSelectedWishlist] = useState<string | null>(null);
   
   const navigate = useNavigate();
 
@@ -221,7 +226,23 @@ export const Settings: React.FC = () => {
     return () => clearTimeout(debounceTimer);
   }, [searchQuery, user, isRootAdmin]);
 
-
+  useEffect(() => {
+    const fetchWishlists = async () => {
+      if (user) {
+        try {
+          const response = await databases.listDocuments(
+            databaseId,
+            wishlistsCollectionId,
+            [Query.equal('teacher_id', user.$id)]
+          );
+          setWishlists(response.documents);
+        } catch (error) {
+          console.error("Failed to fetch wishlists:", error);
+        }
+      }
+    };
+    fetchWishlists();
+  }, [user]);
 
   // Fetch feedback
   const fetchFeedback = useCallback(async () => {
@@ -527,7 +548,7 @@ export const Settings: React.FC = () => {
           <div className="space-y-6">
             <form onSubmit={handleSaveChanges} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-1">Display Name</label>
+                <label className="block text-sm font-medium mb-1">Supporter View Display Name</label>
                 <div className="flex items-center space-x-2">
                   <input
                     type="text"
@@ -554,8 +575,47 @@ export const Settings: React.FC = () => {
                     </button>
                   </Tooltip>
                 </div>
+                <div className="mt-4">
+                  <Tooltip text="View a demo of your wiSHlist">
+                    <button
+                      type="button"
+                      onClick={() => setShowPreview(!showPreview)}
+                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white h-10 transition-colors duration-200 bg-sky-600 hover:bg-sky-800 disabled:bg-gray-400"
+                    >
+                      View wiSHlist
+                    </button>
+                  </Tooltip>
+                </div>
               </div>
             </form>
+            {showPreview && (
+              <div className="mt-4 border-t pt-4">
+                <h3 className="text-lg font-semibold mb-4">Preview Wishlist</h3>
+                <div className="space-y-4">
+                  <select
+                    onChange={(e) => {
+                      const wishlistKey = e.target.value;
+                      if (wishlistKey) {
+                        setSelectedWishlist(wishlistKey);
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-neutral-800"
+                  >
+                    <option value="">Select a wishlist</option>
+                    {wishlists.map((wishlist) => (
+                      <option key={wishlist.$id} value={wishlist.wishlist_key}>
+                        {wishlist.wishlist_name || wishlist.wishlist_key}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedWishlist && (
+                    <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                      <WishlistPreview wishlistKey={selectedWishlist} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
