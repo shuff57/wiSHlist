@@ -17,6 +17,13 @@ interface UserDoc {
   userID?: string; // ID of the admin who invited this user
 }
 
+const FEEDBACK_CATEGORIES = [
+  { value: 'bug', label: 'Issue/Bug' },
+  { value: 'feature', label: 'Feature/Enhancement' },
+  { value: 'question', label: 'Question' },
+  { value: 'other', label: 'Other' }
+];
+
 export const Settings: React.FC = () => {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [userDoc, setUserDoc] = useState<(Models.Document & UserDoc) | null>(null);
@@ -251,6 +258,19 @@ export const Settings: React.FC = () => {
       ));
     } catch (error) {
       console.error('Error updating feedback:', error);
+    }
+  };
+
+  const handleUpdateFeedbackCategory = async (feedbackId: string, newCategory: string) => {
+    try {
+      await databases.updateDocument(databaseId, feedbackCollectionId, feedbackId, {
+        category: newCategory
+      });
+      setFeedback(prev => prev.map(f => 
+        f.$id === feedbackId ? { ...f, category: newCategory } : f
+      ));
+    } catch (error) {
+      console.error('Error updating feedback category:', error);
     }
   };
 
@@ -814,16 +834,23 @@ export const Settings: React.FC = () => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   {item.category && (
-                                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                                      {item.category}
-                                    </span>
+                                    <select
+                                      value={item.category}
+                                      onChange={(e) => handleUpdateFeedbackCategory(item.$id, e.target.value)}
+                                      className={`px-2 py-1 rounded-md text-xs font-medium ${
+                                        item.category === 'bug' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                                        item.category === 'feature' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                        item.category === 'question' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                        item.category === 'other' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' :
+                                        'bg-neutral-200 text-gray-800 dark:bg-neutral-700 dark:text-gray-200'
+                                      }`}
+                                    >
+                                      {FEEDBACK_CATEGORIES.map(cat => (
+                                        <option key={cat.value} value={cat.value}>{cat.label}</option>
+                                      ))}
+                                    </select>
                                   )}
-                                  <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
-                                    item.status === 'resolved' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                    item.status === 'in-progress' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                                    item.status === 'closed' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' :
-                                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                  }`}>
+                                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-neutral-200 text-gray-800 dark:bg-neutral-700 dark:text-gray-200">
                                     {item.status || 'pending'}
                                   </span>
                                 </div>
@@ -841,11 +868,7 @@ export const Settings: React.FC = () => {
                               <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
                                 <button
                                   onClick={() => handleUpdateFeedbackStatus(item.$id, 'in-progress')}
-                                  className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 ${
-                                    item.status === 'in-progress'
-                                      ? 'bg-orange-500 text-white shadow-sm'
-                                      : 'bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900 dark:text-orange-200 dark:hover:bg-orange-800'
-                                  }`}
+                                  className="px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
                                   title="Mark as In Progress"
                                 >
                                   <MessageSquare className="w-3 h-3" />
@@ -854,11 +877,7 @@ export const Settings: React.FC = () => {
 
                                 <button
                                   onClick={() => handleUpdateFeedbackStatus(item.$id, 'resolved')}
-                                  className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 ${
-                                    item.status === 'resolved'
-                                      ? 'bg-green-500 text-white shadow-sm'
-                                      : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800'
-                                  }`}
+                                  className="px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
                                   title="Mark as Resolved"
                                 >
                                   <CheckCircle className="w-3 h-3" />
@@ -867,11 +886,7 @@ export const Settings: React.FC = () => {
 
                                 <button
                                   onClick={() => handleUpdateFeedbackStatus(item.$id, 'closed')}
-                                  className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 ${
-                                    item.status === 'closed'
-                                      ? 'bg-gray-500 text-white shadow-sm'
-                                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700'
-                                  }`}
+                                  className="px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
                                   title="Mark as Closed"
                                 >
                                   <X className="w-3 h-3" />
