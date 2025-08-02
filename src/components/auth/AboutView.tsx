@@ -11,8 +11,8 @@ export const AboutView: React.FC = () => {
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
       <Header 
         title="About" 
-        showSettingsButton={false} 
-        showSignoutButton={false} 
+                showSettingsButton={true} 
+        showSignoutButton={true} 
         showLoginButton={!isLoggedIn}
         showBackButton={isLoggedIn}
       />

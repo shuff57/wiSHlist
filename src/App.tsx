@@ -12,6 +12,7 @@ import { SupporterLanding } from './components/supporter/SupporterLanding';
 import { SupporterView } from './components/supporter/SupporterView';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import { Issues } from './components/common/Issues';
 
 const App: React.FC = () => {
   return (
@@ -25,6 +26,7 @@ const App: React.FC = () => {
               <Route path="/login" element={<LoginView />} /> {/* Explicit login route */}
               <Route path="/register" element={<RegisterView />} />
               <Route path="/about" element={<AboutView />} /> {/* About page */}
+              <Route path="/issues" element={<Issues />} /> {/* Issues page */}
               <Route path="/supporter" element={<SupporterLanding />} /> {/* Supporter landing page */}
               <Route path="/wishlist/:wishlistKey" element={<SupporterView />} />
             </Route>

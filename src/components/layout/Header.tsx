@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User, ClipboardEdit } from 'lucide-react';
+import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User, ClipboardEdit, AlertTriangle } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Tooltip } from '../common/Tooltip';
@@ -25,9 +25,10 @@ interface HeaderProps {
   showInfoButton?: boolean;
   showLoginButton?: boolean;
   isLoading?: boolean;
+  hideIssuesButton?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, showSettingsButton = true, showSignoutButton = true, showSearch = false, showInfoButton = false, showLoginButton = false, isLoading = false }) => {
+export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, showSettingsButton = true, showSignoutButton = true, showSearch = false, showInfoButton = false, showLoginButton = false, isLoading = false, hideIssuesButton = false }) => {
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useTheme();
   const { logout } = useAuth();
@@ -177,6 +178,13 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, s
                 <ClipboardEdit className="w-5 h-5 text-gray-600 dark:text-gray-300" />
               </button>
             </Tooltip>
+            {!hideIssuesButton && (
+              <Tooltip text="Current Issues" position="bottom">
+                <button onClick={() => navigate('/issues')} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
+                  <AlertTriangle className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </Tooltip>
+            )}
             <Tooltip text={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'} position="bottom">
               <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
                 {darkMode ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-600" />}

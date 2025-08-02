@@ -760,7 +760,7 @@ export const Settings: React.FC = () => {
                             className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-neutral-800"
                           >
                             <option value="all">All</option>
-                            <option value="pending">Pending</option>
+                            <option value="new">New</option>
                             <option value="in-progress">In Progress</option>
                             <option value="resolved">Resolved</option>
                             <option value="closed">Closed</option>
