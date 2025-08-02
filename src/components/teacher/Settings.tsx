@@ -164,7 +164,10 @@ export const Settings: React.FC = () => {
       }
       setLoadingSearch(true);
       try {
-        let queries = [Query.equal('userID', user.$id)]; // Only show users YOU invited
+        let queries = [];
+        if (!isRootAdmin) { // Only show users YOU invited, unless you are the root admin
+          queries.push(Query.equal('userID', user.$id));
+        }
         
         // If there's a search query, add the name filter
         if (searchQuery.trim() !== '') {
