@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { account, databases, databaseId, usersCollectionId, invitesCollectionId, feedbackCollectionId } from '../../appwriteConfig';
+import { account, databases, databaseId, usersCollectionId, invitesCollectionId, feedbackCollectionId, wishlistsCollectionId } from '../../appwriteConfig';
 import { useNavigate } from 'react-router-dom';
 import { Models, ID, Query } from 'appwrite';
 import { Save, User, UserPlus, Check, Search, Edit3, MessageSquare, CheckCircle, X, Trash2 } from 'lucide-react';
@@ -23,6 +23,7 @@ export const Settings: React.FC = () => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [nameSaved, setNameSaved] = useState(false);
   
   // State from AdminDashboard
   const [linkExpiry, setLinkExpiry] = useState('24');
@@ -271,7 +272,42 @@ export const Settings: React.FC = () => {
 
     try {
       await account.updateName(name);
-      alert('Name updated successfully!');
+
+      // Update the user's document in the usersCollectionId
+      if (userDoc) {
+        await databases.updateDocument(
+          databaseId,
+          usersCollectionId,
+          userDoc.$id,
+          { name: name, name_lowercase: name.toLowerCase() }
+        );
+        setUserDoc(prev => prev ? { ...prev, name: name } : null);
+      }
+
+      // Update teacher_name in all wishlists associated with this user
+      if (user) {
+        console.log(`Attempting to update wishlists for user ID: ${user.$id}`);
+        const wishlistsResponse = await databases.listDocuments(
+          databaseId,
+          wishlistsCollectionId,
+          [Query.equal('teacher_id', user.$id)]
+        );
+
+        console.log(`Found ${wishlistsResponse.documents.length} wishlists for user ID: ${user.$id}`);
+
+        for (const wishlist of wishlistsResponse.documents) {
+          console.log(`Updating wishlist ID: ${wishlist.$id} with teacher_name: ${name}`);
+          await databases.updateDocument(
+            databaseId,
+            wishlistsCollectionId,
+            wishlist.$id,
+            { teacher_name: name }
+          );
+        }
+      }
+
+      setNameSaved(true);
+      setTimeout(() => setNameSaved(false), 2000); // Show checkmark for 2 seconds
     } catch (error) {
       console.error("Error saving settings:", error);
       alert("Failed to save settings. Please check the console for details.");
@@ -479,9 +515,16 @@ export const Settings: React.FC = () => {
                     <button
                       type="submit"
                       disabled={saving || name === user?.name || loading}
-                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-800 disabled:bg-gray-400 h-10"
+                      className={`inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white h-10 transition-colors duration-200 ${nameSaved ? 'bg-green-600' : 'bg-sky-600 hover:bg-sky-800'} disabled:bg-gray-400`}
                     >
-                      <Save className="w-5 h-5" />
+                      {nameSaved ? (
+                        <div className="flex items-center space-x-1">
+                          <Check className="w-5 h-5" />
+                          <span>Saved!</span>
+                        </div>
+                      ) : (
+                        <Save className="w-5 h-5" />
+                      )}
                     </button>
                   </Tooltip>
                 </div>
