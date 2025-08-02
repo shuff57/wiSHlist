@@ -47,7 +47,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose })
     try {
       // Save feedback to Appwrite database
       const feedbackDoc = {
-        name: formData.name.trim() || 'Anonymous',
+        username: formData.name.trim() || 'Anonymous',
         category: formData.category,
         description: formData.description.trim(),
         submitted_at: new Date().toISOString(),

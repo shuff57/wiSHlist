@@ -233,7 +233,7 @@ export const WishlistEditView: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Pending Suggestions ({suggestions.length})</h3>
               <div className="space-y-4">
                 {suggestions.map(suggestion => (
-                  <div key={suggestion.$id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div key={suggestion.$id} className="bg-white dark:bg-neutral-800 border-2 border-amber-500 dark:border-amber-800 rounded-lg p-4">
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{suggestion.itemName}</h4>
@@ -245,10 +245,10 @@ export const WishlistEditView: React.FC = () => {
                       </div>
                       <div className="flex space-x-2">
                         <Tooltip text="Approve Suggestion">
-                          <button onClick={() => handleApproveSuggestion(suggestion)} className="p-2 text-green-600 hover:text-green-800 bg-green-200 dark:bg-green-700 dark:hover:bg-green-800 rounded-full"><Check size={20} /></button>
+                          <button onClick={() => handleApproveSuggestion(suggestion)} className="p-2 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 rounded-full"><Check size={20} className="text-white" /></button>
                         </Tooltip>
                         <Tooltip text="Decline Suggestion">
-                          <button onClick={() => handleDeclineSuggestion(suggestion.$id)} className="p-2 text-red-600 hover:text-red-800 bg-red-200 dark:bg-red-700 dark:hover:bg-red-800 rounded-full"><X size={20} /></button>
+                          <button onClick={() => handleDeclineSuggestion(suggestion.$id)} className="p-2 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 rounded-full"><X size={20} className="text-white" /></button>
                         </Tooltip>
                       </div>
                     </div>

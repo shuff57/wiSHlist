@@ -701,7 +701,7 @@ export const Settings: React.FC = () => {
                       Close Manager
                     </button>
                   </div>
-                  <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                  <div className="rounded-lg p-4 bg-neutral-900">
                     {/* Combined Filters and Feedback Content */}
                     <div className="space-y-6">
                       {/* Filters */}
@@ -745,13 +745,11 @@ export const Settings: React.FC = () => {
                         <div className="space-y-4">
                           {filteredFeedback.map((item) => (
                             <div key={item.$id} className="border dark:border-neutral-600 rounded-lg p-4 bg-white dark:bg-neutral-800">
-                              {/* Single combined div for all feedback content */}
-                              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md border-l-4 border-blue-400">
                               {/* Header with user info and metadata */}
                               <div className="flex items-start justify-between mb-3">
                                 <div className="flex-1">
                                   <div className="flex items-center gap-3 mb-2">
-                                    <span className="font-medium text-sm">{item.username || 'Anonymous User'}</span>
+                                    <span className="font-medium text-sm">{item.username || item.name || 'Anonymous User'}</span>
                                     <span className="text-xs text-gray-500 dark:text-gray-400">
                                       {new Date(item.$createdAt).toLocaleDateString('en-US', {
                                         year: 'numeric',
@@ -784,7 +782,7 @@ export const Settings: React.FC = () => {
                                   </span>
                                 </div>
                               </div>
-                              
+
                               {/* Feedback Description */}
                               <div className="mb-3">
                                 <h4 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">Feedback Description:</h4>
@@ -792,14 +790,14 @@ export const Settings: React.FC = () => {
                                   {item.message || item.description || 'No description provided'}
                                 </p>
                               </div>
-                              
+
                               {/* Status Update Buttons */}
                               <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
                                 <button
                                   onClick={() => handleUpdateFeedbackStatus(item.$id, 'in-progress')}
                                   className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 ${
-                                    item.status === 'in-progress' 
-                                      ? 'bg-orange-500 text-white shadow-sm' 
+                                    item.status === 'in-progress'
+                                      ? 'bg-orange-500 text-white shadow-sm'
                                       : 'bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900 dark:text-orange-200 dark:hover:bg-orange-800'
                                   }`}
                                   title="Mark as In Progress"
@@ -807,12 +805,12 @@ export const Settings: React.FC = () => {
                                   <MessageSquare className="w-3 h-3" />
                                   In Progress
                                 </button>
-                                
+
                                 <button
                                   onClick={() => handleUpdateFeedbackStatus(item.$id, 'resolved')}
                                   className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 ${
-                                    item.status === 'resolved' 
-                                      ? 'bg-green-500 text-white shadow-sm' 
+                                    item.status === 'resolved'
+                                      ? 'bg-green-500 text-white shadow-sm'
                                       : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800'
                                   }`}
                                   title="Mark as Resolved"
@@ -820,12 +818,12 @@ export const Settings: React.FC = () => {
                                   <CheckCircle className="w-3 h-3" />
                                   Resolved
                                 </button>
-                                
+
                                 <button
                                   onClick={() => handleUpdateFeedbackStatus(item.$id, 'closed')}
                                   className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 ${
-                                    item.status === 'closed' 
-                                      ? 'bg-gray-500 text-white shadow-sm' 
+                                    item.status === 'closed'
+                                      ? 'bg-gray-500 text-white shadow-sm'
                                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-700'
                                   }`}
                                   title="Mark as Closed"
@@ -833,7 +831,7 @@ export const Settings: React.FC = () => {
                                   <X className="w-3 h-3" />
                                   Closed
                                 </button>
-                                
+
                                 <div className="ml-auto">
                                   <button
                                     onClick={() => {
@@ -848,8 +846,7 @@ export const Settings: React.FC = () => {
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     )}
                     </div>

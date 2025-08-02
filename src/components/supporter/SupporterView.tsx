@@ -32,8 +32,10 @@ export const SupporterView: React.FC = () => {
   const [wishlist, setWishlist] = useState<Models.Document & WishlistDoc | null>(null);
   const [items, setItems] = useState<(Models.Document & ItemDoc)[]>([]);
   const [suggestionForm, setSuggestionForm] = useState<SuggestionForm>({ itemName: '', description: '', storeLink: '', estimatedCost: '' });
+  const [submitButtonText, setSubmitButtonText] = useState<string>('Submit Suggestion');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const navigate = useNavigate();
 
@@ -117,7 +119,12 @@ export const SupporterView: React.FC = () => {
           requestedBy: 'Anonymous'
         }
       );
-      alert('Suggestion submitted! The teacher will review it soon.');
+      setSubmitButtonText('Submitted for Review');
+      setTimeout(() => {
+        setSubmitButtonText('Submit Suggestion');
+      }, 3000); // Change back after 3 seconds
+      setSubmissionSuccess(true);
+      setTimeout(() => setSubmissionSuccess(false), 3000);
       setSuggestionForm({ itemName: '', description: '', storeLink: '', estimatedCost: '' });
     } catch (error) {
       console.error("Error submitting suggestion:", error);
@@ -234,15 +241,17 @@ export const SupporterView: React.FC = () => {
             )}
           </div>
 
-          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Suggest a New Item</h3>
-            <form onSubmit={handleSuggestionSubmit} className="space-y-4">
-              <input type="text" name="itemName" placeholder="Item Name" value={suggestionForm.itemName} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" required />
-              <textarea name="description" placeholder="Description" value={suggestionForm.description} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-              <input type="url" name="storeLink" placeholder="Store Link (optional)" value={suggestionForm.storeLink} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-              <input type="text" name="estimatedCost" placeholder="Estimated Cost (e.g., $15.00)" value={suggestionForm.estimatedCost} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-              <button type="submit" className="w-full bg-purple-700 text-white py-2 px-4 rounded-lg hover:bg-purple-900">Submit Suggestion</button>
-            </form>
+          <div className={`bg-white dark:bg-neutral-800 rounded-lg shadow transition-all duration-500 ${submissionSuccess ? 'border-2 border-purple-500' : 'border-2 border-transparent'}`}>
+            <div className={`rounded-lg p-6 transition-colors duration-500 ${submissionSuccess ? 'bg-purple-100/30 dark:bg-purple-900/30' : ''}`}>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Suggest a New Item</h3>
+              <form onSubmit={handleSuggestionSubmit} className="space-y-4">
+                <input type="text" name="itemName" placeholder="Item Name" value={suggestionForm.itemName} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" required />
+                <textarea name="description" placeholder="Description" value={suggestionForm.description} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                <input type="url" name="storeLink" placeholder="Store Link (optional)" value={suggestionForm.storeLink} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                <input type="text" name="estimatedCost" placeholder="Estimated Cost (e.g., $15.00)" value={suggestionForm.estimatedCost} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                <button type="submit" className="w-full bg-purple-700 text-white py-2 px-4 rounded-lg hover:bg-purple-900">{submitButtonText}</button>
+              </form>
+            </div>
           </div>
         </div>
       </main>
