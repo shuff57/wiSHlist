@@ -8,7 +8,6 @@ import { LoadingBar } from '../common/LoadingBar';
 import { FeedbackModal } from '../common/FeedbackModal';
 import logo from '../../assets/logo.png';
 import { databases, databaseId, wishlistsCollectionId, usersCollectionId } from '../../appwriteConfig';
-import { account } from '../../appwriteConfig';
 import { Models, Query } from 'appwrite';
 
 interface WishlistDoc extends Models.Document {

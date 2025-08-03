@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { account, databases, databaseId, usersCollectionId, invitesCollectionId, feedbackCollectionId, wishlistsCollectionId } from '../../appwriteConfig';
 import { useNavigate } from 'react-router-dom';
 import { Models, ID, Query } from 'appwrite';
-import { Save, User, UserPlus, Check, Search, Edit3, MessageSquare, CheckCircle, X, Trash2, Copy } from 'lucide-react';
-import { LINK_EXPIRY_OPTIONS } from '../../constants';
+import { Check, Search, Trash2 } from 'lucide-react';
 import { Header } from '../layout/Header';
 import { Tooltip } from '../common/Tooltip';
 import { EditableAboutView } from '../auth/EditableAboutView';
@@ -555,7 +554,7 @@ export const Settings: React.FC = () => {
                                     isAdmin: isAdminInvite,
                                     userID: user?.$id
                                   };
-                                  const createdDoc = await databases.createDocument(databaseId, invitesCollectionId, token, inviteData);
+      await databases.createDocument(databaseId, invitesCollectionId, token, inviteData);
                                   const link = `${window.location.origin}/register?token=${token}`;
                                   setRegistrationLink(link);
                                 } catch (error) {
@@ -847,10 +846,11 @@ export const Settings: React.FC = () => {
                                                     setShowDeleteModal(true);
                                                     setFeedbackToDelete(item);
                                                   }}
-                                                  className="px-3 py-1 rounded-lg font-semibold text-sm bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800 transition-all duration-200"
+                                                  className="p-2 rounded-full bg-white dark:bg-neutral-800 hover:bg-neutral-900 dark:hover:bg-neutral-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900"
                                                   title="Delete Feedback"
+                                                  aria-label="Delete Feedback"
                                                 >
-                                                  Delete
+                                                  <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
                                                 </button>
                                               </div>
                                             </div>

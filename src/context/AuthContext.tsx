@@ -107,7 +107,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Try to fetch existing document first
       try {
-        const existingDoc = await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
+        await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
         return;
       } catch (error: any) {
         
@@ -116,7 +116,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                         currentUser.email.toLowerCase().includes('huff');
         
         try {
-          const newDoc = await databases.createDocument(
+          await databases.createDocument(
             databaseId,
             usersCollectionId,
             currentUser.$id,
@@ -135,7 +135,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           if (createError.code === 409) {
             // Document exists but we couldn't read it initially - try again
             try {
-              const existingDoc = await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
+              await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
             } catch (retryError: any) {
               // This indicates a permissions issue - the document exists but user can't read it
             }

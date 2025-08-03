@@ -15,14 +15,6 @@ export const Issues: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const handleBack = () => {
-    const lastVisitedWishlist = sessionStorage.getItem('lastVisitedWishlist');
-    if (lastVisitedWishlist) {
-      navigate(`/wishlist/${lastVisitedWishlist}`);
-    } else {
-      navigate('/supporter');
-    }
-  };
 
   // Fetch feedback
   const fetchFeedback = useCallback(async () => {
