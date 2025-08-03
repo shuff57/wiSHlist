@@ -54,12 +54,17 @@ export const Issues: React.FC = () => {
     }
   };
 
+  // Handler for logged-in user back button
+  const handleUserBack = () => {
+    navigate('/dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
       <Header
         title="Current Issues"
-        showBackButton={!user}
-        onBack={handleSupporterBack}
+        showBackButton={true}
+        onBack={user ? handleUserBack : handleSupporterBack}
         showSettingsButton={!!user}
         showInfoButton={true}
         isLoading={loadingFeedback}
@@ -86,13 +91,13 @@ export const Issues: React.FC = () => {
           </div>
           <div className="space-y-4">
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-4 p-4 bg-white dark:bg-neutral-700 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <label className="text-sm font-medium">Status:</label>
+              <div className="flex flex-col xs:flex-row xs:flex-wrap gap-4 p-4 bg-white dark:bg-neutral-700 rounded-lg">
+                <div className="flex items-center space-x-2 w-full xs:w-auto">
+                  <label className="text-sm font-medium whitespace-nowrap">Status:</label>
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-neutral-800"
+                    className="flex-1 xs:flex-none px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-neutral-800"
                   >
                     <option value="all">All</option>
                     <option value="new">New</option>
@@ -101,12 +106,12 @@ export const Issues: React.FC = () => {
                     <option value="closed">Closed</option>
                   </select>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <label className="text-sm font-medium">Category:</label>
+                <div className="flex items-center space-x-2 w-full xs:w-auto">
+                  <label className="text-sm font-medium whitespace-nowrap">Category:</label>
                   <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-neutral-800"
+                    className="flex-1 xs:flex-none px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-neutral-800"
                   >
                     <option value="all">All</option>
                     <option value="bug">Issue/Bug</option>

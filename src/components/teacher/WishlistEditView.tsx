@@ -252,7 +252,7 @@ export const WishlistEditView: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Your Items ({items.length})</h3>
-              <div className="flex items-center space-x-2">
+              <div className="hidden md:flex items-center space-x-2">
                 <Tooltip text="List View">
                   <button
                     onClick={() => setViewMode('list')}

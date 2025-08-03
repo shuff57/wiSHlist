@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User, ClipboardEdit, ClipboardList, AlertTriangle, ScrollText } from 'lucide-react';
+import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User, ClipboardEdit, ClipboardList, AlertTriangle, ScrollText, Menu } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Tooltip } from '../common/Tooltip';
@@ -30,6 +30,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, onBack, showSettingsButton = true, showSignoutButton = true, showSearch = false, showInfoButton = false, showLoginButton = false, isLoading = false, hideIssuesButton = false }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useTheme();
   const { user, logout } = useAuth();
@@ -128,9 +129,55 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
                 <img src={logo} alt="wiSHlist Logo" className="w-8 h-8 rounded-lg" />
                 <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
               </div>
-              {/* Registration info box removed from header. Place next to login box in login page. */}
+              {/* Search in header for all screen sizes */}
+              {showSearch && (
+                <div className="relative flex items-center mx-4">
+                  <input
+                    type="text"
+                    value={wishlistKeyInput}
+                    onChange={(e) => setWishlistKeyInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="px-3 py-1 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 w-40 xs:w-60 pl-9 focus:outline-none"
+                    placeholder="Find a wiSHlist"
+                  />
+                  <div className="absolute left-0 p-2">
+                    <Search className="w-4 h-4 xs:w-5 xs:h-5 text-gray-600 dark:text-gray-300" />
+                  </div>
+                  {isSearching && wishlistKeyInput.trim() && (
+                    <div className="absolute z-10 w-full bg-white dark:bg-neutral-800 shadow-lg rounded-b-lg border border-t-0 border-gray-300 dark:border-neutral-700 p-2 text-sm text-gray-600 dark:text-gray-300 top-full left-0">
+                      Searching...
+                    </div>
+                  )}
+                  {!isSearching && wishlistKeyInput.trim() && searchResults.length > 0 && (
+                    <div className="absolute z-10 w-full bg-white dark:bg-neutral-800 shadow-lg rounded-b-lg border border-t-0 border-gray-300 dark:border-neutral-700 mt-1 max-h-60 overflow-y-auto top-full left-0">
+                      {searchResults.map((wishlist) => (
+                        <div
+                          key={wishlist.wishlist_key}
+                          onClick={() => handleResultClick(wishlist.wishlist_key)}
+                          className="p-2 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 text-gray-900 dark:text-gray-200"
+                        >
+                          {wishlist.wishlist_name || wishlist.wishlist_key}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {!isSearching && wishlistKeyInput.trim() && searchResults.length === 0 && (
+                    <div className="absolute z-10 w-full bg-white dark:bg-neutral-800 shadow-lg rounded-b-lg border border-t-0 border-gray-300 dark:border-neutral-700 p-2 text-sm text-gray-600 dark:text-gray-300 top-full left-0">
+                      No wishlists found.
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            <div className="flex items-center space-x-4 relative"> {/* Added relative for positioning dropdown */}
+            {/* Hamburger for mobile - only show when less than 600px */}
+            <div className="xs:hidden flex items-center">
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 focus:outline-none">
+                <Menu className="w-6 h-6 text-gray-700 dark:text-gray-200" />
+              </button>
+            </div>
+            {/* Desktop icons - show when 600px or wider */}
+            <div className="hidden xs:flex items-center space-x-4 relative"> {/* Added relative for positioning dropdown */}
+            {/* ...existing code for desktop icons... */}
             {showBackButton && user && (
               <Tooltip text="Back to Dashboard" position="bottom">
                 <button onClick={() => navigate('/dashboard')} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
@@ -144,44 +191,6 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
                   <ScrollText className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </button>
               </Tooltip>
-            )}
-            {showSearch && (
-              <div className="relative flex items-center">
-                <input
-                  type="text"
-                  value={wishlistKeyInput}
-                  onChange={(e) => setWishlistKeyInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  className="px-3 py-1 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 w-60 pl-9 focus:outline-none"
-                  placeholder="Find a new wiSHlist"
-                />
-                <div className="absolute left-0 p-2"> {/* Eyeglass icon always visible */}
-                  <Search className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                </div>
-                {isSearching && wishlistKeyInput.trim() && (
-                  <div className="absolute z-10 w-full bg-white dark:bg-neutral-800 shadow-lg rounded-b-lg border border-t-0 border-gray-300 dark:border-neutral-700 p-2 text-sm text-gray-600 dark:text-gray-300 top-full left-0">
-                    Searching...
-                  </div>
-                )}
-                {!isSearching && wishlistKeyInput.trim() && searchResults.length > 0 && (
-                  <div className="absolute z-10 w-full bg-white dark:bg-neutral-800 shadow-lg rounded-b-lg border border-t-0 border-gray-300 dark:border-neutral-700 mt-1 max-h-60 overflow-y-auto top-full left-0">
-                    {searchResults.map((wishlist) => (
-                      <div
-                        key={wishlist.wishlist_key}
-                        onClick={() => handleResultClick(wishlist.wishlist_key)}
-                        className="p-2 cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-700 text-gray-900 dark:text-gray-200"
-                      >
-                        {wishlist.wishlist_name || wishlist.wishlist_key}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {!isSearching && wishlistKeyInput.trim() && searchResults.length === 0 && (
-                  <div className="absolute z-10 w-full bg-white dark:bg-neutral-800 shadow-lg rounded-b-lg border border-t-0 border-gray-300 dark:border-neutral-700 p-2 text-sm text-gray-600 dark:text-gray-300 top-full left-0">
-                    No wishlists found.
-                  </div>
-                )}
-              </div>
             )}
             {showSettingsButton && user && (
               <Tooltip text="Settings" position="bottom">
@@ -197,8 +206,8 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
                 </button>
               </Tooltip>
             )}
-            {showLoginButton && !user && (
-              <Tooltip text="Login" position="bottom">
+            {showLoginButton && !user && title !== "Sign In" && (
+              <Tooltip text="Sign In" position="bottom">
                 <button onClick={() => navigate('/')} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
                   <User className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </button>
@@ -222,24 +231,71 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
               </button>
             </Tooltip>
             {showSignoutButton && user && (
-              <Tooltip text="Logout" position="bottom">
+              <Tooltip text="Sign Out" position="bottom">
                 <button onClick={handleLogout} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">
                   <LogOut className="w-5 h-5 text-red-600" />
                 </button>
               </Tooltip>
             )}
+            {/* ...end desktop icons... */}
+            </div>
           </div>
+          {/* Mobile menu dropdown - only show when less than 600px */}
+          {mobileMenuOpen && (
+            <div className="xs:hidden absolute top-16 right-4 z-50 w-56 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 flex flex-col py-2 animate-fade-in">
+              {showBackButton && user && (
+                <button onClick={() => { setMobileMenuOpen(false); navigate('/dashboard'); }} className="flex items-center px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 w-full text-left text-gray-700 dark:text-gray-200">
+                  <Home className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-300" /> Dashboard
+                </button>
+              )}
+              {showBackButton && !user && (
+                <button onClick={() => { setMobileMenuOpen(false); onBack && onBack(); }} className="flex items-center px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 w-full text-left text-gray-700 dark:text-gray-200">
+                  <ScrollText className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-300" /> wiSHlist
+                </button>
+              )}
+              {showSettingsButton && user && (
+                <button onClick={() => { setMobileMenuOpen(false); navigate('/settings'); }} className="flex items-center px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 w-full text-left text-gray-700 dark:text-gray-200">
+                  <SettingsIcon className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-300" /> Settings
+                </button>
+              )}
+              {showInfoButton && (
+                <button onClick={() => { setMobileMenuOpen(false); navigate('/about'); }} className="flex items-center px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 w-full text-left text-gray-700 dark:text-gray-200">
+                  <Info className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-300" /> About
+                </button>
+              )}
+              {showLoginButton && !user && title !== "Sign In" && (
+                <button onClick={() => { setMobileMenuOpen(false); navigate('/'); }} className="flex items-center px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 w-full text-left text-gray-700 dark:text-gray-200">
+                  <User className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-300" /> Sign In
+                </button>
+              )}
+              <button onClick={() => { setMobileMenuOpen(false); setShowFeedbackModal(true); }} className="flex items-center px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 w-full text-left text-gray-700 dark:text-gray-200">
+                <ClipboardEdit className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-300" /> Send Feedback
+              </button>
+              {!hideIssuesButton && (
+                <button onClick={() => { setMobileMenuOpen(false); navigate('/issues'); }} className="flex items-center px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 w-full text-left text-gray-700 dark:text-gray-200">
+                  <AlertTriangle className="w-5 h-5 mr-3 text-gray-600 dark:text-gray-300" /> Current Issues
+                </button>
+              )}
+              <button onClick={() => { setMobileMenuOpen(false); toggleDarkMode(); }} className="flex items-center px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 w-full text-left text-gray-700 dark:text-gray-200">
+                {darkMode ? <Sun className="w-5 h-5 mr-3 text-yellow-400" /> : <Moon className="w-5 h-5 mr-3 text-gray-600" />} {darkMode ? 'Light Mode' : 'Dark Mode'}
+              </button>
+              {showSignoutButton && user && (
+                <button onClick={() => { setMobileMenuOpen(false); handleLogout(); }} className="flex items-center px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-700 w-full text-left text-gray-700 dark:text-gray-200">
+                  <LogOut className="w-5 h-5 mr-3 text-red-600" /> Sign Out
+                </button>
+              )}
+            </div>
+          )}
         </div>
-      </div>
-    </nav>
+      </nav>
     {/* User stats badges above the login box, not in header */}
     {showLoginButton && !user && (
-      <div className="w-full flex justify-center mt-4 mb-2">
-        <div className="flex flex-row items-center space-x-4">
-          <span className="inline-flex items-center gap-1 text-sm font-bold text-blue-800 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/60 px-3 py-1 rounded-md shadow-sm tracking-wide uppercase w-44 justify-center">
+      <div className="w-full flex justify-center mt-2 mb-1">
+        <div className="flex flex-row items-center space-x-4 w-full max-w-md">
+          <span className="inline-flex items-center gap-1 text-sm font-bold text-blue-800 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/60 px-2 py-0.5 rounded-md shadow-sm tracking-wide uppercase flex-1 justify-center">
             <ClipboardList className="w-4 h-4 mr-1 text-blue-700 dark:text-blue-200" /> Registered: <span className="ml-1 text-blue-900 dark:text-blue-100 text-lg font-extrabold">{registeredUsers !== null ? registeredUsers : '...'}</span>
           </span>
-          <span className="inline-flex items-center gap-1 text-sm font-bold text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/60 px-3 py-1 rounded-md shadow-sm tracking-wide uppercase w-44 justify-center">
+          <span className="inline-flex items-center gap-1 text-sm font-bold text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/60 px-2 py-0.5 rounded-md shadow-sm tracking-wide uppercase flex-1 justify-center">
             <span className="text-base">🟢</span> Active: <span className="ml-1 text-green-900 dark:text-green-100 text-lg font-extrabold">{activeUsers !== null ? activeUsers : '...'}</span>
           </span>
         </div>

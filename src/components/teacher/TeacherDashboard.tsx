@@ -302,9 +302,9 @@ export const TeacherDashboard: React.FC = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Your wiSHlists</h2>
-          <button onClick={createWishlist} className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-800 flex items-center">
-            <Plus className="w-5 h-5 mr-2" />
-            Create New wiSHlist
+          <button onClick={createWishlist} className="bg-green-600 text-white py-2 px-8 xs:px-4 rounded-lg hover:bg-green-800 flex items-center">
+            <Plus className="w-5 h-5 xs:mr-2" />
+            <span className="hidden xs:inline">Create New wiSHlist</span>
           </button>
         </div>
 
@@ -356,10 +356,14 @@ export const TeacherDashboard: React.FC = () => {
                             <div className="flex items-center space-x-2">
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleCopy(wishlist.wishlist_key); }} 
-                                className={`px-3 py-1 text-sm rounded transition-colors flex items-center ${copiedKey === wishlist.wishlist_key ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800'}`}
+                                className={`px-3 py-1 text-sm rounded transition-colors flex items-center ${
+                                  copiedKey === wishlist.wishlist_key 
+                                    ? 'bg-green-600 text-white' 
+                                    : 'bg-transparent text-sky-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 xs:bg-sky-600 xs:text-white xs:hover:bg-sky-800'
+                                }`}
                               >
-                                {copiedKey === wishlist.wishlist_key ? <Check className="w-4 h-4 mr-1" /> : <Share2 className="w-4 h-4 mr-1" />}
-                                {copiedKey === wishlist.wishlist_key ? 'Copied!' : 'Share List'}
+                                {copiedKey === wishlist.wishlist_key ? <Check className="w-4 h-4 xs:mr-1" /> : <Share2 className="w-4 h-4 xs:mr-1" />}
+                                <span className="hidden xs:inline">{copiedKey === wishlist.wishlist_key ? 'Copied!' : 'Share List'}</span>
                               </button>
                               <Tooltip text="Duplicate wiSHlist" position="top">
                                 <button

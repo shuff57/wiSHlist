@@ -159,7 +159,7 @@ export const SupporterView: React.FC = () => {
         <div className="space-y-8 bg-white dark:bg-neutral-900 rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Classroom Needs ({items.length} items)</h3>
-            <div className="flex items-center space-x-2">
+            <div className="hidden md:flex items-center space-x-2">
               <Tooltip text="List View">
                 <button
                   onClick={() => setViewMode('list')}
@@ -197,7 +197,7 @@ export const SupporterView: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="mt-4">
+                <div className="mt-4 w-full">
                   <div className="flex items-center justify-between mb-4">
                     {item.cost && <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>}
                     <span className="text-blue-600 dark:text-blue-400 flex items-center text-sm">
@@ -205,30 +205,30 @@ export const SupporterView: React.FC = () => {
                       {item.contributions} contributions
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    {item.store_link ? (
+                  <div className="flex gap-2 w-full justify-between">
+                    <div className="flex-none">
                       <Tooltip text="Opens in a new tab">
                         <a
-                          href={item.store_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-sky-600 text-white px-6 py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
+                          href={item.store_link || '#'}
+                          target={item.store_link ? "_blank" : undefined}
+                          rel={item.store_link ? "noopener noreferrer" : undefined}
+                          className={`${item.store_link ? 'bg-green-600 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'} text-white px-12 xs:px-6 py-2 rounded-lg transition duration-200 flex items-center justify-center text-sm font-medium`}
                         >
-                          Purchase <ExternalLink className="w-4 h-4 ml-2" />
+                          <span className="hidden xs:inline">Purchase</span> <ExternalLink className="w-4 h-4 xs:ml-2" />
                         </a>
                       </Tooltip>
-                    ) : (
-                      <div></div>
-                    )}
-                    <Tooltip text="Let the teacher know you've purchased this item">
-                      <button
-                        onClick={() => handleMarkContribution(item)}
-                        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition duration-200 flex items-center justify-center text-sm font-medium"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        I bought this
-                      </button>
-                    </Tooltip>
+                    </div>
+                    <div className="flex-none">
+                      <Tooltip text="Let the teacher know you've purchased this item">
+                        <button
+                          onClick={() => handleMarkContribution(item)}
+                          className="bg-sky-600 text-white px-12 xs:px-6 py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
+                        >
+                          <CheckCircle className="w-4 h-4 xs:mr-2" />
+                          <span className="hidden xs:inline">I bought this</span>
+                        </button>
+                      </Tooltip>
+                    </div>
                   </div>
                 </div>
               </div>
