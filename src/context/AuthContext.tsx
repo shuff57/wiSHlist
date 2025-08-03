@@ -37,7 +37,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(currentUser);
       } catch (error: any) {
         // Session expired or invalid - clear user state
-        console.log("No valid session found:", error.message);
         setUser(null);
       } finally {
         setLoading(false);
@@ -59,7 +58,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       // If the session is already invalid or user is already logged out, 
       // we don't need to throw an error - just proceed with cleanup
-      console.log("Session already invalid or user already logged out:", error.message);
     } finally {
       // Always clear the user state regardless of whether deleteSession succeeded
       setUser(null);
@@ -72,7 +70,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(currentUser);
     } catch (error: any) {
       // Session expired or invalid - clear user state
-      console.log("Session expired during refresh:", error.message);
       setUser(null);
     }
   };
@@ -85,10 +82,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Try to fetch existing document first
       try {
         const existingDoc = await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
-        console.log("✅ User document already exists:", existingDoc);
         return;
       } catch (error: any) {
-        console.log("📄 User document not found, will create it. Error:", error.code, error.message);
         
         // Check if this is Mr. Huff (the main admin)
         const isMrHuff = currentUser.name.toLowerCase().includes('huff') || 
@@ -109,26 +104,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               // Note: userID field only set when invited by someone
             }
           );
-          console.log("✅ Created user document successfully:", newDoc);
         } catch (createError: any) {
-          console.log("❌ Failed to create user document:", createError.code, createError.message);
           
           if (createError.code === 409) {
             // Document exists but we couldn't read it initially - try again
-            console.log("🔄 Document exists (409), trying to fetch again...");
             try {
               const existingDoc = await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
-              console.log("✅ Successfully fetched existing document on retry:", existingDoc);
             } catch (retryError: any) {
-              console.log("❌ Still can't fetch document after 409:", retryError.code, retryError.message);
               // This indicates a permissions issue - the document exists but user can't read it
-              console.log("⚠️ Document exists but user lacks read permissions");
             }
           }
         }
       }
     } catch (error) {
-      console.error("❌ Failed to ensure user document:", error);
     }
   };
 

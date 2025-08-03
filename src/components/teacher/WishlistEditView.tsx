@@ -54,7 +54,6 @@ export const WishlistEditView: React.FC = () => {
   };
 
   const fetchWishlistData = useCallback(async (id: string) => {
-    console.log('Fetching wishlist data for ID:', id);
     try {
       const wishlistDoc = await databases.getDocument(databaseId, wishlistsCollectionId, id);
       setWishlist(wishlistDoc as Models.Document & WishlistDoc);
@@ -71,14 +70,12 @@ export const WishlistEditView: React.FC = () => {
 
       sessionStorage.setItem('lastVisitedWishlist', wishlistDoc.wishlist_key);
     } catch (error) {
-      console.error("Failed to fetch wishlist data:", error);
       navigate('/dashboard');
     }
   }, [navigate]);
 
   useEffect(() => {
     if (!wishlistId) {
-      console.log('No wishlistId found in URL, redirecting to dashboard.');
       navigate('/dashboard');
       return;
     }
@@ -87,7 +84,6 @@ export const WishlistEditView: React.FC = () => {
         await account.get();
         await fetchWishlistData(wishlistId);
       } catch (error) {
-        console.error('Authentication check failed:', error);
         navigate('/login');
       } finally {
         setLoading(false);
@@ -104,7 +100,6 @@ export const WishlistEditView: React.FC = () => {
       setWishlist(prev => prev ? { ...prev, ...formData } : null);
       alert('Wishlist settings saved!');
     } catch (error) {
-      console.error("Error saving settings:", error);
       alert('Failed to save settings.');
     }
   };
@@ -126,7 +121,6 @@ export const WishlistEditView: React.FC = () => {
       setItems(prev => [...prev, newItemDoc as Models.Document & ItemDoc]);
       setNewItem({ name: '', description: '', store_link: '', cost: '' });
     } catch (error) {
-      console.error("Error adding item:", error);
     }
   };
 
@@ -158,7 +152,6 @@ export const WishlistEditView: React.FC = () => {
       setItems(prev => prev.map(i => i.$id === editingItemId ? updatedItem as Models.Document & ItemDoc : i));
       handleCancelEdit();
     } catch (error) {
-      console.error("Error updating item:", error);
     }
   };
 
@@ -167,7 +160,6 @@ export const WishlistEditView: React.FC = () => {
       await databases.deleteDocument(databaseId, itemsCollectionId, itemId);
       setItems(prev => prev.filter(item => item.$id !== itemId));
     } catch (error) {
-      console.error("Error deleting item:", error);
     }
   };
 
@@ -186,7 +178,6 @@ export const WishlistEditView: React.FC = () => {
       await databases.deleteDocument(databaseId, suggestionsCollectionId, suggestion.$id);
       setSuggestions(prev => prev.filter(s => s.$id !== suggestion.$id));
     } catch (error) {
-      console.error("Error approving suggestion:", error);
     }
   };
 
@@ -195,7 +186,6 @@ export const WishlistEditView: React.FC = () => {
       await databases.deleteDocument(databaseId, suggestionsCollectionId, suggestionId);
       setSuggestions(prev => prev.filter(s => s.$id !== suggestionId));
     } catch (error) {
-      console.error("Error declining suggestion:", error);
     }
   };
 

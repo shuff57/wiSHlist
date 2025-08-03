@@ -36,12 +36,10 @@ export class AmazonAPI {
    * Get product data from Amazon using ASIN
    */
   static async getProductByASIN(asin: string, country: string = 'US'): Promise<AmazonAPIResponse> {
-    console.log('🔍 AmazonAPI: Fetching product data for ASIN:', asin);
     
     for (const endpoint of this.API_ENDPOINTS) {
       try {
         const url = `${endpoint}/product/${asin}?country=${country}`;
-        console.log('🌐 Trying API endpoint:', url);
         
         const response = await fetch(url, {
           method: 'GET',
@@ -52,12 +50,10 @@ export class AmazonAPI {
         });
 
         if (!response.ok) {
-          console.warn(`❌ API endpoint failed: ${endpoint} (${response.status})`);
           continue;
         }
 
         const data = await response.json();
-        console.log('✅ AmazonAPI: Success!', data);
         
         if (data.success && data.data) {
           return {
@@ -66,7 +62,6 @@ export class AmazonAPI {
           };
         }
       } catch (error) {
-        console.warn(`❌ Error with endpoint ${endpoint}:`, error);
         continue;
       }
     }

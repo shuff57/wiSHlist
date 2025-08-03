@@ -101,15 +101,12 @@ export const Settings: React.FC = () => {
         // Try to fetch user document, but don't fail if it doesn't exist
         try {
           const doc = await databases.getDocument(databaseId, usersCollectionId, loggedInUser.$id);
-          console.log("📄 Found user document:", doc);
-          console.log("🔐 isAdmin:", doc.isAdmin, "🔗 isRecommender:", doc.isRecommender);
           
           // Check if this is Mr. Huff and ensure admin privileges
           const isMrHuff = loggedInUser.name.toLowerCase().includes('huff') || 
                           loggedInUser.email.toLowerCase().includes('huff');
           
           if (isMrHuff && (!doc.isAdmin || !doc.isRecommender)) {
-            console.log("👑 Updating Mr. Huff's privileges to admin");
             try {
               const updatedDoc = await databases.updateDocument(
                 databaseId,
@@ -122,7 +119,6 @@ export const Settings: React.FC = () => {
               );
               setUserDoc(updatedDoc as Models.Document & UserDoc);
             } catch (updateError) {
-              console.error("Failed to update Mr. Huff's privileges:", updateError);
               setUserDoc(doc as Models.Document & UserDoc);
             }
           } else {
@@ -130,17 +126,13 @@ export const Settings: React.FC = () => {
           }
           
           if ((doc as any).isAdmin || (doc as any).isRecommender || isMrHuff) {
-            console.log("👑 User has admin/recommender privileges");
-            console.log("🆔 Your user ID:", loggedInUser.$id);
           }
         } catch (docError) {
-          console.log("📄 User document not found, attempting to fetch updated document");
           
           // Check if this is Mr. Huff (the main admin) - always give admin privileges
           const isMrHuff = loggedInUser.name.toLowerCase().includes('huff') || 
                           loggedInUser.email.toLowerCase().includes('huff');
           
-          console.log("🔍 Is Mr. Huff?", isMrHuff, "Name:", loggedInUser.name, "Email:", loggedInUser.email);
           
           // Try to create the document first, but if it fails (already exists), 
           // try one more time to fetch it with a slight delay
@@ -159,23 +151,18 @@ export const Settings: React.FC = () => {
                 // Note: No userID field for Mr. Huff since he's the main admin
               }
             );
-            console.log("✅ Created user document:", newDoc);
             setUserDoc(newDoc as Models.Document & UserDoc);
             
             if (isMrHuff) {
-              console.log("👑 Mr. Huff privileges set");
             }
           } catch (createError) {
-            console.log("❌ Failed to create user document, trying to fetch existing document:", createError);
             
             // Wait a moment and try to fetch the existing document
             setTimeout(async () => {
               try {
                 const existingDoc = await databases.getDocument(databaseId, usersCollectionId, loggedInUser.$id);
-                console.log("✅ Successfully fetched existing user document:", existingDoc);
                 setUserDoc(existingDoc as Models.Document & UserDoc);
               } catch (fetchError) {
-                console.error("❌ Failed to fetch existing document, using fallback:", fetchError);
                 // Set default userDoc values as fallback, but give Mr. Huff admin privileges
                 setUserDoc({
                   $id: loggedInUser.$id,
@@ -214,12 +201,8 @@ export const Settings: React.FC = () => {
         
         // If there's a search query, add the name filter
         if (searchQuery.trim() !== '') {
-          console.log("🔍 Searching for users with:");
-          console.log("  - Name starts with:", searchQuery.toLowerCase());
-          console.log("  - Current user ID:", user.$id);
           queries.push(Query.startsWith('name_lowercase', searchQuery.toLowerCase()));
         } else {
-          console.log("📋 Loading all users you invited");
         }
         
         // Search for users you invited (with optional name filter)
@@ -228,19 +211,8 @@ export const Settings: React.FC = () => {
           usersCollectionId,
           queries
         );
-        
-        console.log("📋 Users you invited:", response.documents.map(u => ({ 
-          name: u.name, 
-          userID: u.userID || 'NO_USER_ID',
-          id: u.$id,
-          isAdmin: u.isAdmin || false,
-          isRecommender: u.isRecommender || false
-        })));
-        
         setSearchResults(response.documents as (Models.Document & UserDoc)[]);
-        console.log("🔍 Results for users you invited:", response.documents.length);
       } catch (error) {
-        console.error("Failed to search users:", error);
       } finally {
         setLoadingSearch(false);
       }
@@ -264,7 +236,6 @@ export const Settings: React.FC = () => {
           );
           setWishlists(response.documents);
         } catch (error) {
-          console.error("Failed to fetch wishlists:", error);
         }
       }
     };
@@ -280,7 +251,6 @@ export const Settings: React.FC = () => {
       const response = await databases.listDocuments(databaseId, feedbackCollectionId);
       setFeedback(response.documents);
     } catch (error) {
-      console.error('Error fetching feedback:', error);
     } finally {
       setLoadingFeedback(false);
     }
@@ -294,7 +264,6 @@ export const Settings: React.FC = () => {
       setShowDeleteModal(false);
       setFeedbackToDelete(null);
     } catch (error) {
-      console.error('Error deleting feedback:', error);
     }
   };
 
@@ -308,7 +277,6 @@ export const Settings: React.FC = () => {
         f.$id === feedbackId ? { ...f, status: newStatus } : f
       ));
     } catch (error) {
-      console.error('Error updating feedback:', error);
     }
   };
 
@@ -321,7 +289,6 @@ export const Settings: React.FC = () => {
         f.$id === feedbackId ? { ...f, category: newCategory } : f
       ));
     } catch (error) {
-      console.error('Error updating feedback category:', error);
     }
   };
 
@@ -360,17 +327,14 @@ export const Settings: React.FC = () => {
 
       // Update teacher_name in all wishlists associated with this user
       if (user) {
-        console.log(`Attempting to update wishlists for user ID: ${user.$id}`);
         const wishlistsResponse = await databases.listDocuments(
           databaseId,
           wishlistsCollectionId,
           [Query.equal('teacher_id', user.$id)]
         );
 
-        console.log(`Found ${wishlistsResponse.documents.length} wishlists for user ID: ${user.$id}`);
 
         for (const wishlist of wishlistsResponse.documents) {
-          console.log(`Updating wishlist ID: ${wishlist.$id} with teacher_name: ${name}`);
 
           await databases.updateDocument(
             databaseId,
@@ -381,7 +345,6 @@ export const Settings: React.FC = () => {
         }
       }
     } catch (error) {
-      console.error('Error saving changes:', error);
     } finally {
       setSaving(false);
       setNameSaved(true);
@@ -391,7 +354,6 @@ export const Settings: React.FC = () => {
 
   const toggleUserStatus = async (targetUser: Models.Document & UserDoc, field: 'isRecommender' | 'isAdmin') => {
     try {
-      console.log(`🔄 Toggling ${field} for user:`, targetUser.name, "Current value:", targetUser[field]);
       
       // Calculate new values with admin->recommender logic
       let newIsAdmin = targetUser.isAdmin;
@@ -402,14 +364,12 @@ export const Settings: React.FC = () => {
         // If granting admin privileges, automatically grant recommender too
         if (newIsAdmin && !newIsRecommender) {
           newIsRecommender = true;
-          console.log("👑 Granting admin privileges - automatically enabling recommender as well");
         }
       } else if (field === 'isRecommender') {
         newIsRecommender = !targetUser.isRecommender;
         // If removing recommender privileges and user is admin, remove admin too (since admin requires recommender)
         if (!newIsRecommender && newIsAdmin) {
           newIsAdmin = false;
-          console.log("⬇️ Removing recommender privileges - automatically removing admin as well");
         }
       }
       
@@ -425,10 +385,8 @@ export const Settings: React.FC = () => {
             isRecommender: newIsRecommender
           }
         ) as Models.Document & UserDoc;
-        console.log(`✅ Updated privileges for user:`, targetUser.name, 
-          `Admin: ${targetUser.isAdmin} -> ${newIsAdmin}, Recommender: ${targetUser.isRecommender} -> ${newIsRecommender}`);
+          //
       } catch (updateError) {
-        console.log(`❌ Failed to update user document, trying to create it:`, updateError);
         
         // If update fails (document doesn't exist), create the document
         try {
@@ -446,17 +404,14 @@ export const Settings: React.FC = () => {
               userID: user?.$id // Track who created this user
             }
           ) as Models.Document & UserDoc;
-          console.log(`✅ Created user document with privileges:`, targetUser.name, 
-            `Admin: ${newIsAdmin}, Recommender: ${newIsRecommender}`);
+            //
         } catch (createError) {
-          console.error(`❌ Failed to create user document:`, createError);
           throw createError;
         }
       }
       
       // If this is the current user, update userDoc state
       if (targetUser.$id === user?.$id) {
-        console.log("📝 Updating current user's userDoc state");
         setUserDoc(updatedUser);
       }
       
@@ -464,19 +419,12 @@ export const Settings: React.FC = () => {
         prev.map(u => u.$id === targetUser.$id ? updatedUser : u)
       );
     } catch (error) {
-      console.error("Failed to update user:", error);
     }
   };
 
   // Filter out the current user from the display list
   const filteredSearchResults = searchResults.filter(u => u.$id !== user?.$id);
 
-  console.log("🎯 Settings render - userDoc:", userDoc);
-  console.log("🔐 isAdmin:", userDoc?.isAdmin, "🔗 isRecommender:", userDoc?.isRecommender);
-  console.log("📝 Should show registration link?", (userDoc?.isRecommender || userDoc?.isAdmin));
-  console.log("⚙️ Should show user management?", userDoc?.isAdmin);
-  console.log("🎛️ Should show privilege toggles in invitation?", userDoc?.isAdmin);
-  console.log("🔍 Search results (excluding current user):", filteredSearchResults.length);
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
@@ -612,7 +560,6 @@ export const Settings: React.FC = () => {
                                   const link = `${window.location.origin}/register?token=${token}`;
                                   setRegistrationLink(link);
                                 } catch (error) {
-                                  console.error("❌ Error generating registration link:", error);
                                   if (error instanceof Error) {
                                     alert(`Error generating link: ${error.message}`);
                                   } else {

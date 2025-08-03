@@ -58,7 +58,6 @@ export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, e
         setError('No wishlist found with that key. Please check the key and try again.');
       }
     } catch (err: any) {
-      console.error("Error fetching wishlist:", err);
       setError(`Failed to fetch wishlist: ${err.message || 'Unknown error'}. Please try again.`);
     } finally {
       setLoading(false);

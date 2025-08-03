@@ -64,7 +64,6 @@ export const SupporterView: React.FC = () => {
         setError('No wishlist found with that key. Please check the key and try again.');
       }
     } catch (err: any) {
-      console.error("Error fetching wishlist:", err);
       setError(`Failed to fetch wishlist: ${err.message || 'Unknown error'}. Please try again.`);
     } finally {
       setLoading(false);
@@ -94,7 +93,6 @@ export const SupporterView: React.FC = () => {
         )
       );
     } catch (error) {
-      console.error("Error marking contribution:", error);
       alert("Could not mark contribution. Please try again.");
     }
   };
@@ -128,7 +126,6 @@ export const SupporterView: React.FC = () => {
       setTimeout(() => setSubmissionSuccess(false), 3000);
       setSuggestionForm({ itemName: '', description: '', storeLink: '', estimatedCost: '' });
     } catch (error) {
-      console.error("Error submitting suggestion:", error);
       alert("Could not submit suggestion. Please try again.");
     }
   };

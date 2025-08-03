@@ -44,7 +44,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     try {
       await account.deleteSession('current');
     } catch (error) {
-      console.error('Error logging out:', error);
     }
   };
 

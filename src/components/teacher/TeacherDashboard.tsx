@@ -38,7 +38,6 @@ export const TeacherDashboard: React.FC = () => {
 
   // Function to wait and retry when rate limited
   const retryAfterRateLimit = async (retryFn: () => Promise<any>, delayMs: number = 5000) => {
-    console.log(`Rate limited. Waiting ${delayMs}ms before retry...`);
     setRateLimited(true);
     await new Promise(resolve => setTimeout(resolve, delayMs));
     setRateLimited(false);
@@ -46,19 +45,14 @@ export const TeacherDashboard: React.FC = () => {
   };
 
   const fetchUserData = useCallback(async (userId: string, userName: string, userEmail: string) => {
-    console.log("fetchUserData called with:", { userId, userName, userEmail });
     let doc = null;
     
     try {
         // First, try to get the existing document using user ID as document ID
-        console.log("Attempting to fetch existing user document for ID:", userId);
         doc = await databases.getDocument(databaseId, usersCollectionId, userId);
-        console.log("Found existing user document:", doc);
     } catch (e: any) {
-        console.log("Error fetching user document:", e.code, e.message);
         if (e.code === 404) {
             // Document doesn't exist, try to create it
-            console.log("User document not found, creating new one for:", userId, userName, userEmail);
             
             const userDocData = { 
                 name: userName || 'Unknown User', 
@@ -67,7 +61,6 @@ export const TeacherDashboard: React.FC = () => {
                 isRecommender: false, 
                 isAdmin: false 
             };
-            console.log("Creating user document with data:", userDocData);
             
             try {
                 doc = await databases.createDocument(
@@ -76,35 +69,26 @@ export const TeacherDashboard: React.FC = () => {
                     userId, // Use user ID as document ID
                     userDocData
                 );
-                console.log("Successfully created user document:", doc);
             } catch (createError: any) {
-                console.error("Failed to create user document:", createError.code, createError.message);
                 
                 if (createError.code === 409) {
                     // Document was created by another process (likely React StrictMode), try to fetch it
-                    console.log("Race condition detected (409), document already exists. Fetching existing document...");
                     try {
                         // Try multiple times with increasing delays
                         for (let attempt = 1; attempt <= 3; attempt++) {
-                            console.log(`Fetch attempt ${attempt}/3...`);
                             await new Promise(res => setTimeout(res, attempt * 500)); // Increasing delay
                             try {
                                 doc = await databases.getDocument(databaseId, usersCollectionId, userId);
-                                console.log(`Successfully fetched existing user document on attempt ${attempt}:`, doc);
                                 break; // Success, exit the retry loop
                             } catch (fetchError: any) {
-                                console.log(`Fetch attempt ${attempt} failed:`, fetchError.code, fetchError.message);
                                 if (attempt === 3) {
-                                    console.error("Failed to fetch user document after all retry attempts");
                                 }
                             }
                         }
                     } catch (retryError) {
-                        console.error("Error in retry logic:", retryError);
                     }
                 } else if (createError.code === 429) {
                     // Rate limit exceeded - wait and retry once
-                    console.log("Rate limit exceeded. Waiting before retry...");
                     try {
                         doc = await retryAfterRateLimit(async () => {
                             return await databases.createDocument(
@@ -114,21 +98,16 @@ export const TeacherDashboard: React.FC = () => {
                                 userDocData
                             );
                         });
-                        console.log("Successfully created user document after rate limit retry:", doc);
                     } catch (retryError: any) {
-                        console.error("Failed to create user document even after rate limit retry:", retryError);
                     }
                 } else {
-                    console.error("Non-409/429 error creating user document:", createError);
                 }
             }
         } else {
-            console.error("Non-404 error fetching user document:", e);
         }
     }
 
     if (doc) {
-        console.log("Setting user document:", doc);
         setUserDoc(doc as Models.Document & UserDoc);
         try {
             const response = await databases.listDocuments(
@@ -136,10 +115,8 @@ export const TeacherDashboard: React.FC = () => {
             );
             setWishlists(response.documents as (Models.Document & WishlistDoc)[]);
         } catch (error) {
-            console.error("Failed to fetch wishlists:", error);
         }
     } else {
-        console.log("No user document available, but continuing with basic functionality");
         // Set a minimal user doc so the UI can function
         setUserDoc({
             $id: 'temp',
@@ -159,7 +136,6 @@ export const TeacherDashboard: React.FC = () => {
             );
             setWishlists(response.documents as (Models.Document & WishlistDoc)[]);
         } catch (error) {
-            console.error("Failed to fetch wishlists:", error);
             setWishlists([]);
         }
     }
@@ -169,14 +145,9 @@ export const TeacherDashboard: React.FC = () => {
     if (!authLoading && user && !isInitializing) {
       // Prevent duplicate initialization for the same user
       if (initializationRef.current === user.$id) {
-        console.log("Already initializing for user:", user.$id);
         return;
       }
       
-      console.log("User object from auth:", user);
-      console.log("User ID:", user.$id);
-      console.log("User name:", user.name);
-      console.log("User email:", user.email);
       
       setIsInitializing(true);
       initializationRef.current = user.$id;
@@ -189,7 +160,6 @@ export const TeacherDashboard: React.FC = () => {
           // Now fetch the user data and wishlists
           await fetchUserData(user.$id, user.name, user.email);
         } catch (error) {
-          console.error("Failed to initialize user:", error);
         } finally {
           setLoading(false);
           setIsInitializing(false);
@@ -219,7 +189,6 @@ export const TeacherDashboard: React.FC = () => {
       );
       setWishlists(prev => [...prev, newWishlist as Models.Document & WishlistDoc]);
     } catch (error) {
-      console.error("Error creating wishlist:", error);
     }
   };
   
@@ -250,7 +219,6 @@ export const TeacherDashboard: React.FC = () => {
       setWishlists(prev => prev.map(w => w.$id === wishlistId ? updatedWishlist as Models.Document & WishlistDoc : w));
       handleCancelEdit();
     } catch (error) {
-      console.error("Error updating wishlist name:", error);
     }
   };
 
@@ -270,7 +238,6 @@ export const TeacherDashboard: React.FC = () => {
       await databases.deleteDocument(databaseId, wishlistsCollectionId, wishlistToDelete);
       setWishlists(prev => prev.filter(w => w.$id !== wishlistToDelete));
     } catch (error) {
-      console.error("Error deleting wishlist:", error);
     } finally {
       setIsDeleteModalOpen(false);
       setWishlistToDelete(null);
@@ -326,7 +293,6 @@ export const TeacherDashboard: React.FC = () => {
 
   // If no userDoc but we have a user, show a message but continue
   if (!userDoc) {
-    console.log("No user document available, but continuing with limited functionality");
   }
 
   return (
@@ -374,7 +340,6 @@ export const TeacherDashboard: React.FC = () => {
                               <div 
                                 className="flex-grow flex items-center space-x-2 cursor-pointer"
                                 onClick={() => {
-                                  console.log('Navigating to wishlist edit for ID:', wishlist.$id);
                                   navigate(`/wishlist/${wishlist.$id}/edit`);
                                 }}
                               >
@@ -451,7 +416,6 @@ export const TeacherDashboard: React.FC = () => {
                                     setWishlists(response.documents as (Models.Document & WishlistDoc)[]);
                                   } catch (err) {
                                     alert('Failed to duplicate wishlist.');
-                                    console.error(err);
                                   }
                                 }}
                                 className="p-2 text-sky-600 hover:bg-sky-100 dark:hover:bg-neutral-700 rounded-full"
