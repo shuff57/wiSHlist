@@ -371,6 +371,7 @@ export const Settings: React.FC = () => {
 
         for (const wishlist of wishlistsResponse.documents) {
           console.log(`Updating wishlist ID: ${wishlist.$id} with teacher_name: ${name}`);
+
           await databases.updateDocument(
             databaseId,
             wishlistsCollectionId,
@@ -379,100 +380,12 @@ export const Settings: React.FC = () => {
           );
         }
       }
-
-      setNameSaved(true);
-      setTimeout(() => setNameSaved(false), 2000); // Show checkmark for 2 seconds
     } catch (error) {
-      console.error("Error saving settings:", error);
-      alert("Failed to save settings. Please check the console for details.");
+      console.error('Error saving changes:', error);
     } finally {
       setSaving(false);
-    }
-  };
-  
-  // Functions from AdminDashboard
-  const handleCopy = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.log("Clipboard API failed, using fallback method:", error);
-      // Fallback method: create a temporary textarea element
-      try {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.left = '-999999px';
-        textarea.style.top = '-999999px';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        const successful = document.execCommand('copy');
-        document.body.removeChild(textarea);
-        
-        if (successful) {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        } else {
-          throw new Error('execCommand failed');
-        }
-      } catch (fallbackError) {
-        console.error("Both clipboard methods failed:", fallbackError);
-        // Show the text in a prompt as last resort
-        prompt('Copy this link manually:', text);
-      }
-    }
-  };
-
-  const generateLink = async () => {
-    if (!user) {
-      console.error("No user found, cannot generate link");
-      alert("Error: No user session found. Please refresh and try again.");
-      return;
-    }
-    
-    setLoadingLink(true);
-    console.log("🚀 Starting link generation...");
-    console.log("📄 User:", user);
-    console.log("⏰ Link expiry:", linkExpiry, "hours");
-    console.log("🔗 Recommender invite:", isRecommenderInvite);
-    console.log("👑 Admin invite:", isAdminInvite);
-    
-    try {
-      const token = ID.unique();
-      const expiryTime = new Date(Date.now() + parseInt(linkExpiry, 10) * 60 * 60 * 1000);
-      
-      console.log("🎫 Generated token:", token);
-      console.log("⏰ Expiry time:", expiryTime.toISOString());
-      console.log("📊 Database IDs:", { databaseId, invitesCollectionId });
-      
-      const inviteData = {
-        token: token,
-        expiresAt: expiryTime.toISOString(),
-        isRecommender: isRecommenderInvite,
-        isAdmin: isAdminInvite,
-        userID: user.$id // Track who created this invitation
-      };
-      
-      console.log("📝 Creating invite document with data:", inviteData);
-      
-      const createdDoc = await databases.createDocument(databaseId, invitesCollectionId, token, inviteData);
-      
-      console.log("✅ Successfully created invite document:", createdDoc);
-
-      const link = `${window.location.origin}/register?token=${token}`;
-      setRegistrationLink(link);
-      console.log("🔗 Generated invitation link:", link);
-    } catch (error) {
-      console.error("❌ Error generating registration link:", error);
-      if (error instanceof Error) {
-        alert(`Error generating link: ${error.message}`);
-      } else {
-        alert("Unknown error occurred while generating link. Check console for details.");
-      }
-    } finally {
-      setLoadingLink(false);
+      setNameSaved(true);
+      setTimeout(() => setNameSaved(false), 1500);
     }
   };
 
@@ -581,51 +494,18 @@ export const Settings: React.FC = () => {
                         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-8">
                           <div className="flex items-center mb-4">
                             <User className="w-5 h-5 mr-2 text-sky-600 dark:text-sky-400" />
-                            <h2 className="text-lg font-semibold">Support View</h2>
+                            <h2 className="text-lg font-semibold">Supporter View</h2>
                           </div>
                           <div className="space-y-6">
-                            <form onSubmit={handleSaveChanges} className="space-y-6">
-                              <div>
-                                <div className="flex items-center space-x-2">
-                                  <input
-                                    type="text"
-                                    name="name"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="flex-grow block w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm bg-white dark:bg-neutral-700 h-10"
-                                    disabled={loading}
-                                  />
-                                  <Tooltip text="Save your new display name">
-                                    <button
-                                      type="submit"
-                                      disabled={saving || name === user?.name || loading}
-                                      className={`inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white h-10 transition-colors duration-200 ${nameSaved ? 'bg-green-600' : 'bg-sky-600 hover:bg-sky-800'} disabled:bg-gray-400`}
-                                    >
-                                      {nameSaved ? (
-                                        <div className="flex items-center space-x-1">
-                                          <Check className="w-5 h-5" />
-                                          <span>Saved!</span>
-                                        </div>
-                                      ) : (
-                                        <Save className="w-5 h-5" />
-                                      )}
-                                    </button>
-                                  </Tooltip>
-                                </div>
-                                <div className="mt-4">
-                                  <button
-                                    type="button"
-                                    onClick={() => setShowPreview(!showPreview)}
-                                    className="w-full flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white h-10 transition-colors duration-200 bg-sky-600 hover:bg-sky-800 disabled:bg-gray-400"
-                                  >
-                                    Preview wiSHlist
-                                  </button>
-                                </div>
-                              </div>
-                            </form>
+                            <button
+                              type="button"
+                              onClick={() => setShowPreview(!showPreview)}
+                              className="w-full flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white h-10 transition-colors duration-200 bg-sky-600 hover:bg-sky-800 disabled:bg-gray-400"
+                            >
+                              Open wiSHlist Preview
+                            </button>
                             {showPreview && (
                               <div className="mt-4 border-t pt-4">
-                                <h3 className="text-lg font-semibold mb-4">Preview Wishlist</h3>
                                 <div className="space-y-4">
                                   <select
                                     onChange={(e) => {
@@ -645,7 +525,7 @@ export const Settings: React.FC = () => {
                                   </select>
                                   {selectedWishlist && (
                                     <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
-                                      <WishlistPreview wishlistKey={selectedWishlist} editable={true} />
+                                      <WishlistPreview wishlistKey={selectedWishlist} editable={true} userName={name} />
                                     </div>
                                   )}
                                 </div>
@@ -704,7 +584,32 @@ export const Settings: React.FC = () => {
                               </div>
                             )}
                             <button
-                              onClick={generateLink}
+                              onClick={async () => {
+                                setLoadingLink(true);
+                                try {
+                                  const token = ID.unique();
+                                  const expiryTime = new Date(Date.now() + parseInt(linkExpiry, 10) * 60 * 60 * 1000);
+                                  const inviteData = {
+                                    token: token,
+                                    expiresAt: expiryTime.toISOString(),
+                                    isRecommender: isRecommenderInvite,
+                                    isAdmin: isAdminInvite,
+                                    userID: user?.$id
+                                  };
+                                  const createdDoc = await databases.createDocument(databaseId, invitesCollectionId, token, inviteData);
+                                  const link = `${window.location.origin}/register?token=${token}`;
+                                  setRegistrationLink(link);
+                                } catch (error) {
+                                  console.error("❌ Error generating registration link:", error);
+                                  if (error instanceof Error) {
+                                    alert(`Error generating link: ${error.message}`);
+                                  } else {
+                                    alert("Unknown error occurred while generating link. Check console for details.");
+                                  }
+                                } finally {
+                                  setLoadingLink(false);
+                                }
+                              }}
                               disabled={loadingLink}
                               className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
                             >
@@ -730,7 +635,11 @@ export const Settings: React.FC = () => {
                                   />
                                   <Tooltip text="Copy to clipboard">
                                     <button
-                                      onClick={() => handleCopy(registrationLink)}
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(registrationLink);
+                                        setCopied(true);
+                                        setTimeout(() => setCopied(false), 1500);
+                                      }}
                                       className={`px-4 py-2 text-sm rounded-lg font-medium transition-all duration-200 ${copied ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500'}`}
                                     >
                                       {copied ? (

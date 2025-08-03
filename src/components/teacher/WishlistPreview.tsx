@@ -7,6 +7,7 @@ import { Tooltip } from '../common/Tooltip';
 interface WishlistPreviewProps {
   wishlistKey: string;
   editable?: boolean; // If true, show pencil icons and allow editing
+  userName?: string; // Optional user name for default heading
 }
 
 interface WishlistDoc {
@@ -16,7 +17,7 @@ interface WishlistDoc {
 }
 
 
-export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, editable }) => {
+export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, editable, userName }) => {
   interface ItemDoc {
     name: string;
     description?: string;
@@ -84,8 +85,11 @@ export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, e
   }
 
 
-  // Use new attributes if present, fallback to old defaults
-  const heading = wishlist?.title_text || (wishlist ? `Help ${wishlist.teacher_name}'s Students Learn & Grow` : 'Help Students Learn & Grow');
+  // Use new attributes if present, fallback to userName or teacher_name, then generic
+  const heading = wishlist?.title_text
+    || (userName ? `Help ${userName}'s Students Learn & Grow`
+    : wishlist ? `Help ${wishlist.teacher_name}'s Students Learn & Grow`
+    : 'Help Students Learn & Grow');
   const welcome = wishlist?.welcome_message || 'Your contributions make a real difference in our classroom. Thank you for supporting education!';
 
   // Save handler
