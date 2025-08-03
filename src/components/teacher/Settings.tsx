@@ -442,7 +442,6 @@ export const Settings: React.FC = () => {
                       content = (
                         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-8">
                           <div className="flex items-center mb-4">
-                            <User className="w-5 h-5 mr-2 text-sky-600 dark:text-sky-400" />
                             <h2 className="text-lg font-semibold">Supporter View</h2>
                           </div>
                           <div className="space-y-6">
@@ -450,7 +449,7 @@ export const Settings: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => setShowPreview(true)}
-                                className="w-full flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white h-10 transition-colors duration-200 bg-sky-600 hover:bg-sky-800 disabled:bg-gray-400"
+                                className="w-full px-4 py-2 rounded-lg font-semibold text-base bg-sky-600 text-white hover:bg-sky-800 disabled:bg-gray-400 transition-colors duration-200"
                               >
                                 Open wiSHlist Preview
                               </button>
@@ -461,7 +460,7 @@ export const Settings: React.FC = () => {
                                   <span className="font-semibold text-md">wiSHlist Preview</span>
                                   <button
                                     onClick={() => setShowPreview(false)}
-                                    className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+                                    className="px-4 py-2 rounded-lg font-semibold text-base bg-gray-600 text-white hover:bg-gray-700"
                                   >
                                     Close Preview
                                   </button>
@@ -499,7 +498,6 @@ export const Settings: React.FC = () => {
                       content = (
                         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
                           <div className="flex items-center mb-4">
-                            <UserPlus className="w-5 h-5 mr-2 text-sky-600 dark:text-sky-400" />
                             <h2 className="text-lg font-semibold">Generate Teacher Invitation Link</h2>
                           </div>
                           <div className="space-y-4">
@@ -571,7 +569,7 @@ export const Settings: React.FC = () => {
                                 }
                               }}
                               disabled={loadingLink}
-                              className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                              className="w-full px-4 py-2 rounded-lg font-semibold text-base bg-sky-600 text-white hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
                             >
                               {loadingLink ? 'Generating...' : 'Generate Link'}
                             </button>
@@ -600,16 +598,9 @@ export const Settings: React.FC = () => {
                                         setCopied(true);
                                         setTimeout(() => setCopied(false), 1500);
                                       }}
-                                      className={`px-4 py-2 text-sm rounded-lg font-medium transition-all duration-200 ${copied ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500'}`}
+                                      className={`px-4 py-2 rounded-lg font-semibold text-base transition-all duration-200 ${copied ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500'}`}
                                     >
-                                      {copied ? (
-                                        <div className="flex items-center space-x-1">
-                                          <Check className="w-4 h-4" />
-                                          <span>Copied!</span>
-                                        </div>
-                                      ) : (
-                                        'Copy'
-                                      )}
+                                      {copied ? 'Copied!' : 'Copy'}
                                     </button>
                                   </Tooltip>
                                 </div>
@@ -622,14 +613,13 @@ export const Settings: React.FC = () => {
                       content = (
                         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
                           <div className="flex items-center mb-4">
-                            <User className="w-5 h-5 mr-2 text-sky-600 dark:text-sky-400" />
                             <h2 className="text-lg font-semibold">Manage User Permissions</h2>
                           </div>
                           <div className="space-y-4">
                             {!showPermissionManager ? (
                               <button
                                 onClick={() => setShowPermissionManager(true)}
-                                className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                                className="w-full px-4 py-2 rounded-lg font-semibold text-base bg-sky-600 text-white hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
                               >
                                 Open Permissions Manager
                               </button>
@@ -639,7 +629,7 @@ export const Settings: React.FC = () => {
                                   <h3 className="text-md font-medium">Permissions Manager</h3>
                                   <button
                                     onClick={() => setShowPermissionManager(false)}
-                                    className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+                                    className="px-4 py-2 rounded-lg font-semibold text-base bg-gray-600 text-white hover:bg-gray-700"
                                   >
                                     Close Manager
                                   </button>
@@ -718,7 +708,6 @@ export const Settings: React.FC = () => {
                       content = (
                         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
                           <div className="flex items-center mb-4">
-                            <MessageSquare className="w-5 h-5 mr-2 text-sky-600 dark:text-sky-400" />
                             <h2 className="text-lg font-semibold">Feedback Manager</h2>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -728,9 +717,8 @@ export const Settings: React.FC = () => {
                             {!showFeedbackManager ? (
                               <button
                                 onClick={() => setShowFeedbackManager(true)}
-                                className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                                className="w-full px-4 py-2 rounded-lg font-semibold text-base bg-sky-600 text-white hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
                               >
-                                <MessageSquare className="w-4 h-4 mr-2" />
                                 Open Feedback Manager
                               </button>
                             ) : (
@@ -739,7 +727,7 @@ export const Settings: React.FC = () => {
                                   <h3 className="text-md font-medium">Feedback Manager</h3>
                                   <button
                                     onClick={() => setShowFeedbackManager(false)}
-                                    className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+                                    className="px-4 py-2 rounded-lg font-semibold text-base bg-gray-600 text-white hover:bg-gray-700"
                                   >
                                     Close Manager
                                   </button>
@@ -834,26 +822,23 @@ export const Settings: React.FC = () => {
                                             <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
                                               <button
                                                 onClick={() => handleUpdateFeedbackStatus(item.$id, 'in-progress')}
-                                                className="px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
+                                                className="px-3 py-1 rounded-lg font-semibold text-sm bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
                                                 title="Mark as In Progress"
                                               >
-                                                <MessageSquare className="w-3 h-3" />
                                                 In Progress
                                               </button>
                                               <button
                                                 onClick={() => handleUpdateFeedbackStatus(item.$id, 'resolved')}
-                                                className="px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
+                                                className="px-3 py-1 rounded-lg font-semibold text-sm bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
                                                 title="Mark as Resolved"
                                               >
-                                                <CheckCircle className="w-3 h-3" />
                                                 Resolved
                                               </button>
                                               <button
                                                 onClick={() => handleUpdateFeedbackStatus(item.$id, 'closed')}
-                                                className="px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1 bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
+                                                className="px-3 py-1 rounded-lg font-semibold text-sm bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
                                                 title="Mark as Closed"
                                               >
-                                                <X className="w-3 h-3" />
                                                 Closed
                                               </button>
                                               <div className="ml-auto">
@@ -862,10 +847,10 @@ export const Settings: React.FC = () => {
                                                     setShowDeleteModal(true);
                                                     setFeedbackToDelete(item);
                                                   }}
-                                                  className="px-2 py-1 text-xs rounded-lg bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800 transition-all duration-200"
+                                                  className="px-3 py-1 rounded-lg font-semibold text-sm bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800 transition-all duration-200"
                                                   title="Delete Feedback"
                                                 >
-                                                  <Trash2 className="w-3 h-3" />
+                                                  Delete
                                                 </button>
                                               </div>
                                             </div>
@@ -884,7 +869,6 @@ export const Settings: React.FC = () => {
                       content = (
                         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
                           <div className="flex items-center mb-4">
-                            <Edit3 className="w-5 h-5 mr-2 text-sky-600 dark:text-sky-400" />
                             <h2 className="text-lg font-semibold">Edit About Page</h2>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -894,9 +878,8 @@ export const Settings: React.FC = () => {
                             {!showAboutEditor ? (
                               <button
                                 onClick={() => setShowAboutEditor(true)}
-                                className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                                className="w-full px-4 py-2 rounded-lg font-semibold text-base bg-sky-600 text-white hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
                               >
-                                <Edit3 className="w-4 h-4 mr-2" />
                                 Open About Page Editor
                               </button>
                             ) : (
@@ -905,7 +888,7 @@ export const Settings: React.FC = () => {
                                   <h3 className="text-md font-medium">About Page Editor</h3>
                                   <button
                                     onClick={() => setShowAboutEditor(false)}
-                                    className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+                                    className="px-4 py-2 rounded-lg font-semibold text-base bg-gray-600 text-white hover:bg-gray-700"
                                   >
                                     Close Editor
                                   </button>
