@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, ID, Query } from 'appwrite';
-import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save } from 'lucide-react';
+import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save, Copy } from 'lucide-react';
 import { ExternalLink } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
@@ -160,6 +160,27 @@ export const WishlistEditView: React.FC = () => {
       await databases.deleteDocument(databaseId, itemsCollectionId, itemId);
       setItems(prev => prev.filter(item => item.$id !== itemId));
     } catch (error) {
+    }
+  };
+
+  const handleDuplicateItem = async (item: Models.Document & ItemDoc) => {
+    if (!wishlist) return;
+    try {
+      // Get the highest position to add the duplicate at the end
+      const maxPosition = Math.max(...items.map(i => i.position || 0), 0);
+      
+      const duplicatedItemDoc = await databases.createDocument(databaseId, itemsCollectionId, ID.unique(), {
+        wishlist_id: wishlist.$id,
+        name: `${item.name} (Copy)`,
+        description: item.description,
+        store_link: item.store_link,
+        cost: item.cost,
+        contributions: 0, // Reset contributions for the duplicate
+        position: maxPosition + 1
+      });
+      setItems(prev => [...prev, duplicatedItemDoc as Models.Document & ItemDoc]);
+    } catch (error) {
+      console.error('Error duplicating item:', error);
     }
   };
 
@@ -334,6 +355,11 @@ export const WishlistEditView: React.FC = () => {
                                       <Tooltip text="Edit this item">
                                         <button onClick={() => handleEditItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
                                           <Pencil className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                        </button>
+                                      </Tooltip>
+                                      <Tooltip text="Duplicate this item">
+                                        <button onClick={() => handleDuplicateItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                          <Copy className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                                         </button>
                                       </Tooltip>
                                       <Tooltip text="Delete this item">

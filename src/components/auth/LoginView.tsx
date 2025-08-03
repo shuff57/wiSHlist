@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { account } from '../../appwriteConfig';
 import { AppwriteException, OAuthProvider } from 'appwrite';
 import { Header } from '../layout/Header';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { TeacherRegistrationInfo } from './TeacherRegistrationInfo';
 
 export const LoginView: React.FC = () => {
   const { ensureUserDocument } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -71,9 +72,22 @@ export const LoginView: React.FC = () => {
     }
   };
 
+  const handleBackToWishlist = () => {
+    navigate('/supporter');
+  };
+
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
-      <Header title="Sign In" showSettingsButton={false} showSignoutButton={false} showInfoButton={true} isLoading={loading} showLoginButton={true} />
+      <Header 
+        title="Sign In" 
+        showSettingsButton={false} 
+        showSignoutButton={false} 
+        showInfoButton={true} 
+        isLoading={loading} 
+        showLoginButton={true} 
+        showBackButton={true} 
+        onBack={handleBackToWishlist} 
+      />
       <div className="relative flex flex-col items-center justify-start pt-1 p-4 w-full min-h-[calc(100vh-80px)]">
         {/* Centered login box */}
         <div className="z-10 bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md flex flex-col justify-center mx-auto">

@@ -370,17 +370,22 @@ export const TeacherDashboard: React.FC = () => {
                                   onClick={async (e) => {
                                     e.stopPropagation();
                                     try {
+                                      // Simple duplicate naming - just append (copy) each time
+                                      const originalName = wishlist.wishlist_name || wishlist.wishlist_key;
+                                      const newName = `${originalName}(copy)`;
+                                      
                                       // Generate a new unique key for the duplicate
-                                      const newKey = `${wishlist.wishlist_key}-copy-${Math.random().toString(36).substring(2, 8)}`;
-                                      const newName = `${wishlist.wishlist_name || wishlist.wishlist_key} (Copy)`;
+                                      const newKey = `${wishlist.wishlist_key.replace(/[^a-zA-Z0-9]/g, '')}-copy-${Math.random().toString(36).substring(2, 8)}`;
+                                      
                                       // Remove all keys starting with '$' from the wishlist object
                                       const filtered = Object.fromEntries(
                                         Object.entries(wishlist).filter(([key]) => !key.startsWith('$') && key !== 'wishlist_key' && key !== 'wishlist_name')
                                       );
+                                      
                                       await databases.createDocument(
                                         databaseId,
                                         wishlistsCollectionId,
-                                        newKey,
+                                        ID.unique(),
                                         {
                                           ...filtered,
                                           wishlist_key: newKey,
