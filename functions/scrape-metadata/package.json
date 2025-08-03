@@ -1,0 +1,18 @@
+{
+  "name": "scrape-metadata",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "metascraper": "^5.27.7",
+    "metascraper-title": "^5.27.7",
+    "metascraper-description": "^5.27.7",
+    "metascraper-image": "^5.27.7",
+    "metascraper-url": "^5.27.7",
+    "metascraper-author": "^5.27.7",
+    "metascraper-date": "^5.27.7",
+    "metascraper-logo": "^5.27.7",
+    "metascraper-publisher": "^5.27.7",
+    "got": "^12.6.0"
+  }
+}
