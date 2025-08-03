@@ -72,7 +72,7 @@ export const LoginView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
-      <Header title="Login" showSettingsButton={false} showSignoutButton={false} showInfoButton={true} isLoading={loading} />
+      <Header title="Login" showSettingsButton={false} showSignoutButton={false} showInfoButton={true} isLoading={loading} showLoginButton={true} />
       <div className="flex items-center justify-center p-4">
         <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md">
           <div className="text-center mb-6">

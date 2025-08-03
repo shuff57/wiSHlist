@@ -7,7 +7,8 @@ import { Tooltip } from '../common/Tooltip';
 import { LoadingBar } from '../common/LoadingBar';
 import { FeedbackModal } from '../common/FeedbackModal';
 import logo from '../../assets/logo.png';
-import { databases, databaseId, wishlistsCollectionId } from '../../appwriteConfig';
+import { databases, databaseId, wishlistsCollectionId, usersCollectionId } from '../../appwriteConfig';
+import { account } from '../../appwriteConfig';
 import { Models, Query } from 'appwrite';
 
 interface WishlistDoc extends Models.Document {
@@ -37,6 +38,26 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
   const [searchResults, setSearchResults] = useState<WishlistDoc[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [registeredUsers, setRegisteredUsers] = useState<number | null>(null);
+  const [activeUsers, setActiveUsers] = useState<number | null>(null);
+  // Fetch registered and active users for login page
+  useEffect(() => {
+    if (showLoginButton && !user) {
+      // Registered users: count from users collection
+      databases.listDocuments(databaseId, usersCollectionId, []).then(res => {
+        setRegisteredUsers(res.total);
+      }).catch(() => setRegisteredUsers(null));
+      // Active users: count users with lastActive in last 10 minutes
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      databases.listDocuments(
+        databaseId,
+        usersCollectionId,
+        [Query.greaterThan('lastActive', tenMinutesAgo)]
+      ).then(res => {
+        setActiveUsers(res.total);
+      }).catch(() => setActiveUsers(null));
+    }
+  }, [showLoginButton, user]);
 
   const handleLogout = async () => {
     try {
@@ -103,11 +124,18 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
       <nav className="bg-white dark:bg-neutral-800 shadow-sm border-b border-neutral-200 dark:border-neutral-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-          <div className="flex items-center space-x-3">
-            <img src={logo} alt="wiSHlist Logo" className="w-8 h-8 rounded-lg" />
-            <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
-          </div>
-          <div className="flex items-center space-x-4 relative"> {/* Added relative for positioning dropdown */}
+            <div className="flex items-center space-x-3">
+              <img src={logo} alt="wiSHlist Logo" className="w-8 h-8 rounded-lg" />
+              <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
+            </div>
+            {/* Show user stats on login page only, not inside button area */}
+            {showLoginButton && !user && (
+              <div className="flex flex-col items-end mr-4">
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Registered users: {registeredUsers !== null ? registeredUsers : '...'}</span>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Active users: {activeUsers !== null ? activeUsers : '...'}</span>
+              </div>
+            )}
+            <div className="flex items-center space-x-4 relative"> {/* Added relative for positioning dropdown */}
             {showBackButton && user && (
               <Tooltip text="Back to Dashboard" position="bottom">
                 <button onClick={() => navigate('/dashboard')} className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700">

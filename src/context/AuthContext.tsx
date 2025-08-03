@@ -35,6 +35,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const currentUser = await account.get();
         setUser(currentUser);
+        // Update lastActive on session check
+        if (currentUser) {
+          try {
+            await databases.updateDocument(
+              databaseId,
+              usersCollectionId,
+              currentUser.$id,
+              { lastActive: new Date().toISOString() }
+            );
+          } catch (e) {
+            // Ignore update errors (e.g., permissions)
+          }
+        }
       } catch (error: any) {
         // Session expired or invalid - clear user state
         setUser(null);
@@ -49,6 +62,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const session = await account.createEmailPasswordSession(email, pass);
     const currentUser = await account.get();
     setUser(currentUser);
+    // Update lastActive on login
+    if (currentUser) {
+      try {
+        await databases.updateDocument(
+          databaseId,
+          usersCollectionId,
+          currentUser.$id,
+          { lastActive: new Date().toISOString() }
+        );
+      } catch (e) {
+        // Ignore update errors (e.g., permissions)
+      }
+    }
     return session;
   };
 
