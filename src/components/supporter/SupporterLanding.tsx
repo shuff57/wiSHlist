@@ -15,7 +15,7 @@ export const SupporterLanding: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
-      <Header title="Supporter" showSettingsButton={false} showSignoutButton={false} showInfoButton={true} />
+      <Header title="Supporter" showSettingsButton={false} showSignoutButton={false} showInfoButton={true} showLoginButton={true} />
       <div className="flex items-center justify-center p-4">
         <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md text-center">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">Classroom wiSHlist</h1>

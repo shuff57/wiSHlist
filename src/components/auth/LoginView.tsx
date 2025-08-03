@@ -73,7 +73,7 @@ export const LoginView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
-      <Header title="Login" showSettingsButton={false} showSignoutButton={false} showInfoButton={true} isLoading={loading} showLoginButton={true} />
+      <Header title="Login" showSettingsButton={false} showSignoutButton={false} showInfoButton={true} isLoading={loading} showLoginButton={false} />
       <div className="relative flex flex-col items-center justify-center p-4 w-full min-h-[calc(100vh-80px)]">
         {/* Centered login box */}
         <div className="z-10 bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md flex flex-col justify-center mx-auto">
