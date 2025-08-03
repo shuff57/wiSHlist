@@ -165,22 +165,24 @@ export const WishlistEditView: React.FC = () => {
 
   const handleDuplicateItem = async (item: Models.Document & ItemDoc) => {
     if (!wishlist) return;
+    console.log('Duplicating item:', item.name);
     try {
-      // Get the highest position to add the duplicate at the end
-      const maxPosition = Math.max(...items.map(i => i.position || 0), 0);
+      // Simple duplicate naming - just append (copy) each time to match wishlist duplication
+      const newName = `${item.name}(copy)`;
       
       const duplicatedItemDoc = await databases.createDocument(databaseId, itemsCollectionId, ID.unique(), {
         wishlist_id: wishlist.$id,
-        name: `${item.name} (Copy)`,
+        name: newName,
         description: item.description,
         store_link: item.store_link,
         cost: item.cost,
-        contributions: 0, // Reset contributions for the duplicate
-        position: maxPosition + 1
+        contributions: 0 // Reset contributions for the duplicate
       });
       setItems(prev => [...prev, duplicatedItemDoc as Models.Document & ItemDoc]);
+      console.log('Item duplicated successfully:', newName);
     } catch (error) {
       console.error('Error duplicating item:', error);
+      alert('Failed to duplicate item. Please try again.');
     }
   };
 
@@ -359,7 +361,7 @@ export const WishlistEditView: React.FC = () => {
                                       </Tooltip>
                                       <Tooltip text="Duplicate this item">
                                         <button onClick={() => handleDuplicateItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
-                                          <Copy className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                          <Copy className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                                         </button>
                                       </Tooltip>
                                       <Tooltip text="Delete this item">
