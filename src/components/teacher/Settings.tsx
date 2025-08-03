@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { account, databases, databaseId, usersCollectionId, invitesCollectionId, feedbackCollectionId, wishlistsCollectionId } from '../../appwriteConfig';
 import { useNavigate } from 'react-router-dom';
 import { Models, ID, Query } from 'appwrite';
-import { Save, User, UserPlus, Check, Search, Edit3, MessageSquare, CheckCircle, X, Trash2 } from 'lucide-react';
+import { Save, User, UserPlus, Check, Search, Edit3, MessageSquare, CheckCircle, X, Trash2, Copy } from 'lucide-react';
 import { LINK_EXPIRY_OPTIONS } from '../../constants';
 import { Header } from '../layout/Header';
 import { Tooltip } from '../common/Tooltip';
@@ -528,18 +528,19 @@ export const Settings: React.FC = () => {
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-neutral-800"
                                   >
                                     <option value="">Select a wishlist</option>
-                                    {wishlists.map((wishlist) => (
-                                      <option key={wishlist.$id} value={wishlist.wishlist_key}>
-                                        {wishlist.wishlist_name || wishlist.wishlist_key}
-                                      </option>
-                                    ))}
+                                  {wishlists.map((wishlist) => (
+                                    <option key={wishlist.$id} value={wishlist.wishlist_key}>
+                                      {wishlist.wishlist_name || wishlist.wishlist_key}
+                                    </option>
+                                  ))}
                                   </select>
                                   {selectedWishlist && (
                                     <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
                                       <WishlistPreview wishlistKey={selectedWishlist} editable={true} userName={name} />
                                     </div>
                                   )}
-                                </div>
+                </div>
+                {/* Removed dashboard wishlists list and empty div from settings page */}
                               </div>
                             )}
                           </div>

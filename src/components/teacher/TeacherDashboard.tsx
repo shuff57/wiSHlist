@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { databases, databaseId, wishlistsCollectionId, usersCollectionId, itemsCollectionId } from '../../appwriteConfig';
 import { useNavigate } from 'react-router-dom';
 import { Models, ID, Query } from 'appwrite';
-import { Plus, Check, Share2, Pencil, Trash2, X, GripVertical } from 'lucide-react';
+import { Plus, Check, Share2, Pencil, Trash2, X, GripVertical, Copy } from 'lucide-react';
 import { Header } from '../layout/Header';
 import { useAuth } from '../../context/AuthContext';
 import { Modal } from '../common/Modal';
@@ -394,6 +394,70 @@ export const TeacherDashboard: React.FC = () => {
                               >
                                 {copiedKey === wishlist.wishlist_key ? <Check className="w-4 h-4 mr-1" /> : <Share2 className="w-4 h-4 mr-1" />}
                                 {copiedKey === wishlist.wishlist_key ? 'Copied!' : 'Share List'}
+                              </button>
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    // Generate a new unique key for the duplicate
+                                    const newKey = `${wishlist.wishlist_key}-copy-${Math.random().toString(36).substring(2, 8)}`;
+                                    const newName = `${wishlist.wishlist_name || wishlist.wishlist_key} (Copy)`;
+                                    // Remove all keys starting with '$' from the wishlist object
+                                    const filtered = Object.fromEntries(
+                                      Object.entries(wishlist).filter(([key]) => !key.startsWith('$') && key !== 'wishlist_key' && key !== 'wishlist_name')
+                                    );
+                                    await databases.createDocument(
+                                      databaseId,
+                                      wishlistsCollectionId,
+                                      newKey,
+                                      {
+                                        ...filtered,
+                                        wishlist_key: newKey,
+                                        wishlist_name: newName,
+                                        teacher_id: user?.$id,
+                                        teacher_name: user?.name
+                                      }
+                                    );
+
+                                    // Duplicate all items from the original wishlist to the new wishlist
+                                    // Use 'wishlist_id' for the query, as 'wishlist_key' is not in the items schema
+                                    const itemsResponse = await databases.listDocuments(
+                                      databaseId,
+                                      itemsCollectionId,
+                                      [Query.equal('wishlist_id', wishlist.$id)]
+                                    );
+                                    for (const item of itemsResponse.documents) {
+                                      // Remove all keys starting with '$' and 'wishlist_key' from the item object
+                                      const itemFiltered = Object.fromEntries(
+                                        Object.entries(item).filter(([key]) => !key.startsWith('$') && key !== 'wishlist_id' && key !== 'wishlist_key')
+                                      );
+                                      await databases.createDocument(
+                                        databaseId,
+                                        itemsCollectionId,
+                                        ID.unique(),
+                                        {
+                                          ...itemFiltered,
+                                          wishlist_id: newKey
+                                        }
+                                      );
+                                    }
+
+                                    // Refresh wishlists
+                                    const response = await databases.listDocuments(
+                                      databaseId,
+                                      wishlistsCollectionId,
+                                      [Query.equal('teacher_id', user?.$id)]
+                                    );
+                                    setWishlists(response.documents as (Models.Document & WishlistDoc)[]);
+                                  } catch (err) {
+                                    alert('Failed to duplicate wishlist.');
+                                    console.error(err);
+                                  }
+                                }}
+                                className="p-2 text-sky-600 hover:bg-sky-100 dark:hover:bg-neutral-700 rounded-full"
+                                title="Duplicate wishlist"
+                              >
+                                <Copy className="w-5 h-5" />
                               </button>
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleDeleteWishlist(wishlist.$id); }}
