@@ -56,8 +56,6 @@ export const Settings: React.FC = () => {
   const [userDoc, setUserDoc] = useState<(Models.Document & UserDoc) | null>(null);
   const [name, setName] = useState('');
   // loading state moved above
-  const [saving, setSaving] = useState(false);
-  const [nameSaved, setNameSaved] = useState(false);
   
   // State from AdminDashboard
   const [linkExpiry, setLinkExpiry] = useState('24');
@@ -305,52 +303,6 @@ export const Settings: React.FC = () => {
       fetchFeedback();
     }
   }, [isRootAdmin, loading, fetchFeedback]);
-
-  const handleSaveChanges = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || name === user.name) return;
-    setSaving(true);
-
-    try {
-      await account.updateName(name);
-
-      // Update the user's document in the usersCollectionId
-      if (userDoc) {
-        await databases.updateDocument(
-          databaseId,
-          usersCollectionId,
-          userDoc.$id,
-          { name: name, name_lowercase: name.toLowerCase() }
-        );
-        setUserDoc(prev => prev ? { ...prev, name: name } : null);
-      }
-
-      // Update teacher_name in all wishlists associated with this user
-      if (user) {
-        const wishlistsResponse = await databases.listDocuments(
-          databaseId,
-          wishlistsCollectionId,
-          [Query.equal('teacher_id', user.$id)]
-        );
-
-
-        for (const wishlist of wishlistsResponse.documents) {
-
-          await databases.updateDocument(
-            databaseId,
-            wishlistsCollectionId,
-            wishlist.$id,
-            { teacher_name: name }
-          );
-        }
-      }
-    } catch (error) {
-    } finally {
-      setSaving(false);
-      setNameSaved(true);
-      setTimeout(() => setNameSaved(false), 1500);
-    }
-  };
 
   const toggleUserStatus = async (targetUser: Models.Document & UserDoc, field: 'isRecommender' | 'isAdmin') => {
     try {
