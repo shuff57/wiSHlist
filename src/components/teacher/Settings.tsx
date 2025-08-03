@@ -78,6 +78,7 @@ export const Settings: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [feedbackToDelete, setFeedbackToDelete] = useState<Models.Document | null>(null);
   const [showFeedbackManager, setShowFeedbackManager] = useState(false);
+  const [showPermissionManager, setShowPermissionManager] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   
@@ -625,9 +626,9 @@ export const Settings: React.FC = () => {
                             <h2 className="text-lg font-semibold">Manage User Permissions</h2>
                           </div>
                           <div className="space-y-4">
-                            {!showFeedbackManager ? (
+                            {!showPermissionManager ? (
                               <button
-                                onClick={() => setShowFeedbackManager(true)}
+                                onClick={() => setShowPermissionManager(true)}
                                 className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
                               >
                                 Open Permissions Manager
@@ -637,7 +638,7 @@ export const Settings: React.FC = () => {
                                 <div className="flex items-center justify-between">
                                   <h3 className="text-md font-medium">Permissions Manager</h3>
                                   <button
-                                    onClick={() => setShowFeedbackManager(false)}
+                                    onClick={() => setShowPermissionManager(false)}
                                     className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
                                   >
                                     Close Manager

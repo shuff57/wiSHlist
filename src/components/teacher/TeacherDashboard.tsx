@@ -418,7 +418,7 @@ export const TeacherDashboard: React.FC = () => {
                                     alert('Failed to duplicate wishlist.');
                                   }
                                 }}
-                                className="p-2 text-sky-600 hover:bg-sky-100 dark:hover:bg-neutral-700 rounded-full"
+                                className="p-2 text-sky-600 hover:bg-white dark:hover:bg-neutral-900 rounded-full"
                                 title="Duplicate wishlist"
                               >
                                 <Copy className="w-5 h-5" />

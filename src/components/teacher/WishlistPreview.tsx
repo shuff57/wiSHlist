@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { databases, databaseId, wishlistsCollectionId, itemsCollectionId } from '../../appwriteConfig';
 import { Models, Query } from 'appwrite';
-import { ExternalLink, Gift, CheckCircle, Grid, List, Pencil } from 'lucide-react';
+import { ExternalLink, Gift, CheckCircle, Grid, List, PencilLine } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 
 interface WishlistPreviewProps {
@@ -144,7 +144,7 @@ export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, e
                   }}
                   title="Edit heading"
                 >
-                  <Pencil className="h-5 w-5" />
+                  <PencilLine className="h-4 w-4" />
                 </button>
               )}
             </div>
@@ -177,7 +177,7 @@ export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, e
                   }}
                   title="Edit welcome message"
                 >
-                  <Pencil className="h-5 w-5" />
+                  <PencilLine className="h-4 w-4" />
                 </button>
               )}
             </div>
