@@ -497,15 +497,26 @@ export const Settings: React.FC = () => {
                             <h2 className="text-lg font-semibold">Supporter View</h2>
                           </div>
                           <div className="space-y-6">
-                            <button
-                              type="button"
-                              onClick={() => setShowPreview(!showPreview)}
-                              className="w-full flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white h-10 transition-colors duration-200 bg-sky-600 hover:bg-sky-800 disabled:bg-gray-400"
-                            >
-                              Open wiSHlist Preview
-                            </button>
+                            {!showPreview && (
+                              <button
+                                type="button"
+                                onClick={() => setShowPreview(true)}
+                                className="w-full flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white h-10 transition-colors duration-200 bg-sky-600 hover:bg-sky-800 disabled:bg-gray-400"
+                              >
+                                Open wiSHlist Preview
+                              </button>
+                            )}
                             {showPreview && (
                               <div className="mt-4 border-t pt-4">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-semibold text-md">wiSHlist Preview</span>
+                                  <button
+                                    onClick={() => setShowPreview(false)}
+                                    className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+                                  >
+                                    Close Preview
+                                  </button>
+                                </div>
                                 <div className="space-y-4">
                                   <select
                                     onChange={(e) => {
@@ -665,68 +676,90 @@ export const Settings: React.FC = () => {
                             <User className="w-5 h-5 mr-2 text-sky-600 dark:text-sky-400" />
                             <h2 className="text-lg font-semibold">Manage User Permissions</h2>
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Search below to find users you have invited and manage their permissions.
-                          </p>
-                          <div className="relative">
-                            <input
-                              type="text"
-                              value={searchQuery}
-                              onChange={(e) => setSearchQuery(e.target.value)}
-                              placeholder="Search for a teacher by name..."
-                              className="w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-                            />
-                            <Search className="absolute right-3 top-2.5 text-gray-400" />
-                          </div>
-                          <div className="mt-4">
-                            {!loadingSearch && (
+                          <div className="space-y-4">
+                            {!showFeedbackManager ? (
+                              <button
+                                onClick={() => setShowFeedbackManager(true)}
+                                className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                              >
+                                Open Permissions Manager
+                              </button>
+                            ) : (
                               <div className="space-y-4">
-                                {(() => {
-                                  const usersToShow = searchQuery.trim()
-                                    ? filteredSearchResults
-                                    : filteredSearchResults.filter(user => user.isAdmin || user.isRecommender);
-                                  return usersToShow.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                                      <p>No users found.</p>
-                                      <p className="text-sm mt-1">
-                                        {searchQuery.trim()
-                                          ? 'No users match your search.'
-                                          : 'No users with privileges yet. Use search to find and grant privileges to invited users.'}
-                                      </p>
+                                <div className="flex items-center justify-between">
+                                  <h3 className="text-md font-medium">Permissions Manager</h3>
+                                  <button
+                                    onClick={() => setShowFeedbackManager(false)}
+                                    className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+                                  >
+                                    Close Manager
+                                  </button>
+                                </div>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                  Search below to find users you have invited and manage their permissions.
+                                </p>
+                                <div className="relative">
+                                  <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search for a teacher by name..."
+                                    className="w-full px-3 py-2 border border-neutral-300 dark:border-gray-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+                                  />
+                                  <Search className="absolute right-3 top-2.5 text-gray-400" />
+                                </div>
+                                <div className="mt-4">
+                                  {!loadingSearch && (
+                                    <div className="space-y-4">
+                                      {(() => {
+                                        const usersToShow = searchQuery.trim()
+                                          ? filteredSearchResults
+                                          : filteredSearchResults.filter(user => user.isAdmin || user.isRecommender);
+                                        return usersToShow.length === 0 ? (
+                                          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                            <p>No users found.</p>
+                                            <p className="text-sm mt-1">
+                                              {searchQuery.trim()
+                                                ? 'No users match your search.'
+                                                : 'No users with privileges yet. Use search to find and grant privileges to invited users.'}
+                                            </p>
+                                          </div>
+                                        ) : (
+                                          usersToShow.map(foundUser => (
+                                            <div key={foundUser.$id} className="p-4 border rounded-md">
+                                              <div className="flex justify-between items-center">
+                                                <div>
+                                                  <p className="font-semibold">{foundUser.name}</p>
+                                                  <p className="text-sm text-gray-500 dark:text-gray-400">{foundUser.email}</p>
+                                                  {(foundUser.isAdmin || foundUser.isRecommender) && (
+                                                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                                      {foundUser.isAdmin && foundUser.isRecommender ? 'Admin & Recommender' :
+                                                       foundUser.isAdmin ? 'Admin' : 'Recommender'}
+                                                    </p>
+                                                  )}
+                                                </div>
+                                                <div className="flex items-center space-x-4">
+                                                  <div className="flex items-center space-x-2">
+                                                    <label className="text-sm font-medium">Recommender:</label>
+                                                    <button onClick={() => toggleUserStatus(foundUser, 'isRecommender')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isRecommender ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
+                                                      <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${foundUser.isRecommender ? 'translate-x-6' : 'translate-x-1'}`}/>
+                                                    </button>
+                                                  </div>
+                                                  <div className="flex items-center space-x-2">
+                                                    <label className="text-sm font-medium">Admin:</label>
+                                                    <button onClick={() => toggleUserStatus(foundUser, 'isAdmin')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isAdmin ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
+                                                      <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${foundUser.isAdmin ? 'translate-x-6' : 'translate-x-1'}`}/>
+                                                    </button>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          ))
+                                        );
+                                      })()}
                                     </div>
-                                  ) : (
-                                    usersToShow.map(foundUser => (
-                                      <div key={foundUser.$id} className="p-4 border rounded-md">
-                                        <div className="flex justify-between items-center">
-                                          <div>
-                                            <p className="font-semibold">{foundUser.name}</p>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">{foundUser.email}</p>
-                                            {(foundUser.isAdmin || foundUser.isRecommender) && (
-                                              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                                                {foundUser.isAdmin && foundUser.isRecommender ? 'Admin & Recommender' :
-                                                 foundUser.isAdmin ? 'Admin' : 'Recommender'}
-                                              </p>
-                                            )}
-                                          </div>
-                                          <div className="flex items-center space-x-4">
-                                            <div className="flex items-center space-x-2">
-                                              <label className="text-sm font-medium">Recommender:</label>
-                                              <button onClick={() => toggleUserStatus(foundUser, 'isRecommender')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isRecommender ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
-                                                <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${foundUser.isRecommender ? 'translate-x-6' : 'translate-x-1'}`}/>
-                                              </button>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                              <label className="text-sm font-medium">Admin:</label>
-                                              <button onClick={() => toggleUserStatus(foundUser, 'isAdmin')} className={`relative inline-flex items-center h-6 rounded-full w-11 ${foundUser.isAdmin ? 'bg-sky-600 hover:bg-sky-800' : 'bg-gray-300 hover:bg-gray-500'}`}>
-                                                <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${foundUser.isAdmin ? 'translate-x-6' : 'translate-x-1'}`}/>
-                                              </button>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))
-                                  );
-                                })()}
+                                  )}
+                                </div>
                               </div>
                             )}
                           </div>
