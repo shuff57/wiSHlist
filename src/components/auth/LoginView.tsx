@@ -4,6 +4,7 @@ import { AppwriteException, OAuthProvider } from 'appwrite';
 import { Header } from '../layout/Header';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { TeacherRegistrationInfo } from './TeacherRegistrationInfo';
 
 export const LoginView: React.FC = () => {
   const { ensureUserDocument } = useAuth();
@@ -73,19 +74,18 @@ export const LoginView: React.FC = () => {
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
       <Header title="Login" showSettingsButton={false} showSignoutButton={false} showInfoButton={true} isLoading={loading} showLoginButton={true} />
-      <div className="flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md">
+      <div className="relative flex flex-col items-center justify-center p-4 w-full min-h-[calc(100vh-80px)]">
+        {/* Centered login box */}
+        <div className="z-10 bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md flex flex-col justify-center mx-auto">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Classroom wiSHlist</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">Supporting your student's favorite teacher</p>
           </div>
-          
           {loginError && (
             <div className="bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg text-sm mb-4">
               {loginError}
             </div>
           )}
-
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -102,7 +102,6 @@ export const LoginView: React.FC = () => {
                 disabled={loading}
               />
             </div>
-            
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Password
@@ -118,7 +117,6 @@ export const LoginView: React.FC = () => {
                 disabled={loading}
               />
             </div>
-            
             <button
               type="submit"
               className="w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-700 transition duration-200 font-medium disabled:bg-gray-200 dark:disabled:bg-gray-500"
@@ -127,7 +125,6 @@ export const LoginView: React.FC = () => {
               {loading ? 'Signing in...' : 'Sign in with Email'}
             </button>
           </form>
-
           <div className="relative mt-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300 dark:border-gray-600" />
@@ -136,7 +133,6 @@ export const LoginView: React.FC = () => {
               <span className="px-2 bg-white dark:bg-neutral-800 text-gray-500 dark:text-gray-400">or</span>
             </div>
           </div>
-          
           <div className="mt-6">
             <button
               onClick={handleGoogleLogin}
@@ -151,10 +147,18 @@ export const LoginView: React.FC = () => {
               </svg>
               <span>{loading ? 'Processing...' : 'Sign in with Google'}</span>
             </button>
-            <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-              Are you a supporter? <Link to="/supporter" className="text-sky-600 hover:underline">Find a wiSHlist</Link>
-            </div>
+          <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+            Are you a supporter? <Link to="/supporter" className="text-sky-600 hover:underline">Find a wiSHlist</Link>
           </div>
+          <div className="mt-6">
+            <TeacherRegistrationInfo />
+          </div>
+          </div>
+        </div>
+        {/* Registration info now inside the sign-in box */}
+        {/* Show registration info below on mobile */}
+        <div className="flex md:hidden mt-6 w-full max-w-md">
+          <TeacherRegistrationInfo />
         </div>
       </div>
     </div>

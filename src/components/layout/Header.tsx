@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User, ClipboardEdit, AlertTriangle, ScrollText } from 'lucide-react';
+import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User, ClipboardEdit, ClipboardList, AlertTriangle, ScrollText } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Tooltip } from '../common/Tooltip';
@@ -124,17 +124,13 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
       <nav className="bg-white dark:bg-neutral-800 shadow-sm border-b border-neutral-200 dark:border-neutral-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-3">
-              <img src={logo} alt="wiSHlist Logo" className="w-8 h-8 rounded-lg" />
-              <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
-            </div>
-            {/* Show user stats on login page only, not inside button area */}
-            {showLoginButton && !user && (
-              <div className="flex flex-col items-end mr-4">
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Registered users: {registeredUsers !== null ? registeredUsers : '...'}</span>
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Active users: {activeUsers !== null ? activeUsers : '...'}</span>
+            <div className="flex items-center w-full">
+              <div className="flex items-center space-x-3 flex-1">
+                <img src={logo} alt="wiSHlist Logo" className="w-8 h-8 rounded-lg" />
+                <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
               </div>
-            )}
+              {/* Registration info box removed from header. Place next to login box in login page. */}
+            </div>
             <div className="flex items-center space-x-4 relative"> {/* Added relative for positioning dropdown */}
             {showBackButton && user && (
               <Tooltip text="Back to Dashboard" position="bottom">
@@ -237,6 +233,19 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
         </div>
       </div>
     </nav>
+    {/* User stats badges above the login box, not in header */}
+    {showLoginButton && !user && (
+      <div className="w-full flex justify-center mt-4 mb-2">
+        <div className="flex flex-row items-center space-x-4">
+          <span className="inline-flex items-center gap-1 text-sm font-bold text-blue-800 dark:text-blue-200 bg-blue-100 dark:bg-blue-900/60 px-3 py-1 rounded-md shadow-sm tracking-wide uppercase w-44 justify-center">
+            <ClipboardList className="w-4 h-4 mr-1 text-blue-700 dark:text-blue-200" /> Registered: <span className="ml-1 text-blue-900 dark:text-blue-100 text-lg font-extrabold">{registeredUsers !== null ? registeredUsers : '...'}</span>
+          </span>
+          <span className="inline-flex items-center gap-1 text-sm font-bold text-green-800 dark:text-green-200 bg-green-100 dark:bg-green-900/60 px-3 py-1 rounded-md shadow-sm tracking-wide uppercase w-44 justify-center">
+            <span className="text-base">🟢</span> Active: <span className="ml-1 text-green-900 dark:text-green-100 text-lg font-extrabold">{activeUsers !== null ? activeUsers : '...'}</span>
+          </span>
+        </div>
+      </div>
+    )}
     <FeedbackModal 
       isOpen={showFeedbackModal} 
       onClose={() => setShowFeedbackModal(false)} 

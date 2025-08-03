@@ -135,8 +135,8 @@ export const SupporterView: React.FC = () => {
        <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 flex flex-col items-center justify-center text-center p-4">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
         <p className="text-gray-700 dark:text-gray-300 mt-4">{error}</p>
-        <button onClick={() => navigate('/')} className="mt-6 bg-sky-600 text-white px-6 py-2 rounded-lg hover:bg-sky-800">
-          Back to Home
+        <button onClick={() => wishlistKey && navigate(`/wishlist/${wishlistKey}`)} className="mt-6 bg-sky-600 text-white px-6 py-2 rounded-lg hover:bg-sky-800">
+          Return to Wishlist
         </button>
       </div>
     );

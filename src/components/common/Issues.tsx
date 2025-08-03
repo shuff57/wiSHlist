@@ -52,9 +52,28 @@ export const Issues: React.FC = () => {
     fetchFeedback();
   }, [fetchFeedback]);
 
+  // Handler for supporter back button in header
+  const handleSupporterBack = () => {
+    const lastVisitedWishlist = sessionStorage.getItem('lastVisitedWishlist');
+    if (lastVisitedWishlist) {
+      navigate(`/wishlist/${lastVisitedWishlist}`);
+    } else {
+      navigate('/supporter');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
-      <Header title="Current Issues" showBackButton={!!user} onBack={handleBack} showSettingsButton={!!user} showInfoButton={true} isLoading={loadingFeedback} hideIssuesButton={true} showLoginButton={true} />
+      <Header
+        title="Current Issues"
+        showBackButton={!user}
+        onBack={handleSupporterBack}
+        showSettingsButton={!!user}
+        showInfoButton={true}
+        isLoading={loadingFeedback}
+        hideIssuesButton={true}
+        showLoginButton={true}
+      />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center">
