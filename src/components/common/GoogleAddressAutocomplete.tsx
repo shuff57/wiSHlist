@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { MapPin, School, Building, Navigation, NavigationOff, AlertCircle } from 'lucide-react';
 import { useGooglePlacesAutocomplete } from '../../hooks/useGooglePlacesAutocomplete';
 import { useGeolocation } from '../../hooks/useGeolocation';
@@ -41,6 +41,14 @@ export const GoogleAddressAutocomplete: React.FC<GoogleAddressAutocompleteProps>
     loading: locationLoading 
   } = useGeolocation();
   
+  // Memoize the options to prevent unnecessary re-renders
+  const placesOptions = useMemo(() => ({
+    userLatitude: latitude || undefined,
+    userLongitude: longitude || undefined,
+    types: preferSchools ? ['school'] : ['establishment'],
+    componentRestrictions: { country: 'us' }
+  }), [latitude, longitude, preferSchools]);
+  
   const { 
     suggestions, 
     loading, 
@@ -49,12 +57,7 @@ export const GoogleAddressAutocomplete: React.FC<GoogleAddressAutocompleteProps>
     parseAddress, 
     clearSuggestions,
     isConfigured
-  } = useGooglePlacesAutocomplete({
-    userLatitude: latitude || undefined,
-    userLongitude: longitude || undefined,
-    types: preferSchools ? ['school'] : ['establishment'],
-    componentRestrictions: { country: 'us' }
-  });
+  } = useGooglePlacesAutocomplete(placesOptions);
 
   useEffect(() => {
     if (query.length >= 3) {

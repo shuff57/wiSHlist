@@ -127,7 +127,12 @@ export const useGooglePlacesAutocomplete = (options: UseGooglePlacesOptions = {}
       }
       return [];
     }
-  }, [options]);
+  }, [
+    options.userLatitude,
+    options.userLongitude,
+    options.types?.join(','),
+    options.componentRestrictions?.country
+  ]);
 
   const getPlaceDetails = useCallback(async (placeId: string): Promise<PlaceDetails | null> => {
     try {

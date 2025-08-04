@@ -1,6 +1,6 @@
 {
-  "/page": "app/page.js",
   "/api/places/details/route": "app/api/places/details/route.js",
   "/api/places/autocomplete/route": "app/api/places/autocomplete/route.js",
+  "/page": "app/page.js",
   "/[...slug]/page": "app/[...slug]/page.js"
 }
