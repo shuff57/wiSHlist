@@ -3,6 +3,7 @@ import { databases, databaseId, wishlistsCollectionId, itemsCollectionId } from 
 import { Models, Query } from 'appwrite';
 import { ExternalLink, Gift, CheckCircle, Grid, List, PencilLine } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
+import { LoadingBar } from '../common/LoadingBar';
 
 interface WishlistPreviewProps {
   wishlistKey: string;
@@ -70,13 +71,10 @@ export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, e
     }
   }, [wishlistKey, fetchWishlistData]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   if (error) {
     return (
       <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 flex flex-col items-center justify-center text-center p-4">
+        <LoadingBar isLoading={loading} />
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
         <p className="text-gray-700 dark:text-gray-300 mt-4">{error}</p>
       </div>
@@ -116,6 +114,7 @@ export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, e
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
+      <LoadingBar isLoading={loading} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           {/* Editable Heading */}

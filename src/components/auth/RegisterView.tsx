@@ -4,6 +4,7 @@ import { account, databases, databaseId, invitesCollectionId, usersCollectionId 
 import { AppwriteException, ID, OAuthProvider } from 'appwrite';
 
 import { Header } from '../layout/Header';
+import { LoadingBar } from '../common/LoadingBar';
 import { useAuth } from '../../context/AuthContext';
 
 interface InviteDoc {
@@ -114,9 +115,12 @@ export const RegisterView: React.FC = () => {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md text-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Validating Invitation...</h1>
+      <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
+        <LoadingBar isLoading={true} />
+        <div className="flex items-center justify-center p-4 min-h-screen">
+          <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md text-center">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Validating Invitation...</h1>
+          </div>
         </div>
       </div>
     );

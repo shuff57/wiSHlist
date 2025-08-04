@@ -13,12 +13,5 @@ export default function SupporterPage() {
     }
   }, [])
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200">Loading...</h2>
-      </div>
-    </div>
-  )
+  return null // No loading screen, just redirect
 }
