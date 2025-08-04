@@ -17,6 +17,11 @@ interface WishlistDoc {
   contact_info?: string;
   title_text?: string;
   welcome_message?: string;
+  shipping_name?: string;
+  shipping_address?: string;
+  shipping_city?: string;
+  shipping_state?: string;
+  shipping_zip?: string;
 }
 
 
@@ -188,6 +193,18 @@ export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, e
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
               <strong>Contact:</strong> {wishlist.contact_info}
             </p>
+          )}
+          {wishlist?.shipping_address && (
+            <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <strong>Shipping Address:</strong>
+              <div className="ml-2 mt-1">
+                {wishlist.shipping_name && <div>{wishlist.shipping_name}</div>}
+                <div>{wishlist.shipping_address}</div>
+                <div>
+                  {wishlist.shipping_city}{wishlist.shipping_city && wishlist.shipping_state && ', '}{wishlist.shipping_state} {wishlist.shipping_zip}
+                </div>
+              </div>
+            </div>
           )}
         </div>
         

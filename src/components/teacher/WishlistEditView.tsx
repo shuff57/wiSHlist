@@ -6,6 +6,7 @@ import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save, Copy } from '
 import { ExternalLink } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
+import { GoogleAddressAutocomplete } from '../common/GoogleAddressAutocomplete';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useStrictDroppable } from '../../hooks/useStrictDroppable';
 
@@ -13,6 +14,11 @@ interface WishlistDoc {
   wishlist_name?: string;
   contact_info?: string;
   wishlist_key: string;
+  shipping_name?: string;
+  shipping_address?: string;
+  shipping_city?: string;
+  shipping_state?: string;
+  shipping_zip?: string;
 }
 
 interface ItemDoc {
@@ -37,7 +43,15 @@ export const WishlistEditView: React.FC = () => {
   const [wishlist, setWishlist] = useState<Models.Document & WishlistDoc | null>(null);
   const [items, setItems] = useState<(Models.Document & ItemDoc)[]>([]);
   const [suggestions, setSuggestions] = useState<(Models.Document & SuggestionDoc)[]>([]);
-  const [formData, setFormData] = useState({ wishlist_name: '', contact_info: '' });
+  const [formData, setFormData] = useState({ 
+    wishlist_name: '', 
+    contact_info: '',
+    shipping_name: '',
+    shipping_address: '',
+    shipping_city: '',
+    shipping_state: '',
+    shipping_zip: ''
+  });
   const [newItem, setNewItem] = useState({ name: '', description: '', store_link: '', cost: '' });
   const [loading, setLoading] = useState(true);
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
@@ -65,7 +79,12 @@ export const WishlistEditView: React.FC = () => {
       setWishlist(wishlistDoc as unknown as Models.Document & WishlistDoc);
       setFormData({
         wishlist_name: wishlistDoc.wishlist_name || '',
-        contact_info: wishlistDoc.contact_info || ''
+        contact_info: wishlistDoc.contact_info || '',
+        shipping_name: wishlistDoc.shipping_name || '',
+        shipping_address: wishlistDoc.shipping_address || '',
+        shipping_city: wishlistDoc.shipping_city || '',
+        shipping_state: wishlistDoc.shipping_state || '',
+        shipping_zip: wishlistDoc.shipping_zip || ''
       });
 
       const itemsResponse = await databases.listDocuments(databaseId, itemsCollectionId, [Query.equal('wishlist_id', id)]);
@@ -470,6 +489,91 @@ export const WishlistEditView: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Info</label>
                 <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              </div>
+              
+              {/* Shipping Address Section */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Shipping Address</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search School or Address</label>
+                    <GoogleAddressAutocomplete
+                      placeholder="Type school name or address..."
+                      preferSchools={true}
+                      onAddressSelect={(address: {
+                        name: string;
+                        address: string;
+                        city: string;
+                        state: string;
+                        zip: string;
+                        phone?: string;
+                        website?: string;
+                      }) => {
+                        setFormData({
+                          ...formData,
+                          shipping_name: address.name || formData.shipping_name,
+                          shipping_address: address.address,
+                          shipping_city: address.city,
+                          shipping_state: address.state,
+                          shipping_zip: address.zip
+                        });
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                    <input 
+                      type="text" 
+                      value={formData.shipping_name} 
+                      onChange={e => setFormData({...formData, shipping_name: e.target.value})} 
+                      placeholder="Full name for delivery"
+                      className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
+                    <input 
+                      type="text" 
+                      value={formData.shipping_address} 
+                      onChange={e => setFormData({...formData, shipping_address: e.target.value})} 
+                      placeholder="Street address"
+                      className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" 
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">City</label>
+                      <input 
+                        type="text" 
+                        value={formData.shipping_city} 
+                        onChange={e => setFormData({...formData, shipping_city: e.target.value})} 
+                        placeholder="City"
+                        className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" 
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">State</label>
+                      <input 
+                        type="text" 
+                        value={formData.shipping_state} 
+                        onChange={e => setFormData({...formData, shipping_state: e.target.value})} 
+                        placeholder="State"
+                        className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" 
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ZIP Code</label>
+                    <input 
+                      type="text" 
+                      value={formData.shipping_zip} 
+                      onChange={e => setFormData({...formData, shipping_zip: e.target.value})} 
+                      placeholder="ZIP code"
+                      className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" 
+                    />
+                  </div>
+                </div>
               </div>
               <div>
                 <button type="submit" className="mt-1 w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 dark:hover:bg-sky-800 flex items-center justify-center">
