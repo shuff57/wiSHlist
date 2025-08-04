@@ -6,7 +6,6 @@ import { useAuth } from '../../context/AuthContext';
 import { Tooltip } from '../common/Tooltip';
 import { LoadingBar } from '../common/LoadingBar';
 import { FeedbackModal } from '../common/FeedbackModal';
-import logo from '../../assets/logo.png';
 import { databases, databaseId, wishlistsCollectionId, usersCollectionId } from '../../appwriteConfig';
 import { Models, Query } from 'appwrite';
 
@@ -126,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center w-full">
               <div className="flex items-center space-x-3 flex-1">
-                <img src={logo} alt="wiSHlist Logo" className="w-8 h-8 rounded-lg" />
+                <img src="/logo.png" alt="wiSHlist Logo" className="w-8 h-8 rounded-lg" />
                 <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
               </div>
               {/* Search in header for all screen sizes */}

@@ -59,7 +59,7 @@ export const LoginView: React.FC = () => {
       // Now create new OAuth session with unique success URL to force new flow
       await account.createOAuth2Session(
         OAuthProvider.Google,
-        `${window.location.origin}/dashboard?auth_time=${Date.now()}`,
+        `${window.location.origin}/?redirect=dashboard&auth_time=${Date.now()}`,
         `${window.location.origin}/`
       );
     } catch (error) {

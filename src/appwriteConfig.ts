@@ -2,12 +2,13 @@ import { Client, Account, Databases } from 'appwrite';
 
 export const client = new Client();
 
-const endpoint = process.env.REACT_APP_APPWRITE_ENDPOINT;
-const projectId = process.env.REACT_APP_APPWRITE_PROJECT_ID;
+// Support both Next.js and React environment variables
+const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || process.env.REACT_APP_APPWRITE_ENDPOINT;
+const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || process.env.REACT_APP_APPWRITE_PROJECT_ID;
 
 
 if (!endpoint || !projectId) {
-    throw new Error('Missing Appwrite configuration. Please check your .env file and ensure REACT_APP_APPWRITE_ENDPOINT and REACT_APP_APPWRITE_PROJECT_ID are set.');
+    throw new Error('Missing Appwrite configuration. Please check your .env file and ensure APPWRITE_ENDPOINT and APPWRITE_PROJECT_ID are set.');
 }
 
 try {
