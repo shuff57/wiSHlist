@@ -6,6 +6,7 @@ import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save, Copy } from '
 import { ExternalLink } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
+import dynamic from 'next/dynamic';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { useStrictDroppable } from '../../hooks/useStrictDroppable';
 
@@ -45,7 +46,13 @@ export const WishlistEditView: React.FC = () => {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [enabled] = useStrictDroppable(loading);
+  const [isClient, setIsClient] = useState(false);
   const navigate = useNavigate();
+
+  // Ensure client-side rendering for drag-and-drop
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleCopy = (textToCopy: string, type: 'key' | 'link') => {
     navigator.clipboard.writeText(textToCopy);
@@ -303,7 +310,7 @@ export const WishlistEditView: React.FC = () => {
               </div>
             </div>
             <DragDropContext onDragEnd={onDragEnd}>
-              {enabled && (
+              {enabled && isClient && (
                 <Droppable droppableId="wishlist-items">
                   {(provided) => (
                     <div {...provided.droppableProps} ref={provided.innerRef} className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
@@ -381,6 +388,73 @@ export const WishlistEditView: React.FC = () => {
                     </div>
                   )}
                 </Droppable>
+              )}
+              {/* Fallback rendering when drag-and-drop is not available */}
+              {(!enabled || !isClient) && (
+                <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+                  {items.map((item, index) => (
+                    <div
+                      key={item.$id}
+                      className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 flex flex-col justify-between transition-colors duration-200 group"
+                    >
+                      {editingItemId === item.$id ? (
+                        <form onSubmit={handleUpdateItem} className="space-y-4">
+                          <input type="text" name="name" value={editedItemData?.name || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, name: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" required />
+                          <textarea name="description" value={editedItemData?.description || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, description: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                          <input type="url" name="store_link" value={editedItemData?.store_link || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, store_link: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                          <input type="text" name="cost" value={editedItemData?.cost || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, cost: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                          <div className="flex space-x-2">
+                            <button type="submit" className="flex-grow bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 dark:hover:bg-green-900">Save</button>
+                            <button type="button" onClick={handleCancelEdit} className="flex-grow bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">Cancel</button>
+                          </div>
+                        </form>
+                      ) : (
+                        <>
+                          <div className="flex items-center">
+                            <div className="flex-grow">
+                              <div className="flex gap-3 items-start">
+                                <div className="flex-grow">
+                                  <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{item.name}</h4>
+                                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{item.description}</p>
+                                  {item.cost && <span className="text-green-600 font-medium text-lg">{item.cost}</span>}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end space-y-2 ml-4">
+                              {item.store_link && (
+                                <Tooltip text="View this item">
+                                  <a
+                                    href={item.store_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer"
+                                  >
+                                    <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                  </a>
+                                </Tooltip>
+                              )}
+                              <Tooltip text="Edit this item">
+                                <button onClick={() => handleEditItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                  <Pencil className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                </button>
+                              </Tooltip>
+                              <Tooltip text="Duplicate this item">
+                                <button onClick={() => handleDuplicateItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                  <Copy className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                </button>
+                              </Tooltip>
+                              <Tooltip text="Delete this item">
+                                <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                  <Trash2 className="w-5 h-5 text-red-600" />
+                                </button>
+                              </Tooltip>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
             </DragDropContext>
           </div>
