@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
             wishlistsCollectionId,
             [Query.equal('wishlist_key', wishlistKeyInput.trim())]
           );
-          setSearchResults(response.documents as WishlistDoc[]);
+          setSearchResults(response.documents as unknown as WishlistDoc[]);
         } catch (error) {
           console.error("Error searching wishlists:", error);
           setSearchResults([]);

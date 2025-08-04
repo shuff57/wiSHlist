@@ -15,6 +15,8 @@ interface WishlistDoc {
   teacher_name: string;
   wishlist_name?: string;
   contact_info?: string;
+  title_text?: string;
+  welcome_message?: string;
 }
 
 
@@ -47,14 +49,14 @@ export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, e
         [Query.equal('wishlist_key', processedKey)]
       );
       if (response.documents.length > 0) {
-        const foundWishlist = response.documents[0] as Models.Document & WishlistDoc;
+        const foundWishlist = response.documents[0] as unknown as Models.Document & WishlistDoc;
         setWishlist(foundWishlist);
         const itemsResponse = await databases.listDocuments(
           databaseId,
           itemsCollectionId,
           [Query.equal('wishlist_id', foundWishlist.$id)]
         );
-        setItems(itemsResponse.documents as (Models.Document & ItemDoc)[]);
+        setItems(itemsResponse.documents as unknown as (Models.Document & ItemDoc)[]);
       } else {
         setError('No wishlist found with that key. Please check the key and try again.');
       }
@@ -103,7 +105,7 @@ export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, e
           welcome_message: editingField === 'welcome' ? tempWelcome : wishlist.welcome_message,
         }
       );
-      setWishlist(updatedDoc as Models.Document & WishlistDoc);
+      setWishlist(updatedDoc as unknown as Models.Document & WishlistDoc);
       setEditingField(null);
     } catch (err) {
       alert('Failed to save. Please try again.');

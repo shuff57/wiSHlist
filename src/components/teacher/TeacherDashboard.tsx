@@ -7,7 +7,7 @@ import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
 import { useAuth } from '../../context/AuthContext';
 import { Modal } from '../common/Modal';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useStrictDroppable } from '../../hooks/useStrictDroppable';
 
 interface WishlistDoc {
@@ -109,12 +109,12 @@ export const TeacherDashboard: React.FC = () => {
     }
 
     if (doc) {
-        setUserDoc(doc as Models.Document & UserDoc);
+        setUserDoc(doc as unknown as Models.Document & UserDoc);
         try {
             const response = await databases.listDocuments(
                 databaseId, wishlistsCollectionId, [Query.equal('teacher_id', userId)]
             );
-            setWishlists(response.documents as (Models.Document & WishlistDoc)[]);
+            setWishlists(response.documents as unknown as (Models.Document & WishlistDoc)[]);
         } catch (error) {
         }
     } else {
@@ -128,14 +128,14 @@ export const TeacherDashboard: React.FC = () => {
             $databaseId: databaseId,
             isRecommender: false,
             isAdmin: false
-        } as Models.Document & UserDoc);
+        } as unknown as Models.Document & UserDoc);
         
         // Still try to fetch wishlists
         try {
             const response = await databases.listDocuments(
                 databaseId, wishlistsCollectionId, [Query.equal('teacher_id', userId)]
             );
-            setWishlists(response.documents as (Models.Document & WishlistDoc)[]);
+            setWishlists(response.documents as unknown as (Models.Document & WishlistDoc)[]);
         } catch (error) {
             setWishlists([]);
         }
@@ -188,7 +188,7 @@ export const TeacherDashboard: React.FC = () => {
           wishlist_name: `${user.name}'s New wiSHlist`
         }
       );
-      setWishlists(prev => [...prev, newWishlist as Models.Document & WishlistDoc]);
+      setWishlists(prev => [...prev, newWishlist as unknown as Models.Document & WishlistDoc]);
     } catch (error) {
     }
   };
@@ -217,7 +217,7 @@ export const TeacherDashboard: React.FC = () => {
         wishlistId,
         { wishlist_name: newWishlistName }
       );
-      setWishlists(prev => prev.map(w => w.$id === wishlistId ? updatedWishlist as Models.Document & WishlistDoc : w));
+      setWishlists(prev => prev.map(w => w.$id === wishlistId ? updatedWishlist as unknown as Models.Document & WishlistDoc : w));
       handleCancelEdit();
     } catch (error) {
     }
@@ -424,7 +424,7 @@ export const TeacherDashboard: React.FC = () => {
                                         wishlistsCollectionId,
                                         [Query.equal('teacher_id', user?.$id)]
                                       );
-                                      setWishlists(response.documents as (Models.Document & WishlistDoc)[]);
+                                      setWishlists(response.documents as unknown as (Models.Document & WishlistDoc)[]);
                                     } catch (err) {
                                       alert('Failed to duplicate wishlist.');
                                     }

@@ -6,8 +6,18 @@ import { Header } from '../layout/Header';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
+interface FeedbackDoc extends Models.Document {
+  status: string;
+  category: string;
+  description?: string;
+  message?: string;
+  username?: string;
+  name?: string;
+  email?: string;
+}
+
 export const Issues: React.FC = () => {
-  const [feedback, setFeedback] = useState<Models.Document[]>([]);
+  const [feedback, setFeedback] = useState<FeedbackDoc[]>([]);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -21,7 +31,7 @@ export const Issues: React.FC = () => {
     setLoadingFeedback(true);
     try {
       const response = await databases.listDocuments(databaseId, feedbackCollectionId);
-      setFeedback(response.documents);
+      setFeedback(response.documents as unknown as FeedbackDoc[]);
     } catch (error) {
       console.error('Error fetching feedback:', error);
     } finally {

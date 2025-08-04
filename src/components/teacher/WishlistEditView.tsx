@@ -6,8 +6,7 @@ import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save, Copy } from '
 import { ExternalLink } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
-import dynamic from 'next/dynamic';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useStrictDroppable } from '../../hooks/useStrictDroppable';
 
 interface WishlistDoc {
@@ -63,17 +62,17 @@ export const WishlistEditView: React.FC = () => {
   const fetchWishlistData = useCallback(async (id: string) => {
     try {
       const wishlistDoc = await databases.getDocument(databaseId, wishlistsCollectionId, id);
-      setWishlist(wishlistDoc as Models.Document & WishlistDoc);
+      setWishlist(wishlistDoc as unknown as Models.Document & WishlistDoc);
       setFormData({
         wishlist_name: wishlistDoc.wishlist_name || '',
         contact_info: wishlistDoc.contact_info || ''
       });
 
       const itemsResponse = await databases.listDocuments(databaseId, itemsCollectionId, [Query.equal('wishlist_id', id)]);
-      setItems(itemsResponse.documents as (Models.Document & ItemDoc)[]);
+      setItems(itemsResponse.documents as unknown as (Models.Document & ItemDoc)[]);
 
       const suggestionsResponse = await databases.listDocuments(databaseId, suggestionsCollectionId, [Query.equal('wishlist_id', id)]);
-      setSuggestions(suggestionsResponse.documents as (Models.Document & SuggestionDoc)[]);
+      setSuggestions(suggestionsResponse.documents as unknown as (Models.Document & SuggestionDoc)[]);
 
       sessionStorage.setItem('lastVisitedWishlist', wishlistDoc.wishlist_key);
     } catch (error) {
@@ -125,7 +124,7 @@ export const WishlistEditView: React.FC = () => {
         ...newItem,
         contributions: 0
       });
-      setItems(prev => [...prev, newItemDoc as Models.Document & ItemDoc]);
+      setItems(prev => [...prev, newItemDoc as unknown as Models.Document & ItemDoc]);
       setNewItem({ name: '', description: '', store_link: '', cost: '' });
     } catch (error) {
     }
@@ -156,7 +155,7 @@ export const WishlistEditView: React.FC = () => {
           cost: editedItemData.cost,
         }
       );
-      setItems(prev => prev.map(i => i.$id === editingItemId ? updatedItem as Models.Document & ItemDoc : i));
+      setItems(prev => prev.map(i => i.$id === editingItemId ? updatedItem as unknown as Models.Document & ItemDoc : i));
       handleCancelEdit();
     } catch (error) {
     }
@@ -185,7 +184,7 @@ export const WishlistEditView: React.FC = () => {
         cost: item.cost,
         contributions: 0 // Reset contributions for the duplicate
       });
-      setItems(prev => [...prev, duplicatedItemDoc as Models.Document & ItemDoc]);
+      setItems(prev => [...prev, duplicatedItemDoc as unknown as Models.Document & ItemDoc]);
       console.log('Item duplicated successfully:', newName);
     } catch (error) {
       console.error('Error duplicating item:', error);
@@ -204,7 +203,7 @@ export const WishlistEditView: React.FC = () => {
         cost: suggestion.estimatedCost,
         contributions: 0
       });
-      setItems(prev => [...prev, newItemDoc as Models.Document & ItemDoc]);
+      setItems(prev => [...prev, newItemDoc as unknown as Models.Document & ItemDoc]);
       await databases.deleteDocument(databaseId, suggestionsCollectionId, suggestion.$id);
       setSuggestions(prev => prev.filter(s => s.$id !== suggestion.$id));
     } catch (error) {

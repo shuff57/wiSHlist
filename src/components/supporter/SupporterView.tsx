@@ -51,14 +51,14 @@ export const SupporterView: React.FC = () => {
       );
       
       if (response.documents.length > 0) {
-        const foundWishlist = response.documents[0] as Models.Document & WishlistDoc;
+        const foundWishlist = response.documents[0] as unknown as Models.Document & WishlistDoc;
         setWishlist(foundWishlist);
         const itemsResponse = await databases.listDocuments(
           databaseId,
           itemsCollectionId,
           [Query.equal('wishlist_id', foundWishlist.$id)]
         );
-        setItems(itemsResponse.documents as (Models.Document & ItemDoc)[]);
+        setItems(itemsResponse.documents as unknown as (Models.Document & ItemDoc)[]);
         sessionStorage.setItem('lastVisitedWishlist', processedKey);
       } else {
         setError('No wishlist found with that key. Please check the key and try again.');

@@ -7,7 +7,7 @@ import { Header } from '../layout/Header';
 import { Tooltip } from '../common/Tooltip';
 import { EditableAboutView } from '../auth/EditableAboutView';
 import { WishlistPreview } from './WishlistPreview';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { GripVertical } from 'lucide-react';
 import { useStrictDroppable } from '../../hooks/useStrictDroppable';
 
@@ -18,6 +18,21 @@ interface UserDoc {
   isRecommender: boolean;
   isAdmin: boolean;
   userID?: string; // ID of the admin who invited this user
+}
+
+interface FeedbackDoc extends Models.Document {
+  status: string;
+  category: string;
+  description?: string;
+  message?: string;
+  username?: string;
+  name?: string;
+  email?: string;
+}
+
+interface WishlistDoc extends Models.Document {
+  wishlist_key: string;
+  wishlist_name?: string;
 }
 
 const FEEDBACK_CATEGORIES = [
@@ -70,17 +85,17 @@ export const Settings: React.FC = () => {
   const [loadingSearch, setLoadingSearch] = useState(false);
   
   // Feedback Manager State
-  const [feedback, setFeedback] = useState<Models.Document[]>([]);
+  const [feedback, setFeedback] = useState<FeedbackDoc[]>([]);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [feedbackToDelete, setFeedbackToDelete] = useState<Models.Document | null>(null);
+  const [feedbackToDelete, setFeedbackToDelete] = useState<FeedbackDoc | null>(null);
   const [showFeedbackManager, setShowFeedbackManager] = useState(false);
   const [showPermissionManager, setShowPermissionManager] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   
   const [showPreview, setShowPreview] = useState(false);
-  const [wishlists, setWishlists] = useState<Models.Document[]>([]);
+  const [wishlists, setWishlists] = useState<WishlistDoc[]>([]);
   const [selectedWishlist, setSelectedWishlist] = useState<string | null>(null);
   
   const navigate = useNavigate();
@@ -115,12 +130,12 @@ export const Settings: React.FC = () => {
                   isRecommender: true
                 }
               );
-              setUserDoc(updatedDoc as Models.Document & UserDoc);
+              setUserDoc(updatedDoc as unknown as Models.Document & UserDoc);
             } catch (updateError) {
-              setUserDoc(doc as Models.Document & UserDoc);
+              setUserDoc(doc as unknown as Models.Document & UserDoc);
             }
           } else {
-            setUserDoc(doc as Models.Document & UserDoc);
+            setUserDoc(doc as unknown as Models.Document & UserDoc);
           }
           
           if ((doc as any).isAdmin || (doc as any).isRecommender || isMrHuff) {
@@ -149,7 +164,7 @@ export const Settings: React.FC = () => {
                 // Note: No userID field for Mr. Huff since he's the main admin
               }
             );
-            setUserDoc(newDoc as Models.Document & UserDoc);
+            setUserDoc(newDoc as unknown as Models.Document & UserDoc);
             
             if (isMrHuff) {
             }
@@ -159,7 +174,7 @@ export const Settings: React.FC = () => {
             setTimeout(async () => {
               try {
                 const existingDoc = await databases.getDocument(databaseId, usersCollectionId, loggedInUser.$id);
-                setUserDoc(existingDoc as Models.Document & UserDoc);
+                setUserDoc(existingDoc as unknown as Models.Document & UserDoc);
               } catch (fetchError) {
                 // Set default userDoc values as fallback, but give Mr. Huff admin privileges
                 setUserDoc({
@@ -209,7 +224,7 @@ export const Settings: React.FC = () => {
           usersCollectionId,
           queries
         );
-        setSearchResults(response.documents as (Models.Document & UserDoc)[]);
+        setSearchResults(response.documents as unknown as (Models.Document & UserDoc)[]);
       } catch (error) {
       } finally {
         setLoadingSearch(false);
@@ -232,7 +247,7 @@ export const Settings: React.FC = () => {
             wishlistsCollectionId,
             [Query.equal('teacher_id', user.$id)]
           );
-          setWishlists(response.documents);
+          setWishlists(response.documents as unknown as WishlistDoc[]);
         } catch (error) {
         }
       }
@@ -247,7 +262,7 @@ export const Settings: React.FC = () => {
     setLoadingFeedback(true);
     try {
       const response = await databases.listDocuments(databaseId, feedbackCollectionId);
-      setFeedback(response.documents);
+      setFeedback(response.documents as unknown as FeedbackDoc[]);
     } catch (error) {
     } finally {
       setLoadingFeedback(false);
@@ -336,7 +351,7 @@ export const Settings: React.FC = () => {
             isAdmin: newIsAdmin,
             isRecommender: newIsRecommender
           }
-        ) as Models.Document & UserDoc;
+        ) as unknown as Models.Document & UserDoc;
           //
       } catch (updateError) {
         
@@ -355,7 +370,7 @@ export const Settings: React.FC = () => {
               name_lowercase: targetUser.name.toLowerCase(),
               userID: user?.$id // Track who created this user
             }
-          ) as Models.Document & UserDoc;
+          ) as unknown as Models.Document & UserDoc;
             //
         } catch (createError) {
           throw createError;

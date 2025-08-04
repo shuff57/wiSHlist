@@ -1,21 +1,14 @@
 import { useEffect, useState } from 'react';
 
+// This hook is no longer needed with @dnd-kit, but keeping for backward compatibility
+// @hello-pangea/dnd handles strict mode better than react-beautiful-dnd
 export const useStrictDroppable = (loading: boolean) => {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState(true); // Always enabled with @dnd-kit
 
   useEffect(() => {
-    let animationFrame: number;
-
     if (!loading) {
-      animationFrame = requestAnimationFrame(() => {
-        setEnabled(true);
-      });
+      setEnabled(true);
     }
-
-    return () => {
-      cancelAnimationFrame(animationFrame);
-      setEnabled(false);
-    };
   }, [loading]);
 
   return [enabled];
