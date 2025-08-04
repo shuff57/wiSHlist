@@ -1,10 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function SupporterPage() {
-  const router = useRouter()
   
   useEffect(() => {
     // Redirect to your existing React app's supporter route

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useNavigate } from 'react-router-dom';
 import { Sun, Moon, Settings as SettingsIcon, Home, LogOut, Search, Info, User, ClipboardEdit, ClipboardList, AlertTriangle, ScrollText, Menu } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -125,7 +126,7 @@ export const Header: React.FC<HeaderProps> = ({ title, showBackButton = false, o
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center w-full">
               <div className="flex items-center space-x-3 flex-1">
-                <img src="/logo.png" alt="wiSHlist Logo" className="w-8 h-8 rounded-lg" />
+                <Image src="/logo.png" alt="wiSHlist Logo" width={32} height={32} className="w-8 h-8 rounded-lg" />
                 <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">{title}</h1>
               </div>
               {/* Search in header for all screen sizes */}

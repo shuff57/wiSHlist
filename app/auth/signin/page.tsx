@@ -2,6 +2,7 @@
 
 import { signIn, getProviders } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 export default function SignIn() {
   const [providers, setProviders] = useState<any>(null)
@@ -36,12 +37,12 @@ export default function SignIn() {
             ))}
         </div>
         <div className="text-center">
-          <a
+          <Link
             href="/supporter"
             className="text-blue-600 hover:text-blue-500 text-sm"
           >
             Continue without signing in
-          </a>
+          </Link>
         </div>
       </div>
     </div>

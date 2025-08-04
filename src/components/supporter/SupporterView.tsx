@@ -147,7 +147,7 @@ export const SupporterView: React.FC = () => {
       <Header title="wiSHlist" showSettingsButton={false} showSignoutButton={false} showSearch={true} showInfoButton={true} isLoading={loading} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Help {wishlist?.teacher_name}'s Students Learn & Grow</h2>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Help {wishlist?.teacher_name}&apos;s Students Learn & Grow</h2>
           <p className="text-gray-600 dark:text-gray-400">Your contributions make a real difference in our classroom. Thank you for supporting education!</p>
           {wishlist?.contact_info && (
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">

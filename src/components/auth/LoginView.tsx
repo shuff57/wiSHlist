@@ -93,7 +93,7 @@ export const LoginView: React.FC = () => {
         <div className="z-10 bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md flex flex-col justify-center mx-auto">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Classroom wiSHlist</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">Supporting your student's favorite teacher</p>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Supporting your student&apos;s favorite teacher</p>
           </div>
           {loginError && (
             <div className="bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg text-sm mb-4">

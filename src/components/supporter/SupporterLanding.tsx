@@ -19,7 +19,7 @@ export const SupporterLanding: React.FC = () => {
       <div className="flex items-center justify-center p-4">
         <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-8 w-full max-w-md text-center">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">Classroom wiSHlist</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">Enter a teacher's wiSHlist key to view their list.</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">Enter a teacher&apos;s wiSHlist key to view their list.</p>
           
           <form onSubmit={handleSubmit}>
             <input
