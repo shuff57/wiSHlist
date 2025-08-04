@@ -1,2 +1,12 @@
 node_modules
 .env
+.env.local
+.env.production
+.env.development
+
+# Next.js build output
+.next/
+out/
+
+# Appwrite cache
+.appwrite/
