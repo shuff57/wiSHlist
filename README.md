@@ -2,6 +2,8 @@
 
 A modern, user-friendly wishlist application designed specifically for teachers to create and share classroom supply wishlists with supporters. Built with React, TypeScript, and Appwrite.
 
+<!-- Deployment trigger -->
+
 ## 📖 Overview
 
 wiSHlist empowers educators to create organized wishlists of classroom supplies and materials, making it easy for parents, community members, and supporters to contribute to student success. Teachers can manage their wishlists with drag-and-drop functionality, while supporters can view and purchase items through a clean, responsive interface.
