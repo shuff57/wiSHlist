@@ -12,6 +12,7 @@ import { SupporterLanding } from './components/supporter/SupporterLanding';
 import { SupporterView } from './components/supporter/SupporterView';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 import { Issues } from './components/common/Issues';
 import { LoadingBar } from './components/common/LoadingBar';
 import { useNavigationProgress } from './hooks/useNavigationProgress';
@@ -21,16 +22,34 @@ const AppContent: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isNavigating = useNavigationProgress();
+  const { ensureUserDocument } = useAuth();
   
   useEffect(() => {
     const redirectTo = searchParams.get('redirect');
-    if (redirectTo) {
+    const authTime = searchParams.get('auth_time');
+    
+    if (redirectTo && authTime) {
+      // This is an OAuth callback - validate user access
+      const validateAndRedirect = async () => {
+        try {
+          await ensureUserDocument();
+          // If validation succeeds, redirect to dashboard
+          navigate(`/${redirectTo}`);
+        } catch (error) {
+          // If validation fails, redirect to login with error
+          navigate('/?error=access_denied');
+        }
+      };
+      
       // Small delay to ensure authentication state is updated
+      setTimeout(validateAndRedirect, 500);
+    } else if (redirectTo) {
+      // Regular redirect without OAuth validation
       setTimeout(() => {
         navigate(`/${redirectTo}`);
       }, 100);
     }
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, ensureUserDocument]);
   
   return (
     <>

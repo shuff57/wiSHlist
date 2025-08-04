@@ -6,6 +6,7 @@ import { AppwriteException, ID, OAuthProvider } from 'appwrite';
 import { Header } from '../layout/Header';
 import { LoadingBar } from '../common/LoadingBar';
 import { useAuth } from '../../context/AuthContext';
+import { forceAccountSelector } from '../../utils/googleAuth';
 
 interface InviteDoc {
   isRecommender: boolean;
@@ -100,6 +101,10 @@ export const RegisterView: React.FC = () => {
       // Ensure no active session
       try { await account.deleteSession('current'); } catch {}
       
+      // Force Google account selector to appear
+      await forceAccountSelector();
+      
+      // Create OAuth session with account selector
       account.createOAuth2Session(OAuthProvider.Google, `${window.location.origin}/dashboard`, `${window.location.origin}/`);
     } catch (error) {
       setErrorMessage('Could not start Google registration.');

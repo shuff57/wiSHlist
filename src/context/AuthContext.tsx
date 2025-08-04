@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { account, databases, databaseId, usersCollectionId } from '../appwriteConfig';
 import { Models } from 'appwrite';
+import { clearGoogleSession } from '../utils/googleAuth';
 
 interface AuthContextType {
   user: Models.User<Models.Preferences> | null;
@@ -85,6 +86,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // If the session is already invalid or user is already logged out, 
       // we don't need to throw an error - just proceed with cleanup
     } finally {
+      // Clear Google session as well to ensure clean logout
+      try {
+        await clearGoogleSession();
+      } catch (error) {
+        // Ignore Google session clear errors
+      }
       // Always clear the user state regardless of whether deleteSession succeeded
       setUser(null);
     }
@@ -108,13 +115,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Try to fetch existing document first
       try {
         await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
-        return;
+        return; // User exists in database, allow access
       } catch (error: any) {
         
-        // Check if this is Mr. Huff (the main admin)
+        // Check if this is Mr. Huff (the main admin) - only allow him to auto-register
         const isMrHuff = currentUser.name.toLowerCase().includes('huff') || 
                         currentUser.email.toLowerCase().includes('huff');
         
+        if (!isMrHuff) {
+          // User not found in database and is not Mr. Huff - deny access
+          await account.deleteSession('current'); // Log them out
+          throw new Error('Access denied. You must be invited to use this application.');
+        }
+
+        // Only create document for Mr. Huff
         try {
           await databases.createDocument(
             databaseId,
@@ -124,8 +138,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               name: currentUser.name,
               email: currentUser.email,
               role: 'teacher',
-              isRecommender: isMrHuff, // Mr. Huff gets privileges
-              isAdmin: isMrHuff,       // Mr. Huff is always admin
+              isRecommender: true, // Mr. Huff gets privileges
+              isAdmin: true,       // Mr. Huff is always admin
               name_lowercase: currentUser.name.toLowerCase()
               // Note: userID field only set when invited by someone
             }
@@ -138,11 +152,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
             } catch (retryError: any) {
               // This indicates a permissions issue - the document exists but user can't read it
+              await account.deleteSession('current');
+              throw new Error('Access denied. You must be invited to use this application.');
             }
+          } else {
+            // Failed to create document for Mr. Huff
+            await account.deleteSession('current');
+            throw new Error('Failed to initialize user account.');
           }
         }
       }
     } catch (error) {
+      // Re-throw the error so it can be handled by the caller
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Authentication failed.');
     }
   };
 

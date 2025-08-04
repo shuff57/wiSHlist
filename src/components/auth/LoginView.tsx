@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { account } from '../../appwriteConfig';
 import { AppwriteException, OAuthProvider } from 'appwrite';
 import { Header } from '../layout/Header';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { TeacherRegistrationInfo } from './TeacherRegistrationInfo';
+import { forceAccountSelector } from '../../utils/googleAuth';
 
 export const LoginView: React.FC = () => {
   const { ensureUserDocument } = useAuth();
@@ -13,6 +14,16 @@ export const LoginView: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Check for access denied error from OAuth callback
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === 'access_denied') {
+      setLoginError('Access denied. You must be invited to use this application.');
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +41,7 @@ export const LoginView: React.FC = () => {
       // Create email session
       await account.createEmailPasswordSession(email, password);
       
-      // Ensure user document exists
+      // Ensure user document exists - this will throw error if user not authorized
       await ensureUserDocument();
       
       // Redirect to dashboard
@@ -38,6 +49,8 @@ export const LoginView: React.FC = () => {
     } catch (error) {
       console.error('Email login error:', error);
       if (error instanceof AppwriteException) {
+        setLoginError(error.message);
+      } else if (error instanceof Error) {
         setLoginError(error.message);
       } else {
         setLoginError('An unexpected error occurred during login.');
@@ -55,13 +68,29 @@ export const LoginView: React.FC = () => {
       } catch (e) {
         // Ignore error if no session exists
       }
+
+      // Clear Google session by navigating to Google logout URL first
+      // This forces the account selector to appear
+      const googleLogoutUrl = 'https://accounts.google.com/logout';
       
-      // Now create new OAuth session with unique success URL to force new flow
-      await account.createOAuth2Session(
-        OAuthProvider.Google,
-        `${window.location.origin}/?redirect=dashboard&auth_time=${Date.now()}`,
-        `${window.location.origin}/`
-      );
+      // Open Google logout in a hidden iframe to clear the session
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = googleLogoutUrl;
+      document.body.appendChild(iframe);
+      
+      // Wait a moment for logout to process, then remove iframe
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+        
+        // Now create new OAuth session - this should show account selector
+        account.createOAuth2Session(
+          OAuthProvider.Google,
+          `${window.location.origin}/?redirect=dashboard&auth_time=${Date.now()}`,
+          `${window.location.origin}/`
+        );
+      }, 1000);
+      
     } catch (error) {
       if (error instanceof AppwriteException) {
         setLoginError(error.message);
@@ -161,12 +190,12 @@ export const LoginView: React.FC = () => {
               </svg>
               <span>{loading ? 'Processing...' : 'Sign in with Google'}</span>
             </button>
+          </div>
           <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
             Are you a supporter? <Link to="/supporter" className="text-sky-600 hover:underline">Find a wiSHlist</Link>
           </div>
           <div className="mt-6">
             <TeacherRegistrationInfo />
-          </div>
           </div>
         </div>
         {/* Registration info now inside the sign-in box */}
