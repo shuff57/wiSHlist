@@ -1,5 +1,5 @@
 {
-  "projectId": "688189ad000ad6dd9410",
+  "projectId": "686d7df60026eca1ebb0",
   "sites": [
     {
       "name": "wishlist-app",
@@ -9,14 +9,14 @@
         "branch": "main"
       },
       "buildSettings": {
-        "framework": "react",
-        "outputDirectory": "build",
+        "framework": "nextjs",
+        "outputDirectory": ".next",
         "installCommand": "npm install",
         "buildCommand": "npm run build"
       },
       "environmentVariables": {
-        "REACT_APP_APPWRITE_ENDPOINT": "https://cloud.appwrite.io/v1",
-        "REACT_APP_APPWRITE_PROJECT_ID": "688189ad000ad6dd9410"
+        "NEXT_PUBLIC_APPWRITE_ENDPOINT": "https://app.huffpalmer.fyi/v1",
+        "NEXT_PUBLIC_APPWRITE_PROJECT_ID": "686d7df60026eca1ebb0"
       }
     }
   ]
