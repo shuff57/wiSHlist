@@ -2,15 +2,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, ID, Query } from 'appwrite';
-import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save, Copy } from 'lucide-react';
+import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save, Copy, Plus, Zap, Edit } from 'lucide-react';
 import { ExternalLink } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
 import { GoogleAddressAutocomplete } from '../common/GoogleAddressAutocomplete';
 import { UrlPreview } from '../common/UrlPreview';
+import { ItemCard } from '../common/ItemCard';
 import { useUrlPreview } from '../../hooks/useUrlPreview';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useStrictDroppable } from '../../hooks/useStrictDroppable';
+import { AddItemManual } from './AddItemManual';
+import { AddItemAuto } from './AddItemAuto';
 
 interface WishlistDoc {
   wishlist_name?: string;
@@ -81,7 +84,6 @@ export const WishlistEditView: React.FC = () => {
     shipping_state: '',
     shipping_zip: ''
   });
-  const [newItem, setNewItem] = useState({ name: '', description: '', store_link: '', cost: '' });
   const [loading, setLoading] = useState(true);
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const [editedItemData, setEditedItemData] = useState<ItemDoc | null>(null);
@@ -90,8 +92,10 @@ export const WishlistEditView: React.FC = () => {
   const [enabled] = useStrictDroppable(loading);
   const [isClient, setIsClient] = useState(false);
   
-  // URL Preview functionality
-  const newItemPreview = useUrlPreview();
+  // Add Item Mode - 'manual' or 'auto'
+  const [addItemMode, setAddItemMode] = useState<'manual' | 'auto'>('auto');
+  
+  // URL Preview functionality for editing items
   const editItemPreview = useUrlPreview();
   const [urlPreviewTimeout, setUrlPreviewTimeout] = useState<NodeJS.Timeout | null>(null);
   
@@ -174,57 +178,21 @@ export const WishlistEditView: React.FC = () => {
   };
 
   const handleItemFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setNewItem(prev => ({ ...prev, [name]: value }));
-    
-    // Auto-preview URL when store_link changes
-    if (name === 'store_link' && value.trim()) {
-      // Clear existing timeout
-      if (urlPreviewTimeout) {
-        clearTimeout(urlPreviewTimeout);
-      }
-      
-      // Set new timeout to preview URL after user stops typing
-      const timeout = setTimeout(() => {
-        if (value.trim().startsWith('http')) {
-          newItemPreview.previewUrl(value.trim());
-        }
-      }, 1000); // Wait 1 second after user stops typing
-      
-      setUrlPreviewTimeout(timeout);
-    } else if (name === 'store_link' && !value.trim()) {
-      // Clear preview if URL is removed
-      newItemPreview.clearPreview();
-      if (urlPreviewTimeout) {
-        clearTimeout(urlPreviewTimeout);
-      }
-    }
+    // Removed - now handled by individual components
   };
 
   // Handle applying scraped data to form
   const handleApplyPreviewData = (previewData: any) => {
-    setNewItem(prev => ({
-      ...prev,
-      name: previewData.title || prev.name,
-      description: previewData.description || prev.description,
-      cost: previewData.price || prev.cost
-    }));
+    // Removed - now handled by AddItemAuto component
   };
 
   const handleAddItem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!wishlist) return;
-    try {
-      const newItemDoc = await databases.createDocument(databaseId, itemsCollectionId, ID.unique(), {
-        wishlist_id: wishlist.$id,
-        ...newItem,
-        contributions: 0
-      });
-      setItems(prev => [...prev, newItemDoc as unknown as Models.Document & ItemDoc]);
-      setNewItem({ name: '', description: '', store_link: '', cost: '' });
-      newItemPreview.clearPreview(); // Clear preview when form is reset
-    } catch (error) {
-    }
+    // Removed - now handled by individual components
+  };
+
+  // Handle item added callback
+  const handleItemAdded = (newItem: Models.Document & ItemDoc) => {
+    setItems(prev => [...prev, newItem]);
   };
 
   const handleEditItem = (item: Models.Document & ItemDoc) => {
@@ -377,48 +345,44 @@ export const WishlistEditView: React.FC = () => {
       <Header title="Manage wiSHlist" showBackButton={true} showInfoButton={true} isLoading={loading} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
-          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Add New Item</h3>
-            <form onSubmit={handleAddItem} className="space-y-4">
-              <input type="text" name="name" placeholder="Item Name" value={newItem.name} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" required />
-              <textarea name="description" placeholder="Description" value={newItem.description} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" />
-              <div className="space-y-2">
-                <input type="url" name="store_link" placeholder="Store Link (paste Amazon, Best Buy, etc.)" value={newItem.store_link} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-                
-                {/* URL Preview for new item */}
-                {(newItemPreview.loading || newItemPreview.data || newItemPreview.error) && (
-                  <div className="space-y-2">
-                    <UrlPreview 
-                      data={newItemPreview.data}
-                      loading={newItemPreview.loading}
-                      error={newItemPreview.error}
-                      onRetry={() => newItemPreview.previewUrl(newItem.store_link)}
-                    />
-                    {newItemPreview.data && (
-                      <div className="flex space-x-2">
-                        <button 
-                          type="button"
-                          onClick={() => handleApplyPreviewData(newItemPreview.data)}
-                          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-                        >
-                          Use This Info
-                        </button>
-                        <button 
-                          type="button"
-                          onClick={newItemPreview.clearPreview}
-                          className="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        >
-                          Dismiss
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              <input type="text" name="cost" placeholder="Cost (e.g., $12.99)" value={newItem.cost} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-              <button type="submit" className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 dark:hover:bg-green-900">Add to wiSHlist</button>
-            </form>
+        <div className="space-y-6">
+          {/* Add Item Mode Selector */}
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow">
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-200 dark:border-neutral-700">
+              <button
+                onClick={() => setAddItemMode('auto')}
+                className={`flex-1 flex items-center justify-center space-x-2 py-4 px-6 text-sm font-medium transition-colors ${
+                  addItemMode === 'auto'
+                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                <Zap size={18} />
+                <span>Auto (URL)</span>
+              </button>
+              <button
+                onClick={() => setAddItemMode('manual')}
+                className={`flex-1 flex items-center justify-center space-x-2 py-4 px-6 text-sm font-medium transition-colors ${
+                  addItemMode === 'manual'
+                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                <Edit size={18} />
+                <span>Manual</span>
+              </button>
+            </div>
           </div>
+
+          {/* Tab Content */}
+          {addItemMode === 'auto' && wishlist && (
+            <AddItemAuto wishlist={wishlist} onItemAdded={handleItemAdded} />
+          )}
+          {addItemMode === 'manual' && wishlist && (
+            <AddItemManual wishlist={wishlist} onItemAdded={handleItemAdded} />
+          )}
+        </div>
 
           {suggestions.length > 0 && (
             <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
@@ -543,20 +507,7 @@ export const WishlistEditView: React.FC = () => {
                                       <GripVertical className="w-5 h-5 text-black dark:text-white" />
                                     </div>
                                     <div className="flex-grow">
-                                      <div className="flex gap-3 items-start">
-                                        <div className="flex-grow">
-                                          <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{item.name}</h4>
-                                          <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{item.description}</p>
-                                          {item.cost && <span className="text-green-600 font-medium text-lg">{item.cost}</span>}
-                                          
-                                          {/* Show URL preview for items with store links */}
-                                          {item.store_link && item.store_link.trim().startsWith('http') && (
-                                            <div className="mt-3">
-                                              <ItemUrlPreview url={item.store_link} />
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
+                                      <ItemCard item={item} showUrlPreview={true} />
                                     </div>
                                     <div className="flex flex-col items-end space-y-2 ml-4">
                                       {item.store_link && (

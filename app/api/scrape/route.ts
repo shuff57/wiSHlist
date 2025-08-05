@@ -110,7 +110,8 @@ async function saveCacheEntry(entry: CacheEntry): Promise<void> {
       productId: entry.productId,
       metadata: JSON.stringify(entry.metadata),
       timestamp: entry.timestamp,
-      hitCount: entry.hitCount
+      hitCount: entry.hitCount,
+      image_url: entry.metadata.image || null // Save the image URL from metadata
     }
 
     if (entry.$id) {
