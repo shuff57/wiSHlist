@@ -22,6 +22,7 @@ interface ItemDoc {
   description?: string;
   store_link?: string;
   cost?: string;
+  image_url?: string;
   contributions: number;
 }
 
@@ -205,49 +206,133 @@ export const SupporterView: React.FC = () => {
           </div>
           <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
             {items.length > 0 ? items.map(item => (
-              <div key={item.$id} className="bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between w-full">
-                <div>
-                  <div className="mb-3">
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">{item.name}</h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">{item.description}</p>
+              <div key={item.$id} className={`bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between w-full ${viewMode === 'grid' ? 'min-h-[220px]' : 'min-h-[180px]'}`}>
+                {viewMode === 'grid' ? (
+                  // Grid view with same structure as list view
+                  <div className="flex flex-col h-full min-h-[220px]">
+                    {/* Centered image */}
+                    <div className="flex items-center justify-center flex-grow px-4 py-2">
+                      {item.image_url ? (
+                        <img 
+                          src={item.image_url} 
+                          alt={item.name}
+                          className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg"
+                          style={{ maxHeight: '150px', maxWidth: '200px' }}
+                        />
+                      ) : (
+                        <div className="w-32 h-32 flex items-center justify-center text-gray-400 dark:text-gray-600">
+                          <Gift className="w-16 h-16" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Bottom action bar with price/purchase and contributions/bought buttons */}
+                    <div className="flex items-end justify-between pt-2">
+                      {/* Price and Purchase button */}
+                      <div className="flex flex-col items-start space-y-2">
+                        {item.cost ? (
+                          <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>
+                        ) : (
+                          <span className="text-gray-400 text-sm">No price</span>
+                        )}
+                        <Tooltip text="Opens in a new tab">
+                          <a
+                            href={item.store_link || '#'}
+                            target={item.store_link ? "_blank" : undefined}
+                            rel={item.store_link ? "noopener noreferrer" : undefined}
+                            className={`${item.store_link ? 'bg-green-600 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'} text-white px-4 py-2 rounded-lg transition duration-200 flex items-center justify-center text-sm font-medium`}
+                          >
+                            <span className="hidden xs:inline">Purchase</span> <ExternalLink className="w-4 h-4 xs:ml-2" />
+                          </a>
+                        </Tooltip>
+                      </div>
+                      
+                      {/* Contributions and I bought this button */}
+                      <div className="flex flex-col items-end space-y-2">
+                        <span className="text-blue-600 dark:text-blue-400 flex items-center text-sm">
+                          <Gift className="w-4 h-4 mr-1" />
+                          {item.contributions} contributions
+                        </span>
+                        <Tooltip text="Let the teacher know you've purchased this item">
+                          <button
+                            onClick={() => handleMarkContribution(item)}
+                            className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
+                          >
+                            <CheckCircle className="w-4 h-4 xs:mr-2" />
+                            <span className="hidden xs:inline">I bought this</span>
+                          </button>
+                        </Tooltip>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="mt-4 w-full">
-                  <div className="flex items-center justify-between mb-4">
-                    {item.cost && <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>}
-                    <span className="text-blue-600 dark:text-blue-400 flex items-center text-sm">
-                      <Gift className="w-4 h-4 mr-1" />
-                      {item.contributions} contributions
-                    </span>
-                  </div>
-                  <div className="flex gap-2 w-full justify-between">
-                    <div className="flex-none">
-                      <Tooltip text="Opens in a new tab">
-                        <a
-                          href={item.store_link || '#'}
-                          target={item.store_link ? "_blank" : undefined}
-                          rel={item.store_link ? "noopener noreferrer" : undefined}
-                          className={`${item.store_link ? 'bg-green-600 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'} text-white px-12 xs:px-6 py-2 rounded-lg transition duration-200 flex items-center justify-center text-sm font-medium`}
-                        >
-                          <span className="hidden xs:inline">Purchase</span> <ExternalLink className="w-4 h-4 xs:ml-2" />
-                        </a>
-                      </Tooltip>
+                ) : (
+                  // List view - centered content with bottom action bar
+                  <div className="flex flex-col h-full min-h-[180px]">
+                    {/* Centered image and item details */}
+                    <div className="flex items-center justify-center flex-grow py-4">
+                      {/* Image */}
+                      <div className="flex-shrink-0 mr-6 w-24 h-24">
+                        {item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.name}
+                            className="w-full h-full object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
+                            <Gift className="w-12 h-12 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      {/* Item details */}
+                      <div className="text-left">
+                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">{item.name}</h3>
+                        {item.description && (
+                          <p className="text-base text-gray-600 dark:text-gray-400">{item.description}</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-none">
-                      <Tooltip text="Let the teacher know you've purchased this item">
-                        <button
-                          onClick={() => handleMarkContribution(item)}
-                          className="bg-sky-600 text-white px-12 xs:px-6 py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
-                        >
-                          <CheckCircle className="w-4 h-4 xs:mr-2" />
-                          <span className="hidden xs:inline">I bought this</span>
-                        </button>
-                      </Tooltip>
+                    
+                    {/* Bottom action bar with price/purchase and contributions/bought buttons */}
+                    <div className="flex items-end justify-between pt-4">
+                      {/* Price and Purchase button */}
+                      <div className="flex flex-col items-start space-y-2">
+                        {item.cost ? (
+                          <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>
+                        ) : (
+                          <span className="text-gray-400 text-sm">No price</span>
+                        )}
+                        <Tooltip text="Opens in a new tab">
+                          <a
+                            href={item.store_link || '#'}
+                            target={item.store_link ? "_blank" : undefined}
+                            rel={item.store_link ? "noopener noreferrer" : undefined}
+                            className={`${item.store_link ? 'bg-green-600 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'} text-white px-4 py-2 rounded-lg transition duration-200 flex items-center justify-center text-sm font-medium`}
+                          >
+                            <span className="hidden xs:inline">Purchase</span> <ExternalLink className="w-4 h-4 xs:ml-2" />
+                          </a>
+                        </Tooltip>
+                      </div>
+                      
+                      {/* Contributions and I bought this button */}
+                      <div className="flex flex-col items-end space-y-2">
+                        <span className="text-blue-600 dark:text-blue-400 flex items-center text-sm">
+                          <Gift className="w-4 h-4 mr-1" />
+                          {item.contributions} contributions
+                        </span>
+                        <Tooltip text="Let the teacher know you've purchased this item">
+                          <button
+                            onClick={() => handleMarkContribution(item)}
+                            className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
+                          >
+                            <CheckCircle className="w-4 h-4 xs:mr-2" />
+                            <span className="hidden xs:inline">I bought this</span>
+                          </button>
+                        </Tooltip>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             )) : (
               <div className="text-center py-10 bg-white dark:bg-neutral-800 rounded-lg shadow">

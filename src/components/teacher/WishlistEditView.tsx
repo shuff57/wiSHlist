@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { account, databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, ID, Query } from 'appwrite';
-import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save, Copy, Plus, Zap, Edit } from 'lucide-react';
+import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save, Copy, Plus, Zap, Edit, Gift } from 'lucide-react';
 import { ExternalLink } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
@@ -31,6 +31,7 @@ interface ItemDoc {
   description?: string;
   store_link?: string;
   cost?: string;
+  image_url?: string;
   contributions: number;
   position: number;
 }
@@ -506,43 +507,131 @@ export const WishlistEditView: React.FC = () => {
                                 </form>
                               ) : (
                                 <>
-                                  <div className="flex items-center">
-                                    <div {...provided.dragHandleProps} className="p-2 cursor-grab active:cursor-grabbing">
-                                      <GripVertical className="w-5 h-5 text-black dark:text-white" />
-                                    </div>
-                                    <div className="flex-grow">
-                                      <ItemCard item={item} showUrlPreview={true} />
-                                    </div>
-                                    <div className="flex flex-col items-end space-y-2 ml-4">
-                                      {item.store_link && (
-                                        <Tooltip text="View this item">
-                                          <a
-                                            href={item.store_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer"
-                                          >
-                                            <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                                          </a>
+                                  {viewMode === 'grid' ? (
+                                    // Compact grid view - all elements inline (drag handle, image, actions)
+                                    <div className="flex items-center space-x-3">
+                                      {/* Drag handle on left - vertically centered */}
+                                      <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing">
+                                        <GripVertical className="w-5 h-5 text-black dark:text-white" />
+                                      </div>
+                                      
+                                      {/* Image and price in center */}
+                                      <div className="flex-grow">
+                                        <div className="aspect-square mb-3 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                                          {item.image_url ? (
+                                            <img 
+                                              src={item.image_url} 
+                                              alt={item.name}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
+                                              <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                              </svg>
+                                            </div>
+                                          )}
+                                        </div>
+                                        
+                                        {/* Price centered below image */}
+                                        <div className="text-center">
+                                          <span className="text-xl font-semibold text-green-600 dark:text-green-400">
+                                            {item.cost || 'No price'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Action buttons on right */}
+                                      <div className="flex flex-col space-y-1">
+                                        {item.store_link && (
+                                          <Tooltip text="View this item">
+                                            <a
+                                              href={item.store_link}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer"
+                                            >
+                                              <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                            </a>
+                                          </Tooltip>
+                                        )}
+                                        <Tooltip text="Edit this item">
+                                          <button onClick={() => handleEditItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                            <Pencil className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                          </button>
                                         </Tooltip>
-                                      )}
-                                      <Tooltip text="Edit this item">
-                                        <button onClick={() => handleEditItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
-                                          <Pencil className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                                        </button>
-                                      </Tooltip>
-                                      <Tooltip text="Duplicate this item">
-                                        <button onClick={() => handleDuplicateItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
-                                          <Copy className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                                        </button>
-                                      </Tooltip>
-                                      <Tooltip text="Delete this item">
-                                        <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
-                                          <Trash2 className="w-5 h-5 text-red-600" />
-                                        </button>
-                                      </Tooltip>
+                                        <Tooltip text="Duplicate this item">
+                                          <button onClick={() => handleDuplicateItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                            <Copy className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                          </button>
+                                        </Tooltip>
+                                        <Tooltip text="Delete this item">
+                                          <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                            <Trash2 className="w-5 h-5 text-red-600" />
+                                          </button>
+                                        </Tooltip>
+                                      </div>
                                     </div>
-                                  </div>
+                                  ) : (
+                                    // List view - item details inline with drag handle and actions
+                                    <div className="flex items-center">
+                                      <div {...provided.dragHandleProps} className="p-2 cursor-grab active:cursor-grabbing">
+                                        <GripVertical className="w-5 h-5 text-black dark:text-white" />
+                                      </div>
+                                      {/* Image */}
+                                      <div className="flex-shrink-0 mr-3">
+                                        {item.image_url ? (
+                                          <img
+                                            src={item.image_url}
+                                            alt={item.name}
+                                            className="w-12 h-12 object-cover rounded"
+                                          />
+                                        ) : (
+                                          <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
+                                            <Gift className="w-6 h-6 text-gray-400" />
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="flex-grow px-3">
+                                        <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{item.name}</h4>
+                                        {item.description && (
+                                          <p className="text-gray-600 dark:text-gray-400 text-sm mb-1">{item.description}</p>
+                                        )}
+                                        {item.cost && (
+                                          <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>
+                                        )}
+                                      </div>
+                                      <div className="flex flex-col items-end space-y-2 ml-4">
+                                        {item.store_link && (
+                                          <Tooltip text="View this item">
+                                            <a
+                                              href={item.store_link}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer"
+                                            >
+                                              <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                            </a>
+                                          </Tooltip>
+                                        )}
+                                        <Tooltip text="Edit this item">
+                                          <button onClick={() => handleEditItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                            <Pencil className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                          </button>
+                                        </Tooltip>
+                                        <Tooltip text="Duplicate this item">
+                                          <button onClick={() => handleDuplicateItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                            <Copy className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                          </button>
+                                        </Tooltip>
+                                        <Tooltip text="Delete this item">
+                                          <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                            <Trash2 className="w-5 h-5 text-red-600" />
+                                          </button>
+                                        </Tooltip>
+                                      </div>
+                                    </div>
+                                  )}
                                 </>
                               )}
                             </div>
@@ -607,53 +696,109 @@ export const WishlistEditView: React.FC = () => {
                         </form>
                       ) : (
                         <>
-                          <div className="flex items-center">
-                            <div className="flex-grow">
-                              <div className="flex gap-3 items-start">
-                                <div className="flex-grow">
-                                  <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{item.name}</h4>
-                                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{item.description}</p>
-                                  {item.cost && <span className="text-green-600 font-medium text-lg">{item.cost}</span>}
-                                  
-                                  {/* Show URL preview for items with store links */}
-                                  {item.store_link && item.store_link.trim().startsWith('http') && (
-                                    <div className="mt-3">
-                                      <ItemUrlPreview url={item.store_link} />
+                          {viewMode === 'grid' ? (
+                            // Compact grid view - all elements inline (image and actions only, no drag handle)
+                            <div className="flex items-start space-x-3">
+                              {/* Image and price in center */}
+                              <div className="flex-grow">
+                                <div className="aspect-square mb-3 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                                  {item.image_url ? (
+                                    <img 
+                                      src={item.image_url} 
+                                      alt={item.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
+                                      <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                      </svg>
                                     </div>
                                   )}
                                 </div>
+                                
+                                {/* Price centered below image */}
+                                <div className="text-center">
+                                  <span className="text-xl font-semibold text-green-600 dark:text-green-400">
+                                    {item.cost || 'No price'}
+                                  </span>
+                                </div>
+                              </div>
+                              
+                              {/* Action buttons on right */}
+                              <div className="flex flex-col space-y-1">
+                                {item.store_link && (
+                                  <Tooltip text="View this item">
+                                    <a
+                                      href={item.store_link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer"
+                                    >
+                                      <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                    </a>
+                                  </Tooltip>
+                                )}
+                                <Tooltip text="Edit this item">
+                                  <button onClick={() => handleEditItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                    <Pencil className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                  </button>
+                                </Tooltip>
+                                <Tooltip text="Duplicate this item">
+                                  <button onClick={() => handleDuplicateItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                    <Copy className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                  </button>
+                                </Tooltip>
+                                <Tooltip text="Delete this item">
+                                  <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                    <Trash2 className="w-5 h-5 text-red-600" />
+                                  </button>
+                                </Tooltip>
                               </div>
                             </div>
-                            <div className="flex flex-col items-end space-y-2 ml-4">
-                              {item.store_link && (
-                                <Tooltip text="View this item">
-                                  <a
-                                    href={item.store_link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer"
-                                  >
-                                    <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                                  </a>
+                          ) : (
+                            // List view - item details inline with actions (no drag handle)
+                            <div className="flex items-center">
+                              <div className="flex-grow px-3">
+                                <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{item.name}</h4>
+                                {item.description && (
+                                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-1">{item.description}</p>
+                                )}
+                                {item.cost && (
+                                  <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>
+                                )}
+                              </div>
+                              <div className="flex flex-col items-end space-y-2 ml-4">
+                                {item.store_link && (
+                                  <Tooltip text="View this item">
+                                    <a
+                                      href={item.store_link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer"
+                                    >
+                                      <ExternalLink className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                    </a>
+                                  </Tooltip>
+                                )}
+                                <Tooltip text="Edit this item">
+                                  <button onClick={() => handleEditItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                    <Pencil className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                  </button>
                                 </Tooltip>
-                              )}
-                              <Tooltip text="Edit this item">
-                                <button onClick={() => handleEditItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
-                                  <Pencil className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                                </button>
-                              </Tooltip>
-                              <Tooltip text="Duplicate this item">
-                                <button onClick={() => handleDuplicateItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
-                                  <Copy className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                                </button>
-                              </Tooltip>
-                              <Tooltip text="Delete this item">
-                                <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
-                                  <Trash2 className="w-5 h-5 text-red-600" />
-                                </button>
-                              </Tooltip>
+                                <Tooltip text="Duplicate this item">
+                                  <button onClick={() => handleDuplicateItem(item)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                    <Copy className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                  </button>
+                                </Tooltip>
+                                <Tooltip text="Delete this item">
+                                  <button onClick={() => handleDeleteItem(item.$id)} className="p-2 rounded-full bg-transparent hover:bg-gray-200 dark:hover:bg-neutral-700 focus:outline-none transition-colors flex items-center cursor-pointer">
+                                    <Trash2 className="w-5 h-5 text-red-600" />
+                                  </button>
+                                </Tooltip>
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </>
                       )}
                     </div>
