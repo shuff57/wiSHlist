@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
+import { databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId, urlCacheCollectionId } from '../../appwriteConfig';
 import { Models, Query, ID } from 'appwrite';
-import { ExternalLink, Gift, CheckCircle, Grid, List } from 'lucide-react';
+import { ExternalLink, Gift, CheckCircle, Grid, List, Zap, Edit } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
+import { AddItemAuto } from '../teacher/AddItemAuto';
+import { AddItemManual } from '../teacher/AddItemManual';
 
 interface WishlistDoc {
   teacher_name: string;
+  wishlist_key: string;
   wishlist_name?: string;
   contact_info?: string;
   shipping_name?: string;
@@ -36,8 +39,8 @@ interface SuggestionForm {
 export const SupporterView: React.FC = () => {
   const { wishlistKey } = useParams<{ wishlistKey: string }>();
   const [wishlist, setWishlist] = useState<Models.Document & WishlistDoc | null>(null);
+  const [addItemMode, setAddItemMode] = useState<'manual' | 'auto'>('auto');
   const [items, setItems] = useState<(Models.Document & ItemDoc)[]>([]);
-  const [suggestionForm, setSuggestionForm] = useState<SuggestionForm>({ itemName: '', description: '', storeLink: '', estimatedCost: '' });
   const [submitButtonText, setSubmitButtonText] = useState<string>('Submit Suggestion');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -103,36 +106,65 @@ export const SupporterView: React.FC = () => {
     }
   };
 
-  const handleSuggestionFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setSuggestionForm(prev => ({ ...prev, [name]: value }));
-  };
 
-  const handleSuggestionSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Handler for AddItemAuto/AddItemManual to submit as suggestion (pending approval)
+  const handleSuggestionAdded = async (item: any) => {
     if (!wishlist) return;
-
     try {
+      // Create suggestion document
       await databases.createDocument(
         databaseId,
         suggestionsCollectionId,
         ID.unique(),
         {
           wishlist_id: wishlist.$id,
-          ...suggestionForm,
+          name: item.name || item.item_name || '',
+          description: item.description || '',
+          cost: item.cost || item.estimatedCost || '',
+          store_link: item.store_link || item.storeLink || '',
+          image_url: item.image_url || '',
           status: 'pending',
-          requestedBy: 'Anonymous'
+          requestedBy: 'Anonymous',
         }
       );
+
+      // Upsert into url-cache collection if a store_link is present
+      if (item.store_link || item.storeLink) {
+        const url = item.store_link || item.storeLink;
+        const normalizedUrl = url.trim().toLowerCase();
+        const urlHash = btoa(normalizedUrl); // Simple hash, replace with better if needed
+        const now = Date.now();
+        try {
+          await databases.createDocument(
+            databaseId,
+            urlCacheCollectionId,
+            ID.unique(),
+            {
+              url,
+              normalizedUrl,
+              productId: '',
+              metadata: '',
+              timestamp: now,
+              hitCount: 1,
+              urlHash,
+              image_url: item.image_url || '',
+              name: item.name || item.item_name || '',
+              description: item.description || '',
+              aiEnhanced: false,
+              searchContext: '',
+            }
+          );
+        } catch (err) {
+          // Optionally handle duplicate error or update logic here
+        }
+      }
+
       setSubmitButtonText('Submitted for Review');
-      setTimeout(() => {
-        setSubmitButtonText('Submit Suggestion');
-      }, 3000); // Change back after 3 seconds
+      setTimeout(() => setSubmitButtonText('Submit Suggestion'), 3000);
       setSubmissionSuccess(true);
       setTimeout(() => setSubmissionSuccess(false), 3000);
-      setSuggestionForm({ itemName: '', description: '', storeLink: '', estimatedCost: '' });
     } catch (error) {
-      alert("Could not submit suggestion. Please try again.");
+      alert('Could not submit suggestion. Please try again.');
     }
   };
 
@@ -341,16 +373,47 @@ export const SupporterView: React.FC = () => {
             )}
           </div>
 
-          <div className={`bg-white dark:bg-neutral-800 rounded-lg shadow transition-all duration-500 ${submissionSuccess ? 'border-2 border-purple-500' : 'border-2 border-transparent'}`}>
-            <div className={`rounded-lg p-6 transition-colors duration-500 ${submissionSuccess ? 'bg-purple-100/30 dark:bg-purple-900/30' : ''}`}>
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Suggest a New Item</h3>
-              <form onSubmit={handleSuggestionSubmit} className="space-y-4">
-                <input type="text" name="itemName" placeholder="Item Name" value={suggestionForm.itemName} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" required />
-                <textarea name="description" placeholder="Description" value={suggestionForm.description} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-                <input type="url" name="storeLink" placeholder="Store Link (optional)" value={suggestionForm.storeLink} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-                <input type="text" name="estimatedCost" placeholder="Estimated Cost (e.g., $15.00)" value={suggestionForm.estimatedCost} onChange={handleSuggestionFormChange} className="w-full p-2 rounded bg-white dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-                <button type="submit" className="w-full bg-purple-700 text-white py-2 px-4 rounded-lg hover:bg-purple-900">{submitButtonText}</button>
-              </form>
+          {/* Suggestion Section */}
+          <div className="flex flex-col mt-8">
+            <div className={`bg-white dark:bg-neutral-800 rounded-lg shadow transition-all duration-500 border-2 ${submissionSuccess ? 'border-purple-500' : 'border-purple-300 dark:border-purple-700'}`}>
+              <div className={`rounded-lg p-6 transition-colors duration-500 ${submissionSuccess ? 'bg-purple-100/30 dark:bg-purple-900/30' : ''}`}>
+                <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-4">Suggest a New Item</h3>
+                {/* Tab Navigation */}
+                <div className="flex border-b border-purple-200 dark:border-purple-700 mb-4">
+                  <button
+                    onClick={() => setAddItemMode('auto')}
+                    className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
+                      addItemMode === 'auto'
+                        ? 'text-purple-700 dark:text-purple-300 border-b-2 border-purple-500 dark:border-purple-400 bg-purple-100 dark:bg-purple-900'
+                        : 'text-purple-400 dark:text-purple-500 hover:text-purple-600 dark:hover:text-purple-300'
+                    }`}
+                  >
+                    <Zap size={18} />
+                    <span>Auto (URL)</span>
+                  </button>
+                  <button
+                    onClick={() => setAddItemMode('manual')}
+                    className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
+                      addItemMode === 'manual'
+                        ? 'text-purple-700 dark:text-purple-300 border-b-2 border-purple-500 dark:border-purple-400 bg-purple-100 dark:bg-purple-900'
+                        : 'text-purple-400 dark:text-purple-500 hover:text-purple-600 dark:hover:text-purple-300'
+                    }`}
+                  >
+                    <Edit size={18} />
+                    <span>Manual</span>
+                  </button>
+                </div>
+                {/* Tab Content */}
+                {addItemMode === 'auto' && wishlist && (
+                  <AddItemAuto wishlist={wishlist} onItemAdded={handleSuggestionAdded} suggestionMode />
+                )}
+                {addItemMode === 'manual' && wishlist && (
+                  <AddItemManual wishlist={wishlist} onItemAdded={handleSuggestionAdded} suggestionMode />
+                )}
+                {submissionSuccess && (
+                  <div className="mt-4 text-purple-700 dark:text-purple-300 font-semibold text-center">Suggestion submitted for review!</div>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -37,10 +37,11 @@ interface ItemDoc {
 }
 
 interface SuggestionDoc {
-  itemName: string;
+  name: string;
   description?: string;
-  storeLink?: string;
-  estimatedCost?: string;
+  cost?: string;
+  store_link?: string;
+  image_url?: string;
   requestedBy: string;
 }
 
@@ -306,10 +307,11 @@ export const WishlistEditView: React.FC = () => {
     try {
       const newItemDoc = await databases.createDocument(databaseId, itemsCollectionId, ID.unique(), {
         wishlist_id: wishlist.$id,
-        name: suggestion.itemName,
-        description: suggestion.description,
-        store_link: suggestion.storeLink,
-        cost: suggestion.estimatedCost,
+        name: suggestion.name,
+        description: suggestion.description || '',
+        store_link: suggestion.store_link,
+        cost: suggestion.cost,
+        image_url: suggestion.image_url || '',
         contributions: 0
       });
       setItems(prev => [...prev, newItemDoc as unknown as Models.Document & ItemDoc]);
@@ -397,11 +399,18 @@ export const WishlistEditView: React.FC = () => {
                   <div key={suggestion.$id} className="bg-white dark:bg-neutral-800 border-2 border-amber-500 dark:border-amber-800 rounded-lg p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{suggestion.itemName}</h4>
-                        {suggestion.description && <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{suggestion.description}</p>}
+                        <div className="flex items-center space-x-3 mb-2">
+                          {suggestion.image_url && (
+                            <img src={suggestion.image_url} alt={suggestion.name} className="w-16 h-16 object-cover rounded border" />
+                          )}
+                          <div>
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{suggestion.name}</h4>
+                            {suggestion.description && <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{suggestion.description}</p>}
+                          </div>
+                        </div>
                         <div className="flex items-center space-x-4 text-sm mt-2">
-                          {suggestion.estimatedCost && <span className="text-green-600 font-medium text-lg">{suggestion.estimatedCost}</span>}
-                          {suggestion.storeLink && <a href={suggestion.storeLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Item</a>}
+                          {suggestion.cost && <span className="text-green-600 font-medium text-lg">{suggestion.cost}</span>}
+                          {suggestion.store_link && <a href={suggestion.store_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Item</a>}
                         </div>
                       </div>
                       <div className="flex space-x-2">

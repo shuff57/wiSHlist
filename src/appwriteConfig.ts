@@ -30,3 +30,4 @@ export const usersCollectionId = '6883a8c90016dd267443';
 export const invitesCollectionId = '6882c46c002e4d03f317';
 export const suggestionsCollectionId = '6882cf3f003528f846bc';
 export const feedbackCollectionId = '68895a6c000b4fe3fdc5';
+export const urlCacheCollectionId = '68915fa8003d3174638e';

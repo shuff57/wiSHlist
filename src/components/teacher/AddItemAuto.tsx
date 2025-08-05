@@ -27,11 +27,12 @@ interface ItemDoc {
 
 interface AddItemAutoProps {
   wishlist: Models.Document & WishlistDoc;
-  onItemAdded: (item: Models.Document & ItemDoc) => void;
-  existingItems?: (Models.Document & ItemDoc)[]; // Optional - no breaking changes
+  onItemAdded: (item: any) => void;
+  existingItems?: (Models.Document & ItemDoc)[];
+  suggestionMode?: boolean;
 }
 
-export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded, existingItems = [] }) => {
+export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded, existingItems = [], suggestionMode = false }) => {
   const [url, setUrl] = useState('');
   const [urlPreviewTimeout, setUrlPreviewTimeout] = useState<NodeJS.Timeout | null>(null);
   const [editableData, setEditableData] = useState({
@@ -151,34 +152,40 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded,
 
   const handleUseThisItem = async () => {
     if (!urlPreview.data || !editableData.name.trim()) return;
-
     setIsSubmitting(true);
     try {
-      const newItemDoc = await databases.createDocument(
-        databaseId,
-        itemsCollectionId,
-        ID.unique(),
-        {
-          wishlist_id: wishlist.$id,
+      if (suggestionMode) {
+        const itemData = {
           name: editableData.name,
           description: editableData.description,
-          store_link: url,
           cost: editableData.cost,
-          image_url: urlPreview.data.image || null, // Save the scraped image URL
-          contributions: 0
-        }
-      );
-      
-      onItemAdded(newItemDoc as unknown as Models.Document & ItemDoc);
-      
-      // Reset form
+          store_link: url,
+          image_url: urlPreview.data?.image || '',
+        };
+        await onItemAdded(itemData);
+      } else {
+        const newItemDoc = await databases.createDocument(
+          databaseId,
+          itemsCollectionId,
+          ID.unique(),
+          {
+            wishlist_id: wishlist.$id,
+            name: editableData.name,
+            description: editableData.description,
+            store_link: url,
+            cost: editableData.cost,
+            image_url: urlPreview.data.image || null, // Save the scraped image URL
+            contributions: 0
+          }
+        );
+        onItemAdded(newItemDoc as unknown as Models.Document & ItemDoc);
+      }
       setUrl('');
       setEditableData({ name: '', description: '', cost: '' });
       setIsEditing(false);
       urlPreview.clearPreview();
     } catch (error) {
-      console.error('Error adding item:', error);
-      alert('Failed to add item. Please try again.');
+      alert('Failed to submit suggestion. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -336,10 +343,10 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded,
                   <button
                     onClick={handleUseThisItem}
                     disabled={isSubmitting || !editableData.name.trim()}
-                    className="flex-1 flex items-center justify-center space-x-2 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+                    className={`flex-1 flex items-center justify-center space-x-2 ${suggestionMode ? 'bg-purple-700 hover:bg-purple-900' : 'bg-green-600 hover:bg-green-700'} text-white py-2 px-4 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium`}
                   >
                     <CheckCircle size={16} />
-                    <span>{isSubmitting ? 'Adding...' : 'Use This Item'}</span>
+                    <span>{isSubmitting ? 'Submitting...' : (suggestionMode ? 'Submit Suggestion' : 'Use This Item')}</span>
                   </button>
                   
                   <button

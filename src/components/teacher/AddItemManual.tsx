@@ -25,7 +25,8 @@ interface ItemDoc {
 
 interface AddItemManualProps {
   wishlist: Models.Document & WishlistDoc;
-  onItemAdded: (item: Models.Document & ItemDoc) => void;
+  onItemAdded: (item: any) => void;
+  suggestionMode?: boolean;
 }
 
 interface CachedItem {
@@ -36,7 +37,7 @@ interface CachedItem {
   price: string | null;
 }
 
-export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAdded }) => {
+export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAdded, suggestionMode = false }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -158,30 +159,31 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
 
     setIsSubmitting(true);
     try {
-      const newItemDoc = await databases.createDocument(
-        databaseId,
-        itemsCollectionId,
-        ID.unique(),
-        {
-          wishlist_id: wishlist.$id,
-          ...formData,
-          contributions: 0
-        }
-      );
-      
-      onItemAdded(newItemDoc as unknown as Models.Document & ItemDoc);
-      
-      // Reset form
-      setFormData({
-        name: '',
-        description: '',
-        store_link: '',
-        cost: '',
-        image_url: ''
-      });
+      if (suggestionMode) {
+        const itemData = {
+          name: formData.name,
+          description: formData.description,
+          cost: formData.cost,
+          store_link: formData.store_link,
+          image_url: formData.image_url,
+        };
+        await onItemAdded(itemData);
+      } else {
+        const newItemDoc = await databases.createDocument(
+          databaseId,
+          itemsCollectionId,
+          ID.unique(),
+          {
+            wishlist_id: wishlist.$id,
+            ...formData,
+            contributions: 0
+          }
+        );
+        onItemAdded(newItemDoc as unknown as Models.Document & ItemDoc);
+      }
+      setFormData({ name: '', description: '', store_link: '', cost: '', image_url: '' });
     } catch (error) {
-      console.error('Error adding item:', error);
-      alert('Failed to add item. Please try again.');
+      alert('Failed to submit suggestion. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -362,9 +364,9 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
         <button
           type="submit"
           disabled={isSubmitting || !formData.name.trim()}
-          className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium"
+          className={`w-full ${suggestionMode ? 'bg-purple-700 hover:bg-purple-900' : 'bg-green-600 hover:bg-green-700'} text-white py-3 px-4 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 font-medium`}
         >
-          {isSubmitting ? 'Adding Item...' : 'Add to wiSHlist'}
+          {isSubmitting ? 'Submitting...' : (suggestionMode ? 'Submit Suggestion' : 'Add to wiSHlist')}
         </button>
       </form>
     </div>
