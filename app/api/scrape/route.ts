@@ -65,6 +65,9 @@ interface CacheEntry {
   metadata: any
   timestamp: number
   hitCount: number
+  aiEnhanced?: boolean // Flag to track if AI enhancement has been applied
+  name?: string | null // AI-enhanced item name
+  description?: string | null // AI-enhanced description
 }
 
 // Cache management functions using Appwrite
@@ -84,7 +87,10 @@ async function loadCache(): Promise<Map<string, CacheEntry>> {
         productId: doc.productId,
         metadata: JSON.parse(doc.metadata),
         timestamp: doc.timestamp,
-        hitCount: doc.hitCount
+        hitCount: doc.hitCount,
+        aiEnhanced: doc.aiEnhanced || false,
+        name: doc.name || null,
+        description: doc.description || null
       })
     })
     
@@ -111,7 +117,10 @@ async function saveCacheEntry(entry: CacheEntry): Promise<void> {
       metadata: JSON.stringify(entry.metadata),
       timestamp: entry.timestamp,
       hitCount: entry.hitCount,
-      image_url: entry.metadata.image || null // Save the image URL from metadata
+      image_url: entry.metadata.image || null, // Save the image URL from metadata
+      aiEnhanced: entry.aiEnhanced || false,
+      name: entry.name || null,
+      description: entry.description || null
     }
 
     if (entry.$id) {
@@ -249,6 +258,80 @@ const RATE_LIMIT_WINDOW = Number(process.env.SCRAPE_RATE_LIMIT_WINDOW) || 60000 
 const RATE_LIMIT_MAX = Number(process.env.SCRAPE_RATE_LIMIT_MAX) || 10 // 10 requests
 // --- END: Rate Limiter ---
 
+// AI Enhancement function
+async function enhanceItemWithAI(metadata: any, searchContext?: string): Promise<{ enhancedName: string; enhancedDescription: string } | null> {
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      console.warn('Gemini API key not configured, skipping AI enhancement');
+      return null;
+    }
+
+    // Dynamic import for server-side usage
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    const prompt = `
+You are an AI assistant helping parents understand classroom supply needs. Your goal is to create clear, brand-independent item names and practical descriptions for educational materials.
+
+Given the following scraped item data:
+- Title: ${metadata.title || 'Not provided'}
+- Description: ${metadata.description || 'Not provided'}
+- Price: ${metadata.price || 'Not provided'}
+- URL: ${metadata.url || 'Not provided'}${searchContext ? `
+- User Search Context: ${searchContext} (This indicates what the user was specifically looking for)` : ''}
+
+Please generate:
+1. A clear, generic item name (max 50 characters) that describes WHAT the item is without technical specifications
+2. A factual description (max 200 characters) focused on specifications and educational use cases
+
+Guidelines for PARENTS evaluating classroom contributions:
+- Remove all brand names but keep essential item context (e.g. "3D Printer Filament" not "Filament", "Wired Game Controller" not "USB Game Controller")
+- Keep important descriptive words that help identify the item type and basic functionality
+- Remove technical specifications like sizes, dimensions, model numbers from the name
+- Put all technical specifications, measurements, and detailed specs in the description
+- Focus description on specifications, measurements, and technical details parents need to know
+- Explain briefly HOW this will be used in the classroom or learning context
+- Avoid marketing language like "Perfect for!" or "Amazing quality!"
+- Include key specs that matter for educational use (size, material, compatibility, etc.)
+- Help parents understand if this is a consumable supply vs. durable equipment${searchContext ? `
+- Consider the search context: "${searchContext}" and emphasize relevant educational use` : ''}
+
+Examples:
+- "High-speed SUNLU PLA+ Filament 1.75mm" → Name: "3D Printer Filament", Description: "1.75mm PLA plastic filament for 3D printing projects. Used to create educational models, prototypes, and student projects."
+- "Apple iPad 10.2-inch WiFi 64GB" → Name: "Tablet", Description: "10.2-inch WiFi tablet with 64GB storage for educational apps, research, and multimedia learning activities in the classroom."
+- "Logitech G F310 Wired USB Gamepad" → Name: "Wired Game Controller", Description: "USB wired controller for educational gaming, programming projects, and interactive learning software."
+
+Return your response in this exact JSON format:
+{
+  "name": "clear item name here",
+  "description": "factual educational description here"
+}
+`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    
+    // Parse the JSON response
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('Invalid response format from Gemini');
+    }
+    
+    const parsed = JSON.parse(jsonMatch[0]);
+    
+    return {
+      enhancedName: parsed.name || metadata.title || 'Untitled Item',
+      enhancedDescription: parsed.description || metadata.description || ''
+    };
+
+  } catch (error) {
+    console.error('Error enhancing item with AI:', error);
+    return null;
+  }
+}
+
 // Amazon-specific extraction functions
 function extractAmazonProductImage(html: string): string | null {
   // Multiple patterns to find Amazon product images
@@ -346,6 +429,7 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url)
   const targetUrl = searchParams.get('url')
+  const searchContext = searchParams.get('context') // Get optional search context
 
   if (!targetUrl) {
     return NextResponse.json({ error: 'URL parameter is missing.' }, { status: 400 })
@@ -372,14 +456,31 @@ export async function GET(request: NextRequest) {
   }
   
   if (cachedEntry) {
+    // Check if cached item needs AI enhancement
+    if (!cachedEntry.aiEnhanced) {
+      console.log(`Cached item found but not AI enhanced, enhancing now...`)
+      
+      // Enhance the cached item
+      const aiEnhancement = await enhanceItemWithAI(cachedEntry.metadata, searchContext || undefined)
+      
+      if (aiEnhancement) {
+        // Update the cache entry with AI enhancement
+        cachedEntry.aiEnhanced = true
+        cachedEntry.name = aiEnhancement.enhancedName
+        cachedEntry.description = aiEnhancement.enhancedDescription
+        
+        console.log(`AI enhancement added to cached item: "${aiEnhancement.enhancedName}"`)
+      }
+    }
+    
     // Update hit count and return cached result
     cachedEntry.hitCount++
     console.log(`Cache hit for ${targetUrl} (similar to ${cachedEntry.url}), hit count: ${cachedEntry.hitCount}`)
     
-    // Update hit count in database
+    // Update hit count and AI enhancement in database
     await saveCacheEntry(cachedEntry)
     
-    // Add cache info to response
+    // Add cache info to response and include AI-enhanced data if available
     const response = {
       ...cachedEntry.metadata,
       _cache: {
@@ -388,6 +489,13 @@ export async function GET(request: NextRequest) {
         similarity: calculateUrlSimilarity(targetUrl, cachedEntry.url),
         hitCount: cachedEntry.hitCount,
         cachedAt: new Date(cachedEntry.timestamp).toISOString()
+      },
+      _ai: cachedEntry.aiEnhanced ? {
+        enhanced: true,
+        name: cachedEntry.name,
+        description: cachedEntry.description
+      } : {
+        enhanced: false
       }
     }
     
@@ -448,7 +556,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 6. Save to cache
+    // 6. Apply AI Enhancement to the scraped data
+    let aiEnhancement = null
+    try {
+      aiEnhancement = await enhanceItemWithAI(enhancedMetadata, searchContext || undefined)
+    } catch (error) {
+      console.warn('AI enhancement failed, continuing without enhancement:', error)
+    }
+
+    // 7. Save to cache with AI enhancement data
     const newCacheEntry: CacheEntry = {
       url: targetUrl,
       normalizedUrl: normalizedUrl,
@@ -456,20 +572,32 @@ export async function GET(request: NextRequest) {
       productId: extractProductId(targetUrl),
       metadata: enhancedMetadata,
       timestamp: Date.now(),
-      hitCount: 1
+      hitCount: 1,
+      aiEnhanced: aiEnhancement !== null,
+      name: aiEnhancement?.enhancedName || null,
+      description: aiEnhancement?.enhancedDescription || null
     }
     
     // Save to database
     await saveCacheEntry(newCacheEntry)
     
-    console.log(`Cached new entry for ${targetUrl}`)
+    console.log(`Cached new entry for ${targetUrl}${aiEnhancement ? ' with AI enhancement' : ''}${searchContext ? ` (context: ${searchContext})` : ''}`)
 
-    // 7. Return the enhanced scraped data with cache info
+    // 8. Return the enhanced scraped data with cache and AI info
     const response = {
       ...enhancedMetadata,
       _cache: {
         hit: false,
         cachedAt: new Date().toISOString()
+      },
+      _ai: aiEnhancement ? {
+        enhanced: true,
+        name: aiEnhancement.enhancedName,
+        description: aiEnhancement.enhancedDescription,
+        context: searchContext || null
+      } : {
+        enhanced: false,
+        context: searchContext || null
       }
     }
     
@@ -493,7 +621,7 @@ export async function GET(request: NextRequest) {
 // Keep POST method for backward compatibility with existing frontend code
 export async function POST(request: NextRequest) {
   try {
-    const { url } = await request.json()
+    const { url, context } = await request.json()
     
     if (!url) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 })
@@ -502,6 +630,9 @@ export async function POST(request: NextRequest) {
     // Create a new URL with the target URL as a search parameter
     const requestUrl = new URL(request.url)
     requestUrl.searchParams.set('url', url)
+    if (context) {
+      requestUrl.searchParams.set('context', context)
+    }
     
     // Create a new request object for GET handler
     const getRequest = new NextRequest(requestUrl.toString(), {

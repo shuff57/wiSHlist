@@ -28,9 +28,10 @@ interface ItemDoc {
 interface AddItemAutoProps {
   wishlist: Models.Document & WishlistDoc;
   onItemAdded: (item: Models.Document & ItemDoc) => void;
+  existingItems?: (Models.Document & ItemDoc)[]; // Optional - no breaking changes
 }
 
-export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded }) => {
+export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded, existingItems = [] }) => {
   const [url, setUrl] = useState('');
   const [urlPreviewTimeout, setUrlPreviewTimeout] = useState<NodeJS.Timeout | null>(null);
   const [editableData, setEditableData] = useState({
@@ -40,6 +41,7 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded 
   });
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
   
   const urlPreview = useUrlPreview();
 
@@ -52,17 +54,71 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded 
     };
   }, [urlPreviewTimeout]);
 
+  // Function to check if URL already exists in the wishlist (only if existingItems provided)
+  const checkForDuplicateUrl = (inputUrl: string): string | null => {
+    if (!existingItems || existingItems.length === 0) {
+      return null; // No duplicate checking if existingItems not provided - no breaking changes
+    }
+    
+    const normalizedInputUrl = inputUrl.toLowerCase().trim();
+    
+    for (const item of existingItems) {
+      if (item.store_link) {
+        const normalizedExistingUrl = item.store_link.toLowerCase().trim();
+        
+        // Check for exact match
+        if (normalizedInputUrl === normalizedExistingUrl) {
+          return `This URL already exists as "${item.name}"`;
+        }
+        
+        // Check for Amazon product matches (same ASIN)
+        const inputAsin = normalizedInputUrl.match(/\/dp\/([A-Z0-9]{10})/);
+        const existingAsin = normalizedExistingUrl.match(/\/dp\/([A-Z0-9]{10})/);
+        
+        if (inputAsin && existingAsin && inputAsin[1] === existingAsin[1]) {
+          return `This Amazon product already exists as "${item.name}"`;
+        }
+        
+        // Check for similar URLs (same domain and path without query params)
+        try {
+          const inputUrlObj = new URL(normalizedInputUrl);
+          const existingUrlObj = new URL(normalizedExistingUrl);
+          
+          if (inputUrlObj.hostname === existingUrlObj.hostname && 
+              inputUrlObj.pathname === existingUrlObj.pathname) {
+            return `A similar URL already exists as "${item.name}"`;
+          }
+        } catch {
+          // Invalid URL, skip comparison
+        }
+      }
+    }
+    
+    return null;
+  };
+
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setUrl(value);
     
-    // Clear existing timeout
+    // Clear existing timeout and warnings
     if (urlPreviewTimeout) {
       clearTimeout(urlPreviewTimeout);
     }
+    setDuplicateWarning(null);
     
     if (value.trim() && value.startsWith('http')) {
-      // Set new timeout to preview URL after user stops typing
+      // Check for duplicates if existingItems is provided
+      const duplicateMessage = checkForDuplicateUrl(value.trim());
+      
+      if (duplicateMessage) {
+        setDuplicateWarning(duplicateMessage);
+        // Don't load preview for duplicates - saves API calls and time
+        urlPreview.clearPreview();
+        return;
+      }
+      
+      // Set new timeout to preview URL after user stops typing (only if not duplicate)
       const timeout = setTimeout(() => {
         urlPreview.previewUrl(value.trim());
       }, 1000); // Wait 1 second after user stops typing
@@ -77,9 +133,13 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded 
   // Auto-populate editable data when preview loads
   useEffect(() => {
     if (urlPreview.data && !isEditing) {
+      // Use AI-enhanced data if available, otherwise fall back to original scraped data
+      const name = urlPreview.data._ai?.enhanced ? urlPreview.data._ai.name : urlPreview.data.title;
+      const description = urlPreview.data._ai?.enhanced ? urlPreview.data._ai.description : urlPreview.data.description;
+      
       setEditableData({
-        name: urlPreview.data.title || '',
-        description: urlPreview.data.description || '',
+        name: name || '',
+        description: description || '',
         cost: urlPreview.data.price || ''
       });
     }
@@ -168,6 +228,22 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded 
             </button>
           )}
         </div>
+
+        {/* Duplicate Warning */}
+        {duplicateWarning && (
+          <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700">
+            <div className="flex items-center space-x-2">
+              <div className="text-amber-600 dark:text-amber-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                This item appears to already be in your wishlist. Consider checking your existing items before adding duplicates.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* URL Preview */}
         {(urlPreview.loading || urlPreview.data || urlPreview.error) && (

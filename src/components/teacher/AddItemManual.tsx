@@ -82,8 +82,10 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
       for (const doc of response.documents) {
         try {
           const metadata = JSON.parse(doc.metadata);
-          const title = metadata.title || '';
-          const description = metadata.description || '';
+          
+          // Use AI-enhanced data if available, otherwise fall back to original
+          const title = doc.name || metadata.title || '';
+          const description = doc.description || metadata.description || '';
           
           // Simple text matching - check if search term appears in title or description
           const searchLower = searchTerm.toLowerCase();
@@ -91,8 +93,8 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
               description.toLowerCase().includes(searchLower)) {
             
             suggestions.push({
-              title: metadata.title || 'No title',
-              description: metadata.description || '',
+              title: title || 'No title',
+              description: description || '',
               image: metadata.image || null,
               url: doc.url,
               price: metadata.price || null
@@ -125,11 +127,11 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
       }
       
       // Set new timeout to search after user stops typing
-      const timeout = setTimeout(() => {
+      const searchTimer = setTimeout(() => {
         searchCacheForSimilarItems(value.trim());
       }, 500); // Wait 500ms after user stops typing
       
-      setSearchTimeout(timeout);
+      setSearchTimeout(searchTimer);
     } else if (name === 'name' && !value.trim()) {
       // Clear suggestions if name is empty
       setSuggestedItems([]);
@@ -191,7 +193,7 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
         Add New Item (Manual)
       </h3>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        Enter item details manually. Start typing an item name to see suggestions from cached items.
+        Enter item details manually. Start typing an item name to see suggestions from cached items with AI-enhanced names and descriptions.
       </p>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -202,14 +204,14 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
             placeholder="Item Name *"
             value={formData.name}
             onChange={handleChange}
-            className="w-full p-3 rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 pr-12 rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
-          {isSearching && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+            {isSearching && (
               <Search size={16} className="text-gray-400 animate-pulse" />
-            </div>
-          )}
+            )}
+          </div>
           
           {/* Suggestions Dropdown */}
           {suggestedItems.length > 0 && (
@@ -288,11 +290,11 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <h5 className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                <h5 className="font-medium text-gray-900 dark:text-gray-100 break-words">
                   {formData.name || 'Item Name'}
                 </h5>
                 {formData.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words">
                     {formData.description}
                   </p>
                 )}
@@ -314,12 +316,23 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
         )}
         
         <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Description (optional)
+            </label>
+            {formData.description && (
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {formData.description.length}/150 chars
+              </span>
+            )}
+          </div>
           <textarea
             name="description"
-            placeholder="Description (optional)"
+            placeholder="Description (optional) - suggestions may include AI-enhanced descriptions"
             value={formData.description}
             onChange={handleChange}
             rows={3}
+            maxLength={150}
             className="w-full p-3 rounded-lg bg-neutral-100 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           />
         </div>

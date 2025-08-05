@@ -377,7 +377,11 @@ export const WishlistEditView: React.FC = () => {
 
           {/* Tab Content */}
           {addItemMode === 'auto' && wishlist && (
-            <AddItemAuto wishlist={wishlist} onItemAdded={handleItemAdded} />
+            <AddItemAuto 
+              wishlist={wishlist} 
+              onItemAdded={handleItemAdded} 
+              existingItems={items}
+            />
           )}
           {addItemMode === 'manual' && wishlist && (
             <AddItemManual wishlist={wishlist} onItemAdded={handleItemAdded} />

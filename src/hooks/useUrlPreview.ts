@@ -7,6 +7,18 @@ interface UrlPreviewData {
   url: string
   price: string | null
   success: boolean
+  _ai?: {
+    enhanced: boolean
+    name?: string
+    description?: string
+  }
+  _cache?: {
+    hit: boolean
+    originalUrl?: string
+    similarity?: number
+    hitCount?: number
+    cachedAt?: string
+  }
 }
 
 interface UrlPreviewError {
@@ -103,7 +115,9 @@ export function useUrlPreview(): UseUrlPreviewReturn {
         image: result.image || null,
         url: result.url || url.trim(),
         price: result.price || null,
-        success: true
+        success: true,
+        _ai: result._ai || { enhanced: false },
+        _cache: result._cache || { hit: false }
       }
 
       setData(transformedData)
