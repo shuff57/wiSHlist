@@ -108,17 +108,17 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded,
     setDuplicateWarning(null);
     
     if (value.trim() && value.startsWith('http')) {
-      // Check for duplicates if existingItems is provided
+      // Check for duplicates IMMEDIATELY to prevent any loading state
       const duplicateMessage = checkForDuplicateUrl(value.trim());
       
       if (duplicateMessage) {
         setDuplicateWarning(duplicateMessage);
-        // Don't load preview for duplicates - saves API calls and time
+        // Clear any existing preview since this is a duplicate
         urlPreview.clearPreview();
-        return;
+        return; // Exit early - no timeout needed for duplicates
       }
       
-      // Set new timeout to preview URL after user stops typing (only if not duplicate)
+      // Only set timeout for non-duplicate URLs
       const timeout = setTimeout(() => {
         urlPreview.previewUrl(value.trim());
       }, 1000); // Wait 1 second after user stops typing

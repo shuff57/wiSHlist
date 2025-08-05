@@ -21,23 +21,21 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, showUrlPreview = true,
   const [cachedImage, setCachedImage] = useState<string | null>(null);
   
   useEffect(() => {
-    // If item has a store link and we should show URL preview, fetch it
-    if (item.store_link && item.store_link.trim().startsWith('http') && showUrlPreview) {
-      itemPreview.previewUrl(item.store_link);
-    }
-    
-    // If item has a cached image URL, use it
+    // Only use cached image - no URL preview for existing items
     if (item.image_url) {
       setCachedImage(item.image_url);
     }
     
+    // Don't auto-preview URLs for existing items - they already have their data
+    // URL preview should only be used when adding new items
+    
     return () => {
       itemPreview.clearPreview();
     };
-  }, [item.store_link, item.image_url]);
+  }, [item.image_url]); // Removed item.store_link dependency
 
-  // Determine which image to show (priority: URL preview > cached image)
-  const displayImage = itemPreview.data?.image || cachedImage || null;
+  // For existing items, only use cached image (no URL preview needed)
+  const displayImage = cachedImage || null;
 
   return (
     <div className={`bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow ${className}`}>
@@ -95,18 +93,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, showUrlPreview = true,
           </div>
         </div>
         
-        {/* URL Preview (if enabled and loading/error) */}
-        {showUrlPreview && item.store_link && item.store_link.trim().startsWith('http') && 
-         (itemPreview.loading || itemPreview.error) && (
-          <div className="mt-3 border-l-4 border-blue-500 pl-3">
-            <UrlPreview
-              data={itemPreview.data}
-              loading={itemPreview.loading}
-              error={itemPreview.error}
-              className="text-sm"
-            />
-          </div>
-        )}
+        {/* No URL preview needed for existing items - they already have their data */}
       </div>
     </div>
   );
