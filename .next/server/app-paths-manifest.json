@@ -1,5 +1,4 @@
 {
-  "/[...slug]/page": "app/[...slug]/page.js",
-  "/api/scrape/route": "app/api/scrape/route.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/api/scrape/route": "app/api/scrape/route.js"
 }
