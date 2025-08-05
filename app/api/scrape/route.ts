@@ -6,6 +6,7 @@ import got from 'got'
 import { HttpsProxyAgent } from 'hpagent'
 import { Client, Databases, Query, ID } from 'appwrite'
 import crypto from 'crypto'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // Initialize metascraper with the plugins you need for link previews
 const metascraper = require('metascraper')([
@@ -267,7 +268,6 @@ async function enhanceItemWithAI(metadata: any, searchContext?: string): Promise
     }
 
     // Dynamic import for server-side usage
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
@@ -309,7 +309,12 @@ Return your response in this exact JSON format:
 }
 `;
 
-    const result = await model.generateContent(prompt);
+    const result: any = await Promise.race([
+      model.generateContent(prompt),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Gemini API timeout')), 15000) // 15 second timeout for Gemini API
+      )
+    ]);
     const response = await result.response;
     const text = response.text();
     
@@ -460,25 +465,41 @@ export async function GET(request: NextRequest) {
     if (!cachedEntry.aiEnhanced) {
       console.log(`Cached item found but not AI enhanced, enhancing now...`)
       
-      // Enhance the cached item
-      const aiEnhancement = await enhanceItemWithAI(cachedEntry.metadata, searchContext || undefined)
-      
-      if (aiEnhancement) {
-        // Update the cache entry with AI enhancement
-        cachedEntry.aiEnhanced = true
-        cachedEntry.name = aiEnhancement.enhancedName
-        cachedEntry.description = aiEnhancement.enhancedDescription
+      // Enhance the cached item with timeout protection
+      try {
+        const enhancementPromise = enhanceItemWithAI(cachedEntry.metadata, searchContext || undefined)
+        const timeoutPromise = new Promise<null>((_, reject) => 
+          setTimeout(() => reject(new Error('AI enhancement timeout')), 15000) // 15 second timeout for cached items
+        )
         
-        console.log(`AI enhancement added to cached item: "${aiEnhancement.enhancedName}"`)
+        const aiEnhancement = await Promise.race([enhancementPromise, timeoutPromise])
+        
+        if (aiEnhancement) {
+          // Update the cache entry with AI enhancement
+          cachedEntry.aiEnhanced = true
+          cachedEntry.name = aiEnhancement.enhancedName
+          cachedEntry.description = aiEnhancement.enhancedDescription
+          
+          console.log(`AI enhancement added to cached item: "${aiEnhancement.enhancedName}"`)
+          
+          // Save enhancement to database (non-blocking)
+          saveCacheEntry(cachedEntry).catch(error => {
+            console.error('Failed to save enhanced cache entry (non-blocking):', error)
+          })
+        }
+      } catch (error) {
+        console.warn('AI enhancement for cached item failed or timed out:', error)
       }
     }
     
-    // Update hit count and return cached result
+    // Update hit count
     cachedEntry.hitCount++
     console.log(`Cache hit for ${targetUrl} (similar to ${cachedEntry.url}), hit count: ${cachedEntry.hitCount}`)
     
-    // Update hit count and AI enhancement in database
-    await saveCacheEntry(cachedEntry)
+    // Update hit count in database (non-blocking)
+    saveCacheEntry(cachedEntry).catch(error => {
+      console.error('Failed to update cache hit count (non-blocking):', error)
+    })
     
     // Add cache info to response and include AI-enhanced data if available
     const response = {
@@ -556,15 +577,22 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 6. Apply AI Enhancement to the scraped data
-    let aiEnhancement = null
+    // 6. Apply AI Enhancement to the scraped data with timeout protection
+    let aiEnhancement: { enhancedName: string; enhancedDescription: string } | null = null
     try {
-      aiEnhancement = await enhanceItemWithAI(enhancedMetadata, searchContext || undefined)
+      // Set a timeout for AI enhancement to prevent 408 errors
+      const enhancementPromise = enhanceItemWithAI(enhancedMetadata, searchContext || undefined)
+      const timeoutPromise = new Promise<null>((_, reject) => 
+        setTimeout(() => reject(new Error('AI enhancement timeout')), 20000) // 20 second timeout
+      )
+      
+      aiEnhancement = await Promise.race([enhancementPromise, timeoutPromise])
     } catch (error) {
-      console.warn('AI enhancement failed, continuing without enhancement:', error)
+      console.warn('AI enhancement failed or timed out, continuing without enhancement:', error)
+      aiEnhancement = null
     }
 
-    // 7. Save to cache with AI enhancement data
+    // 7. Save to cache with AI enhancement data (if available)
     const newCacheEntry: CacheEntry = {
       url: targetUrl,
       normalizedUrl: normalizedUrl,
@@ -578,8 +606,10 @@ export async function GET(request: NextRequest) {
       description: aiEnhancement?.enhancedDescription || null
     }
     
-    // Save to database
-    await saveCacheEntry(newCacheEntry)
+    // Save to database (don't await to avoid blocking response)
+    saveCacheEntry(newCacheEntry).catch(error => {
+      console.error('Failed to save cache entry (non-blocking):', error)
+    })
     
     console.log(`Cached new entry for ${targetUrl}${aiEnhancement ? ' with AI enhancement' : ''}${searchContext ? ` (context: ${searchContext})` : ''}`)
 

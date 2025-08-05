@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface ItemEnhancementRequest {
   action: 'enhance-scraped' | 'enhance-manual' | 'improve-existing';
@@ -30,8 +31,7 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Dynamic import for server-side usage
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    // Initialize Gemini AI
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
@@ -151,7 +151,12 @@ Return your response in this exact JSON format:
         }, { status: 400 });
     }
 
-    const result = await model.generateContent(prompt);
+    const result: any = await Promise.race([
+      model.generateContent(prompt),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Gemini API timeout')), 15000) // 15 second timeout for Gemini API
+      )
+    ]);
     const response = await result.response;
     const text = response.text();
     

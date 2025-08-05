@@ -34,23 +34,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const checkUserSession = async () => {
       setLoading(true);
       try {
-        const currentUser = await account.get();
-        setUser(currentUser);
-        // Update lastActive on session check
+        // Add timeout protection to prevent 408 errors on initial load
+        const timeoutPromise = new Promise<null>((_, reject) => 
+          setTimeout(() => reject(new Error('Session check timeout')), 20000) // 20 second timeout
+        );
+        
+        const currentUser = await Promise.race([account.get(), timeoutPromise]);
+        
         if (currentUser) {
-          try {
-            await databases.updateDocument(
-              databaseId,
-              usersCollectionId,
-              currentUser.$id,
-              { lastActive: new Date().toISOString() }
-            );
-          } catch (e) {
+          setUser(currentUser);
+          // Update lastActive on session check (non-blocking)
+          databases.updateDocument(
+            databaseId,
+            usersCollectionId,
+            currentUser.$id,
+            { lastActive: new Date().toISOString() }
+          ).catch(e => {
             // Ignore update errors (e.g., permissions)
-          }
+            console.warn('Failed to update lastActive:', e);
+          });
         }
       } catch (error: any) {
-        // Session expired or invalid - clear user state
+        // Session expired, invalid, or timed out - clear user state
+        console.warn('Session check failed or timed out:', error);
         setUser(null);
       } finally {
         setLoading(false);
@@ -109,59 +115,69 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const ensureUserDocument = async () => {
     try {
-      const currentUser = await account.get();
-      if (!currentUser) return;
+      // Add timeout protection to prevent 408 errors
+      const timeoutPromise = new Promise<null>((_, reject) => 
+        setTimeout(() => reject(new Error('User document check timeout')), 25000) // 25 second timeout
+      );
+      
+      const userCheckPromise = async () => {
+        const currentUser = await account.get();
+        if (!currentUser) return;
 
-      // Try to fetch existing document first
-      try {
-        await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
-        return; // User exists in database, allow access
-      } catch (error: any) {
-        
-        // Check if this is Mr. Huff (the main admin) - only allow him to auto-register
-        const isMrHuff = currentUser.name.toLowerCase().includes('huff') || 
-                        currentUser.email.toLowerCase().includes('huff');
-        
-        if (!isMrHuff) {
-          // User not found in database and is not Mr. Huff - deny access
-          await account.deleteSession('current'); // Log them out
-          throw new Error('Access denied. You must be invited to use this application.');
-        }
-
-        // Only create document for Mr. Huff
+        // Try to fetch existing document first
         try {
-          await databases.createDocument(
-            databaseId,
-            usersCollectionId,
-            currentUser.$id,
-            {
-              name: currentUser.name,
-              email: currentUser.email,
-              role: 'teacher',
-              isRecommender: true, // Mr. Huff gets privileges
-              isAdmin: true,       // Mr. Huff is always admin
-              name_lowercase: currentUser.name.toLowerCase()
-              // Note: userID field only set when invited by someone
-            }
-          );
-        } catch (createError: any) {
+          await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
+          return; // User exists in database, allow access
+        } catch (error: any) {
           
-          if (createError.code === 409) {
-            // Document exists but we couldn't read it initially - try again
-            try {
-              await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
-            } catch (retryError: any) {
-              // This indicates a permissions issue - the document exists but user can't read it
+          // Check if this is Mr. Huff (the main admin) - only allow him to auto-register
+          const isMrHuff = currentUser.name.toLowerCase().includes('huff') || 
+                          currentUser.email.toLowerCase().includes('huff');
+          
+          if (!isMrHuff) {
+            // User not found in database and is not Mr. Huff - deny access
+            await account.deleteSession('current'); // Log them out
+            throw new Error('Access denied. You must be invited to use this application.');
+          }
+
+          // Only create document for Mr. Huff
+          try {
+            await databases.createDocument(
+              databaseId,
+              usersCollectionId,
+              currentUser.$id,
+              {
+                name: currentUser.name,
+                email: currentUser.email,
+                role: 'teacher',
+                isRecommender: true, // Mr. Huff gets privileges
+                isAdmin: true,       // Mr. Huff is always admin
+                name_lowercase: currentUser.name.toLowerCase()
+                // Note: userID field only set when invited by someone
+              }
+            );
+          } catch (createError: any) {
+            
+            if (createError.code === 409) {
+              // Document exists but we couldn't read it initially - try again
+              try {
+                await databases.getDocument(databaseId, usersCollectionId, currentUser.$id);
+              } catch (retryError: any) {
+                // This indicates a permissions issue - the document exists but user can't read it
+                await account.deleteSession('current');
+                throw new Error('Access denied. You must be invited to use this application.');
+              }
+            } else {
+              // Failed to create document for Mr. Huff
               await account.deleteSession('current');
-              throw new Error('Access denied. You must be invited to use this application.');
+              throw new Error('Failed to initialize user account.');
             }
-          } else {
-            // Failed to create document for Mr. Huff
-            await account.deleteSession('current');
-            throw new Error('Failed to initialize user account.');
           }
         }
-      }
+      };
+      
+      await Promise.race([userCheckPromise(), timeoutPromise]);
+      
     } catch (error) {
       // Re-throw the error so it can be handled by the caller
       if (error instanceof Error) {

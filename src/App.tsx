@@ -29,13 +29,19 @@ const AppContent: React.FC = () => {
     const authTime = searchParams.get('auth_time');
     
     if (redirectTo && authTime) {
-      // This is an OAuth callback - validate user access
+      // This is an OAuth callback - validate user access with timeout protection
       const validateAndRedirect = async () => {
         try {
-          await ensureUserDocument();
+          // Add timeout to user document validation to prevent 408 errors
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('User validation timeout')), 25000) // 25 second timeout
+          );
+          
+          await Promise.race([ensureUserDocument(), timeoutPromise]);
           // If validation succeeds, redirect to dashboard
           navigate(`/${redirectTo}`);
         } catch (error) {
+          console.warn('User validation failed or timed out:', error);
           // If validation fails, redirect to login with error
           navigate('/?error=access_denied');
         }
