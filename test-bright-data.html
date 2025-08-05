@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Data URL Preview Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover:not(:disabled) {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: #666;
+        }
+        .loading.show {
+            display: block;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        .result.show {
+            display: block;
+        }
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .preview-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .preview-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .preview-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .preview-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .preview-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        .preview-description {
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+        .preview-url {
+            font-size: 12px;
+            color: #888;
+            word-break: break-all;
+        }
+        .preview-price {
+            background: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .test-urls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .test-urls h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .test-url {
+            display: block;
+            color: #007bff;
+            text-decoration: none;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            cursor: pointer;
+        }
+        .test-url:hover {
+            background: #e9ecef;
+            padding-left: 10px;
+            margin-left: -10px;
+            margin-right: -10px;
+        }
+        .test-url:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 Bright Data URL Preview Test</h1>
+        
+        <div class="test-urls">
+            <h3>Quick Test URLs:</h3>
+            <a href="#" class="test-url" onclick="setUrl('https://www.amazon.com/dp/B08N5WRWNW')">Amazon Echo Dot</a>
+            <a href="#" class="test-url" onclick="setUrl('https://www.amazon.com/Apple-AirPods-Pro-2nd-Generation/dp/B0BDHWDR12')">Apple AirPods Pro</a>
+            <a href="#" class="test-url" onclick="setUrl('https://github.com/microsoft/vscode')">GitHub - VS Code</a>
+            <a href="#" class="test-url" onclick="setUrl('https://news.ycombinator.com')">Hacker News</a>
+            <a href="#" class="test-url" onclick="setUrl('https://www.reddit.com')">Reddit</a>
+        </div>
+
+        <div class="form-group">
+            <label for="url">Enter URL to Preview:</label>
+            <input type="url" id="url" placeholder="https://example.com" required>
+        </div>
+        
+        <button onclick="previewUrl()" id="previewBtn">
+            🔍 Preview URL
+        </button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            Fetching preview through Bright Data proxy...
+        </div>
+        
+        <div class="result" id="result">
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        function setUrl(url) {
+            document.getElementById('url').value = url;
+        }
+
+        async function previewUrl() {
+            const urlInput = document.getElementById('url');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+            
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            const previewBtn = document.getElementById('previewBtn');
+            
+            // Show loading
+            loading.classList.add('show');
+            result.classList.remove('show');
+            previewBtn.disabled = true;
+            previewBtn.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch('/api/scrape', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url }),
+                });
+                
+                const data = await response.json();
+                
+                // Hide loading
+                loading.classList.remove('show');
+                result.classList.add('show');
+                
+                if (response.ok && data.success) {
+                    result.className = 'result show success';
+                    resultContent.innerHTML = `
+                        <h3>✅ Preview Successful!</h3>
+                        <div class="preview-card">
+                            <div class="preview-header">
+                                ${data.image ? `<img src="${data.image}" alt="Preview" class="preview-image" onerror="this.style.display='none'">` : ''}
+                                <div class="preview-content">
+                                    ${data.title ? `<div class="preview-title">${escapeHtml(data.title)}</div>` : ''}
+                                    ${data.description ? `<div class="preview-description">${escapeHtml(data.description)}</div>` : ''}
+                                    <div class="preview-url">${escapeHtml(data.url)}</div>
+                                    ${data.price ? `<div class="preview-price">${escapeHtml(data.price)}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <p><strong>Metadata extracted via Bright Data proxy:</strong></p>
+                        <pre style="background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 12px;">${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    result.className = 'result show error';
+                    resultContent.innerHTML = `
+                        <h3>❌ Preview Failed</h3>
+                        <p><strong>Error:</strong> ${escapeHtml(data.error || 'Unknown error occurred')}</p>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p>This might be due to:</p>
+                        <ul>
+                            <li>Website blocking automated requests</li>
+                            <li>CAPTCHA protection</li>
+                            <li>Rate limiting</li>
+                            <li>Network connectivity issues</li>
+                            <li>Invalid URL format</li>
+                        </ul>
+                    `;
+                }
+            } catch (error) {
+                loading.classList.remove('show');
+                result.classList.add('show');
+                result.className = 'result show error';
+                resultContent.innerHTML = `
+                    <h3>❌ Network Error</h3>
+                    <p><strong>Error:</strong> ${escapeHtml(error.message)}</p>
+                    <p>Please check your network connection and try again.</p>
+                `;
+            } finally {
+                previewBtn.disabled = false;
+                previewBtn.textContent = '🔍 Preview URL';
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('url').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                previewUrl();
+            }
+        });
+    </script>
+</body>
+</html>

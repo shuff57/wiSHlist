@@ -7,6 +7,8 @@ import { ExternalLink } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
 import { GoogleAddressAutocomplete } from '../common/GoogleAddressAutocomplete';
+import { UrlPreview } from '../common/UrlPreview';
+import { useUrlPreview } from '../../hooks/useUrlPreview';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useStrictDroppable } from '../../hooks/useStrictDroppable';
 
@@ -38,6 +40,33 @@ interface SuggestionDoc {
   requestedBy: string;
 }
 
+// Item URL Preview Component
+const ItemUrlPreview: React.FC<{ url: string }> = ({ url }) => {
+  const itemPreview = useUrlPreview();
+  
+  useEffect(() => {
+    if (url && url.trim().startsWith('http')) {
+      itemPreview.previewUrl(url);
+    }
+    return () => {
+      itemPreview.clearPreview();
+    };
+  }, [url]);
+  
+  if (!itemPreview.data && !itemPreview.loading && !itemPreview.error) {
+    return null;
+  }
+  
+  return (
+    <UrlPreview
+      data={itemPreview.data}
+      loading={itemPreview.loading}
+      error={itemPreview.error}
+      className="border-l-4 border-blue-500 pl-3"
+    />
+  );
+};
+
 export const WishlistEditView: React.FC = () => {
   const { wishlistId } = useParams<{ wishlistId: string }>();
   const [wishlist, setWishlist] = useState<Models.Document & WishlistDoc | null>(null);
@@ -60,12 +89,27 @@ export const WishlistEditView: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [enabled] = useStrictDroppable(loading);
   const [isClient, setIsClient] = useState(false);
+  
+  // URL Preview functionality
+  const newItemPreview = useUrlPreview();
+  const editItemPreview = useUrlPreview();
+  const [urlPreviewTimeout, setUrlPreviewTimeout] = useState<NodeJS.Timeout | null>(null);
+  
   const navigate = useNavigate();
 
   // Ensure client-side rendering for drag-and-drop
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Cleanup URL preview timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (urlPreviewTimeout) {
+        clearTimeout(urlPreviewTimeout);
+      }
+    };
+  }, [urlPreviewTimeout]);
 
   const handleCopy = (textToCopy: string, type: 'key' | 'link') => {
     navigator.clipboard.writeText(textToCopy);
@@ -132,6 +176,39 @@ export const WishlistEditView: React.FC = () => {
   const handleItemFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewItem(prev => ({ ...prev, [name]: value }));
+    
+    // Auto-preview URL when store_link changes
+    if (name === 'store_link' && value.trim()) {
+      // Clear existing timeout
+      if (urlPreviewTimeout) {
+        clearTimeout(urlPreviewTimeout);
+      }
+      
+      // Set new timeout to preview URL after user stops typing
+      const timeout = setTimeout(() => {
+        if (value.trim().startsWith('http')) {
+          newItemPreview.previewUrl(value.trim());
+        }
+      }, 1000); // Wait 1 second after user stops typing
+      
+      setUrlPreviewTimeout(timeout);
+    } else if (name === 'store_link' && !value.trim()) {
+      // Clear preview if URL is removed
+      newItemPreview.clearPreview();
+      if (urlPreviewTimeout) {
+        clearTimeout(urlPreviewTimeout);
+      }
+    }
+  };
+
+  // Handle applying scraped data to form
+  const handleApplyPreviewData = (previewData: any) => {
+    setNewItem(prev => ({
+      ...prev,
+      name: previewData.title || prev.name,
+      description: previewData.description || prev.description,
+      cost: previewData.price || prev.cost
+    }));
   };
 
   const handleAddItem = async (e: React.FormEvent) => {
@@ -145,6 +222,7 @@ export const WishlistEditView: React.FC = () => {
       });
       setItems(prev => [...prev, newItemDoc as unknown as Models.Document & ItemDoc]);
       setNewItem({ name: '', description: '', store_link: '', cost: '' });
+      newItemPreview.clearPreview(); // Clear preview when form is reset
     } catch (error) {
     }
   };
@@ -152,11 +230,54 @@ export const WishlistEditView: React.FC = () => {
   const handleEditItem = (item: Models.Document & ItemDoc) => {
     setEditingItemId(item.$id);
     setEditedItemData(item);
+    editItemPreview.clearPreview();
+    // Auto-preview existing URL if present
+    if (item.store_link && item.store_link.trim().startsWith('http')) {
+      setTimeout(() => {
+        editItemPreview.previewUrl(item.store_link!);
+      }, 100);
+    }
   };
 
   const handleCancelEdit = () => {
     setEditingItemId(null);
     setEditedItemData(null);
+    editItemPreview.clearPreview();
+  };
+
+  // Handle edit form changes with URL preview
+  const handleEditItemChange = (field: keyof ItemDoc, value: string) => {
+    setEditedItemData(prev => ({ ...prev!, [field]: value }));
+    
+    // Auto-preview URL when store_link changes
+    if (field === 'store_link' && value.trim()) {
+      if (urlPreviewTimeout) {
+        clearTimeout(urlPreviewTimeout);
+      }
+      
+      const timeout = setTimeout(() => {
+        if (value.trim().startsWith('http')) {
+          editItemPreview.previewUrl(value.trim());
+        }
+      }, 1000);
+      
+      setUrlPreviewTimeout(timeout);
+    } else if (field === 'store_link' && !value.trim()) {
+      editItemPreview.clearPreview();
+      if (urlPreviewTimeout) {
+        clearTimeout(urlPreviewTimeout);
+      }
+    }
+  };
+
+  // Handle applying scraped data to edit form
+  const handleApplyEditPreviewData = (previewData: any) => {
+    setEditedItemData(prev => ({
+      ...prev!,
+      name: previewData.title || prev!.name,
+      description: previewData.description || prev!.description,
+      cost: previewData.price || prev!.cost
+    }));
   };
 
   const handleUpdateItem = async (e: React.FormEvent) => {
@@ -261,7 +382,39 @@ export const WishlistEditView: React.FC = () => {
             <form onSubmit={handleAddItem} className="space-y-4">
               <input type="text" name="name" placeholder="Item Name" value={newItem.name} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" required />
               <textarea name="description" placeholder="Description" value={newItem.description} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" />
-              <input type="url" name="store_link" placeholder="Store Link (optional)" value={newItem.store_link} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              <div className="space-y-2">
+                <input type="url" name="store_link" placeholder="Store Link (paste Amazon, Best Buy, etc.)" value={newItem.store_link} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                
+                {/* URL Preview for new item */}
+                {(newItemPreview.loading || newItemPreview.data || newItemPreview.error) && (
+                  <div className="space-y-2">
+                    <UrlPreview 
+                      data={newItemPreview.data}
+                      loading={newItemPreview.loading}
+                      error={newItemPreview.error}
+                      onRetry={() => newItemPreview.previewUrl(newItem.store_link)}
+                    />
+                    {newItemPreview.data && (
+                      <div className="flex space-x-2">
+                        <button 
+                          type="button"
+                          onClick={() => handleApplyPreviewData(newItemPreview.data)}
+                          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                          Use This Info
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={newItemPreview.clearPreview}
+                          className="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
               <input type="text" name="cost" placeholder="Cost (e.g., $12.99)" value={newItem.cost} onChange={handleItemFormChange} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
               <button type="submit" className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 dark:hover:bg-green-900">Add to wiSHlist</button>
             </form>
@@ -342,10 +495,42 @@ export const WishlistEditView: React.FC = () => {
                             >
                               {editingItemId === item.$id ? (
                                 <form onSubmit={handleUpdateItem} className="space-y-4">
-                                  <input type="text" name="name" value={editedItemData?.name || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, name: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" required />
-                                  <textarea name="description" value={editedItemData?.description || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, description: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" />
-                                  <input type="url" name="store_link" value={editedItemData?.store_link || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, store_link: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-                                  <input type="text" name="cost" value={editedItemData?.cost || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, cost: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                                  <input type="text" name="name" value={editedItemData?.name || ''} onChange={(e) => handleEditItemChange('name', e.target.value)} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" required />
+                                  <textarea name="description" value={editedItemData?.description || ''} onChange={(e) => handleEditItemChange('description', e.target.value)} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                                  <div className="space-y-2">
+                                    <input type="url" name="store_link" value={editedItemData?.store_link || ''} onChange={(e) => handleEditItemChange('store_link', e.target.value)} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" placeholder="Store Link (paste Amazon, Best Buy, etc.)" />
+                                    
+                                    {/* URL Preview for edit form */}
+                                    {(editItemPreview.loading || editItemPreview.data || editItemPreview.error) && (
+                                      <div className="space-y-2">
+                                        <UrlPreview 
+                                          data={editItemPreview.data}
+                                          loading={editItemPreview.loading}
+                                          error={editItemPreview.error}
+                                          onRetry={() => editItemPreview.previewUrl(editedItemData?.store_link || '')}
+                                        />
+                                        {editItemPreview.data && (
+                                          <div className="flex space-x-2">
+                                            <button 
+                                              type="button"
+                                              onClick={() => handleApplyEditPreviewData(editItemPreview.data)}
+                                              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                                            >
+                                              Use This Info
+                                            </button>
+                                            <button 
+                                              type="button"
+                                              onClick={editItemPreview.clearPreview}
+                                              className="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                            >
+                                              Dismiss
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <input type="text" name="cost" value={editedItemData?.cost || ''} onChange={(e) => handleEditItemChange('cost', e.target.value)} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" placeholder="Cost (e.g., $12.99)" />
                                   <div className="flex space-x-2">
                                     <button type="submit" className="flex-grow bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 dark:hover:bg-green-900">Save</button>
                                     <button type="button" onClick={handleCancelEdit} className="flex-grow bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">Cancel</button>
@@ -363,6 +548,13 @@ export const WishlistEditView: React.FC = () => {
                                           <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{item.name}</h4>
                                           <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{item.description}</p>
                                           {item.cost && <span className="text-green-600 font-medium text-lg">{item.cost}</span>}
+                                          
+                                          {/* Show URL preview for items with store links */}
+                                          {item.store_link && item.store_link.trim().startsWith('http') && (
+                                            <div className="mt-3">
+                                              <ItemUrlPreview url={item.store_link} />
+                                            </div>
+                                          )}
                                         </div>
                                       </div>
                                     </div>
@@ -417,10 +609,42 @@ export const WishlistEditView: React.FC = () => {
                     >
                       {editingItemId === item.$id ? (
                         <form onSubmit={handleUpdateItem} className="space-y-4">
-                          <input type="text" name="name" value={editedItemData?.name || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, name: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" required />
-                          <textarea name="description" value={editedItemData?.description || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, description: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" />
-                          <input type="url" name="store_link" value={editedItemData?.store_link || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, store_link: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-                          <input type="text" name="cost" value={editedItemData?.cost || ''} onChange={(e) => setEditedItemData(prev => ({ ...prev!, cost: e.target.value }))} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                          <input type="text" name="name" value={editedItemData?.name || ''} onChange={(e) => handleEditItemChange('name', e.target.value)} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" required />
+                          <textarea name="description" value={editedItemData?.description || ''} onChange={(e) => handleEditItemChange('description', e.target.value)} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 text-gray-900 dark:text-gray-200 focus:outline-none" />
+                          <div className="space-y-2">
+                            <input type="url" name="store_link" value={editedItemData?.store_link || ''} onChange={(e) => handleEditItemChange('store_link', e.target.value)} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" placeholder="Store Link (paste Amazon, Best Buy, etc.)" />
+                            
+                            {/* URL Preview for edit form */}
+                            {(editItemPreview.loading || editItemPreview.data || editItemPreview.error) && (
+                              <div className="space-y-2">
+                                <UrlPreview 
+                                  data={editItemPreview.data}
+                                  loading={editItemPreview.loading}
+                                  error={editItemPreview.error}
+                                  onRetry={() => editItemPreview.previewUrl(editedItemData?.store_link || '')}
+                                />
+                                {editItemPreview.data && (
+                                  <div className="flex space-x-2">
+                                    <button 
+                                      type="button"
+                                      onClick={() => handleApplyEditPreviewData(editItemPreview.data)}
+                                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                                    >
+                                      Use This Info
+                                    </button>
+                                    <button 
+                                      type="button"
+                                      onClick={editItemPreview.clearPreview}
+                                      className="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                    >
+                                      Dismiss
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <input type="text" name="cost" value={editedItemData?.cost || ''} onChange={(e) => handleEditItemChange('cost', e.target.value)} className="w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" placeholder="Cost (e.g., $12.99)" />
                           <div className="flex space-x-2">
                             <button type="submit" className="flex-grow bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 dark:hover:bg-green-900">Save</button>
                             <button type="button" onClick={handleCancelEdit} className="flex-grow bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400">Cancel</button>
@@ -435,6 +659,13 @@ export const WishlistEditView: React.FC = () => {
                                   <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{item.name}</h4>
                                   <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{item.description}</p>
                                   {item.cost && <span className="text-green-600 font-medium text-lg">{item.cost}</span>}
+                                  
+                                  {/* Show URL preview for items with store links */}
+                                  {item.store_link && item.store_link.trim().startsWith('http') && (
+                                    <div className="mt-3">
+                                      <ItemUrlPreview url={item.store_link} />
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>

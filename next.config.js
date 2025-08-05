@@ -6,6 +6,21 @@ const nextConfig = {
   // Configure static file serving
   assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
   
+  // Configure external images for URL previews
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: '**',
+      }
+    ],
+    unoptimized: true
+  },
+  
   // Handle static assets from your existing public folder
   async redirects() {
     return []
@@ -24,6 +39,24 @@ const nextConfig = {
         },
       },
     });
+
+    // Handle native binary modules
+    config.externals = config.externals || [];
+    if (isServer) {
+      config.externals.push({
+        're2': 'commonjs re2',
+        'hpagent': 'commonjs hpagent'
+      });
+    }
+
+    // Ignore binary modules for client-side
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
+    };
     
     return config;
   },
