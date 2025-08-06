@@ -1,16 +1,22 @@
 {
   "app\\[...slug]\\page.tsx -> ../../components/ReactApp": {
-    "id": "app\\[...slug]\\page.tsx -> ../../components/ReactApp",
+    "id": 7231,
     "files": [
-      "static/css/_app-pages-browser_components_ReactApp_tsx.css",
-      "static/chunks/_app-pages-browser_components_ReactApp_tsx.js"
+      "static/css/655d998a7157b79c.css",
+      "static/chunks/4b1a69f1.f3367e70d769d171.js",
+      "static/chunks/602dbae6.d2960f1c5434870a.js",
+      "static/chunks/700.7b1cf1cb5831a4ed.js",
+      "static/chunks/231.8e7ed98f978ed8cb.js"
     ]
   },
   "app\\page.tsx -> ../components/ReactApp": {
-    "id": "app\\page.tsx -> ../components/ReactApp",
+    "id": 7231,
     "files": [
-      "static/css/_app-pages-browser_components_ReactApp_tsx.css",
-      "static/chunks/_app-pages-browser_components_ReactApp_tsx.js"
+      "static/css/655d998a7157b79c.css",
+      "static/chunks/4b1a69f1.f3367e70d769d171.js",
+      "static/chunks/602dbae6.d2960f1c5434870a.js",
+      "static/chunks/700.7b1cf1cb5831a4ed.js",
+      "static/chunks/231.8e7ed98f978ed8cb.js"
     ]
   }
 }

@@ -240,117 +240,28 @@ export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, e
             </div>
           </div>
           <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
-            {items.length > 0 ? items.map(item => (
-              <div key={item.$id} className="bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow">
-                {viewMode === 'grid' ? (
-                  // Compact grid view - image and price only
-                  <div className="p-4 flex flex-col items-center space-y-3">
-                    {/* Item Image */}
-                    {item.image_url ? (
-                      <div className="w-full aspect-square">
-                        <img
-                          src={item.image_url}
-                          alt={item.name}
-                          className="w-full h-full object-cover rounded-lg border"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-full aspect-square bg-gray-100 dark:bg-neutral-700 rounded-lg border flex items-center justify-center">
-                        <Gift className="w-8 h-8 text-gray-400" />
-                      </div>
-                    )}
-                    
-                    {/* Price */}
-                    {item.cost && (
-                      <span className="text-green-600 dark:text-green-400 font-medium text-lg text-center">
-                        {item.cost}
-                      </span>
-                    )}
-                    
-                    {/* Action Buttons - Compact */}
-                    <div className="flex gap-2 w-full">
-                      {item.store_link && (
-                        <Tooltip text="Purchase">
-                          <a
-                            href={item.store_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 bg-green-600 hover:bg-green-800 text-white py-2 rounded-lg transition duration-200 flex items-center justify-center text-sm"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        </Tooltip>
-                      )}
-                      <Tooltip text="I bought this">
-                        <button className="flex-1 bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm">
-                          <CheckCircle className="w-4 h-4" />
-                        </button>
-                      </Tooltip>
-                    </div>
+            {viewMode === 'grid' ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white dark:bg-neutral-800 rounded-lg shadow flex flex-col items-center justify-center p-8 aspect-square border-2 border-dashed border-gray-300 dark:border-gray-700">
+                  <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                    <Gift className="w-8 h-8 text-gray-400" />
                   </div>
-                ) : (
-                  // List view - item details inline with image
-                  <div className="p-6 flex items-center w-full">
-                    {/* Image */}
-                    <div className="flex-shrink-0 mr-4">
-                      {item.image_url ? (
-                        <img
-                          src={item.image_url}
-                          alt={item.name}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
-                          <Gift className="w-8 h-8 text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-grow">
-                      <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-1">{item.name}</h3>
-                      {item.description && (
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">{item.description}</p>
-                      )}
-                      <div className="flex items-center space-x-4">
-                        {item.cost && (
-                          <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>
-                        )}
-                        <span className="text-blue-600 dark:text-blue-400 flex items-center text-sm">
-                          <Gift className="w-4 h-4 mr-1" />
-                          {item.contributions} contributions
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 ml-4">
-                      <Tooltip text="Opens in a new tab">
-                        <a
-                          href={item.store_link || '#'}
-                          target={item.store_link ? "_blank" : undefined}
-                          rel={item.store_link ? "noopener noreferrer" : undefined}
-                          className={`${item.store_link ? 'bg-green-600 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'} text-white px-6 py-2 rounded-lg transition duration-200 flex items-center justify-center text-sm font-medium`}
-                        >
-                          <span className="hidden xs:inline">Purchase</span> <ExternalLink className="w-4 h-4 xs:ml-2" />
-                        </a>
-                      </Tooltip>
-                      <Tooltip text="Let the teacher know you've purchased this item">
-                        <button
-                          className="bg-sky-600 text-white px-6 py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
-                        >
-                          <CheckCircle className="w-4 h-4 xs:mr-2" />
-                          <span className="hidden xs:inline">I bought this</span>
-                        </button>
-                      </Tooltip>
-                    </div>
+                  <div className="h-4 w-2/3 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
+                  <div className="h-3 w-1/2 bg-gray-100 dark:bg-gray-800 rounded" />
+                </div>
+              ))
+            ) : (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white dark:bg-neutral-800 rounded-lg shadow flex items-center p-6 border-2 border-dashed border-gray-300 dark:border-gray-700">
+                  <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mr-6">
+                    <Gift className="w-8 h-8 text-gray-400" />
                   </div>
-                )}
-              </div>
-            )) : (
-              <div className="text-center py-10 bg-white dark:bg-neutral-800 rounded-lg shadow">
-                <p className="text-gray-600 dark:text-gray-400">This wiSHlist is empty!</p>
-              </div>
+                  <div className="flex-1">
+                    <div className="h-5 w-1/2 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
+                    <div className="h-3 w-1/3 bg-gray-100 dark:bg-gray-800 rounded" />
+                  </div>
+                </div>
+              ))
             )}
           </div>
         </div>
