@@ -292,6 +292,7 @@ export const WishlistEditView: React.FC = () => {
         description: item.description,
         store_link: item.store_link,
         cost: item.cost,
+        image_url: item.image_url || '',
         contributions: 0 // Reset contributions for the duplicate
       });
       setItems(prev => [...prev, duplicatedItemDoc as unknown as Models.Document & ItemDoc]);
@@ -348,47 +349,50 @@ export const WishlistEditView: React.FC = () => {
       <Header title="Manage wiSHlist" showBackButton={true} showInfoButton={true} isLoading={loading} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
-        <div className="space-y-6">
-          {/* Add Item Mode Selector */}
+
+        {/* Merged Add New Item (Auto/Manual) section with bg-neutral and no border */}
+        <div className="flex flex-col">
           <div className="bg-white dark:bg-neutral-800 rounded-lg shadow">
-            {/* Tab Navigation */}
-            <div className="flex border-b border-gray-200 dark:border-neutral-700">
-              <button
-                onClick={() => setAddItemMode('auto')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-4 px-6 text-sm font-medium transition-colors ${
-                  addItemMode === 'auto'
-                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                <Zap size={18} />
-                <span>Auto (URL)</span>
-              </button>
-              <button
-                onClick={() => setAddItemMode('manual')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-4 px-6 text-sm font-medium transition-colors ${
-                  addItemMode === 'manual'
-                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-              >
-                <Edit size={18} />
-                <span>Manual</span>
-              </button>
+            <div className="rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-sky-600 dark:text-sky-600 mb-4">Add New Item</h3>
+              {/* Tab Navigation */}
+              <div className="flex border-b border-neutral-200 dark:border-neutral-700 mb-4 bg-white dark:bg-neutral-900 rounded-t-lg">
+                <button
+                  onClick={() => setAddItemMode('auto')}
+                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
+                    addItemMode === 'auto'
+                      ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
+                      : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
+                  }`}
+                >
+                  <Zap size={18} />
+                  <span>Auto (URL)</span>
+                </button>
+                <button
+                  onClick={() => setAddItemMode('manual')}
+                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
+                    addItemMode === 'manual'
+                      ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
+                      : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
+                  }`}
+                >
+                  <Edit size={18} />
+                  <span>Manual</span>
+                </button>
+              </div>
+              {/* Tab Content */}
+              {addItemMode === 'auto' && wishlist && (
+                <AddItemAuto 
+                  wishlist={wishlist} 
+                  onItemAdded={handleItemAdded} 
+                  existingItems={items}
+                />
+              )}
+              {addItemMode === 'manual' && wishlist && (
+                <AddItemManual wishlist={wishlist} onItemAdded={handleItemAdded} />
+              )}
             </div>
           </div>
-
-          {/* Tab Content */}
-          {addItemMode === 'auto' && wishlist && (
-            <AddItemAuto 
-              wishlist={wishlist} 
-              onItemAdded={handleItemAdded} 
-              existingItems={items}
-            />
-          )}
-          {addItemMode === 'manual' && wishlist && (
-            <AddItemManual wishlist={wishlist} onItemAdded={handleItemAdded} />
-          )}
         </div>
 
           {suggestions.length > 0 && (
