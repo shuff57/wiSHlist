@@ -18,6 +18,7 @@ interface WishlistDoc {
   shipping_city?: string;
   shipping_state?: string;
   shipping_zip?: string;
+  shipping_info?: string;
 }
 
 interface ItemDoc {
@@ -185,25 +186,24 @@ export const SupporterView: React.FC = () => {
       <Header title="wiSHlist" showSettingsButton={false} showSignoutButton={false} showSearch={true} showInfoButton={true} isLoading={loading} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Help {wishlist?.teacher_name}&apos;s Students Learn & Grow</h2>
-          <p className="text-gray-600 dark:text-gray-400">Your contributions make a real difference in our classroom. Thank you for supporting education!</p>
-          {wishlist?.contact_info && (
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              <strong>Contact:</strong> {wishlist.contact_info}
-            </p>
-          )}
-          {wishlist?.shipping_address && (
-            <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              <strong>Shipping Address:</strong>
-              <div className="ml-2 mt-1">
-                {wishlist.shipping_name && <div>{wishlist.shipping_name}</div>}
-                <div>{wishlist.shipping_address}</div>
-                <div>
-                  {wishlist.shipping_city}{wishlist.shipping_city && wishlist.shipping_state && ', '}{wishlist.shipping_state} {wishlist.shipping_zip}
+          <div className="mb-4 bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">Help {wishlist?.teacher_name}&apos;s Students Learn & Grow</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400">Your contributions make a real difference in our classroom. Thank you for supporting education!</p>
+          </div>
+          <div className="flex flex-col md:flex-row items-stretch justify-center gap-6">
+            {wishlist?.contact_info && wishlist?.shipping_info && (
+              <div className="w-full flex flex-col md:flex-row items-stretch justify-center gap-6">
+                <div className="w-full md:w-1/2 bg-white dark:bg-neutral-800 rounded-lg shadow p-6 flex flex-col items-center justify-center h-full min-h-[180px]">
+                  <span className="text-xl text-gray-700 dark:text-gray-200 font-semibold mb-1">Contact Info:</span>
+                  <span className="text-lg text-gray-700 dark:text-gray-200 mb-0">{wishlist.contact_info}</span>
+                </div>
+                <div className="w-full md:w-1/2 bg-white dark:bg-neutral-800 rounded-lg shadow p-6 flex flex-col items-center justify-center h-full min-h-[180px]">
+                  <span className="text-xl text-gray-700 dark:text-gray-200 font-semibold mb-1">Shipping Info:</span>
+                  <span className="text-lg text-gray-700 dark:text-gray-200 whitespace-pre-line mb-0">{wishlist.shipping_info}</span>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         
         <div className="space-y-8 bg-white dark:bg-neutral-900 rounded-lg shadow p-6">

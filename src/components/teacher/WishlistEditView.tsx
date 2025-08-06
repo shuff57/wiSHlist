@@ -24,6 +24,7 @@ interface WishlistDoc {
   shipping_city?: string;
   shipping_state?: string;
   shipping_zip?: string;
+  shipping_info?: string;
 }
 
 interface ItemDoc {
@@ -73,6 +74,7 @@ const ItemUrlPreview: React.FC<{ url: string }> = ({ url }) => {
 };
 
 export const WishlistEditView: React.FC = () => {
+  const [showShippingConfirmation, setShowShippingConfirmation] = useState(false);
   const { wishlistId } = useParams<{ wishlistId: string }>();
   const [wishlist, setWishlist] = useState<Models.Document & WishlistDoc | null>(null);
   const [items, setItems] = useState<(Models.Document & ItemDoc)[]>([]);
@@ -171,8 +173,12 @@ export const WishlistEditView: React.FC = () => {
     e.preventDefault();
     if (!wishlist) return;
     try {
-      await databases.updateDocument(databaseId, wishlistsCollectionId, wishlist.$id, formData);
-      setWishlist(prev => prev ? { ...prev, ...formData } : null);
+      // Save both school name and full address to contact_info
+      await databases.updateDocument(databaseId, wishlistsCollectionId, wishlist.$id, {
+        wishlist_name: formData.wishlist_name,
+        contact_info: formData.contact_info
+      });
+      setWishlist(prev => prev ? { ...prev, wishlist_name: formData.wishlist_name, contact_info: formData.contact_info } : null);
       alert('Wishlist settings saved!');
     } catch (error) {
       alert('Failed to save settings.');
@@ -836,87 +842,48 @@ export const WishlistEditView: React.FC = () => {
               </div>
               
               {/* Shipping Address Section */}
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
-                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Shipping Address</h4>
+              {/* Shipping Address Section */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Shipping Info</h4>
                 <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search School or Address</label>
-                    <GoogleAddressAutocomplete
-                      placeholder="Type school name or address..."
-                      preferSchools={true}
-                      onAddressSelect={(address: {
-                        name: string;
-                        address: string;
-                        city: string;
-                        state: string;
-                        zip: string;
-                        phone?: string;
-                        website?: string;
-                      }) => {
-                        setFormData({
-                          ...formData,
-                          shipping_name: address.name || formData.shipping_name,
-                          shipping_address: address.address,
-                          shipping_city: address.city,
-                          shipping_state: address.state,
-                          shipping_zip: address.zip
+                  <GoogleAddressAutocomplete
+                    placeholder="Type school name or address..."
+                    preferSchools={true}
+                    onAddressSelect={(address: {
+                      name: string;
+                      address: string;
+                      city?: string;
+                      state?: string;
+                      zip?: string;
+                    }) => {
+                      setFormData({
+                        ...formData,
+                        shipping_name: address.name || address.address || '',
+                        shipping_address: address.address || '',
+                        shipping_city: address.city || '',
+                        shipping_state: address.state || '',
+                        shipping_zip: address.zip || ''
+                      });
+                      // Immediately save shipping_info to wishlist as plain info, no prefixes
+                      const cityState = address.city && address.state ? `${address.city}, ${address.state}` : `${address.city || ''}${address.state ? address.state : ''}`;
+                      const shippingInfo = `${address.name || ''}\n${address.address || ''}\n${cityState}\n${address.zip || ''}`;
+                      if (wishlist) {
+                        databases.updateDocument(databaseId, wishlistsCollectionId, wishlist.$id, {
+                          shipping_info: shippingInfo
                         });
-                      }}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                    <input 
-                      type="text" 
-                      value={formData.shipping_name} 
-                      onChange={e => setFormData({...formData, shipping_name: e.target.value})} 
-                      placeholder="Full name for delivery"
-                      className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
-                    <input 
-                      type="text" 
-                      value={formData.shipping_address} 
-                      onChange={e => setFormData({...formData, shipping_address: e.target.value})} 
-                      placeholder="Street address"
-                      className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" 
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">City</label>
-                      <input 
-                        type="text" 
-                        value={formData.shipping_city} 
-                        onChange={e => setFormData({...formData, shipping_city: e.target.value})} 
-                        placeholder="City"
-                        className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">State</label>
-                      <input 
-                        type="text" 
-                        value={formData.shipping_state} 
-                        onChange={e => setFormData({...formData, shipping_state: e.target.value})} 
-                        placeholder="State"
-                        className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" 
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ZIP Code</label>
-                    <input 
-                      type="text" 
-                      value={formData.shipping_zip} 
-                      onChange={e => setFormData({...formData, shipping_zip: e.target.value})} 
-                      placeholder="ZIP code"
-                      className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" 
-                    />
-                  </div>
+                        setWishlist(prev => prev ? { ...prev, shipping_info: shippingInfo } : null);
+                      }
+                    }}
+                    className="mt-1"
+                  />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">Selected School/Address</label>
+                  <input
+                    type="text"
+                    value={formData.shipping_name}
+                    onChange={e => setFormData({ ...formData, shipping_name: e.target.value })}
+                    placeholder="School or address name"
+                    className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none"
+                  />
                 </div>
               </div>
               <div>

@@ -5,5 +5,12 @@
       "static/css/_app-pages-browser_components_ReactApp_tsx.css",
       "static/chunks/_app-pages-browser_components_ReactApp_tsx.js"
     ]
+  },
+  "app\\page.tsx -> ../components/ReactApp": {
+    "id": "app\\page.tsx -> ../components/ReactApp",
+    "files": [
+      "static/css/_app-pages-browser_components_ReactApp_tsx.css",
+      "static/chunks/_app-pages-browser_components_ReactApp_tsx.js"
+    ]
   }
 }
