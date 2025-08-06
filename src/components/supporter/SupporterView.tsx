@@ -20,6 +20,8 @@ interface WishlistDoc {
   shipping_state?: string;
   shipping_zip?: string;
   shipping_info?: string;
+  title_text?: string;
+  welcome_message?: string;
 }
 
 interface ItemDoc {
@@ -184,12 +186,12 @@ export const SupporterView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
-      <Header title="wiSHlist" showSettingsButton={false} showSignoutButton={false} showSearch={true} showInfoButton={true} isLoading={loading} />
+      <Header title={wishlist?.title_text || "wiSHlist"} showSettingsButton={false} showSignoutButton={false} showSearch={true} showInfoButton={true} isLoading={loading} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <div className="mb-4 bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
-            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">Help {wishlist?.teacher_name}&apos;s Students Learn & Grow</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">Your contributions make a real difference in our classroom. Thank you for supporting education!</p>
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">{wishlist?.title_text || `Help ${wishlist?.teacher_name}&apos;s Students Learn & Grow`}</h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400">{wishlist?.welcome_message || "Your contributions make a real difference in our classroom. Thank you for supporting education!"}</p>
           </div>
           <div className="flex flex-col md:flex-row items-stretch justify-center gap-6">
             {wishlist?.contact_info && wishlist?.shipping_info && (
