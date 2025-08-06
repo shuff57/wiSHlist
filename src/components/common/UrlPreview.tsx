@@ -66,11 +66,7 @@ export function UrlPreview({ data, loading, error, onRetry, className }: UrlPrev
   }
 
   return (
-<<<<<<< HEAD
     <div className={`relative border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow ${className || ''}`}>
-=======
-    <div className={`relative border rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow overflow-hidden max-w-full ${className || ''}`}>
->>>>>>> 7f99b977fcc7c7eb301530f3b1e863c7b0f24769
       {/* Show warning banner for fallback or error scenarios */}
       {(error || (data && data.fallback)) && (
         <div className="mb-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded text-xs">
@@ -84,7 +80,6 @@ export function UrlPreview({ data, loading, error, onRetry, className }: UrlPrev
           </div>
         </div>
       )}
-<<<<<<< HEAD
       {data ? (
         <a 
           href={data?.url || '#'} 
@@ -141,63 +136,6 @@ export function UrlPreview({ data, loading, error, onRetry, className }: UrlPrev
           )}
         </a>
       ) : null}
-=======
-      <a 
-        href={data.url} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="block hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded p-2 -m-2 overflow-hidden max-w-full"
-      >
-        <div className="flex space-x-4 overflow-hidden max-w-full">
-          {data.image && (
-            <div className="flex-shrink-0">
-              <img
-                src={data.image}
-                alt={data.title || 'Preview'}
-                className="w-20 h-20 object-cover rounded border"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.style.display = 'none'
-                }}
-              />
-            </div>
-          )}
-          <div className="flex-1 min-w-0 overflow-hidden max-w-full">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                {data.title && (
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 mb-1 overflow-hidden max-w-full">
-                    {data.title}
-                  </h3>
-                )}
-                {data.description && (
-                  <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-2 overflow-hidden max-w-full">
-                    {data.description}
-                  </p>
-                )}
-                <p className="text-xs text-gray-500 dark:text-gray-500 truncate overflow-hidden max-w-full">
-                  {data.url}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
-          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5-1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
-          </svg>
-          Click to open link
-        </div>
-      </a>
-      {/* Price at the bottom of the preview */}
-      {data.price && (
-        <div className="absolute left-4 right-4 bottom-4 flex justify-end">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-600 dark:bg-green-700 text-gray-100 dark:text-gray-300 shadow">
-            {data.price}
-          </span>
-        </div>
-      )}
->>>>>>> 7f99b977fcc7c7eb301530f3b1e863c7b0f24769
     </div>
   );
 }
