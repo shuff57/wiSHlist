@@ -112,7 +112,12 @@ export const TeacherDashboard: React.FC = () => {
         setUserDoc(doc as unknown as Models.Document & UserDoc);
         try {
             const response = await databases.listDocuments(
-                databaseId, wishlistsCollectionId, [Query.equal('teacher_id', userId)]
+                databaseId,
+                wishlistsCollectionId,
+                [
+                  Query.equal('teacher_id', userId),
+                  Query.orderAsc('position')
+                ]
             );
             setWishlists(response.documents as unknown as (Models.Document & WishlistDoc)[]);
         } catch (error) {
@@ -255,7 +260,19 @@ export const TeacherDashboard: React.FC = () => {
     reorderedWishlists.splice(destination.index, 0, removed);
 
     setWishlists(reorderedWishlists);
-    // Here you would typically update the order in your database
+    // Update position field for each wishlist in the new order (sequentially, ensuring DB update)
+    (async () => {
+      for (let idx = 0; idx < reorderedWishlists.length; idx++) {
+        const wishlist = reorderedWishlists[idx];
+        try {
+          await databases.updateDocument(databaseId, wishlistsCollectionId, wishlist.$id, {
+            position: idx
+          });
+        } catch (error) {
+          // Optionally handle error (e.g., show notification)
+        }
+      }
+    })();
   };
 
   if (authLoading || loading || !user) {
