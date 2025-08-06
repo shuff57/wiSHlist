@@ -94,7 +94,12 @@ export const WishlistEditView: React.FC = () => {
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const [editedItemData, setEditedItemData] = useState<ItemDoc | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('wishlistViewMode') as 'list' | 'grid') || 'list';
+    }
+    return 'list';
+  });
   const [enabled] = useStrictDroppable(loading);
   const [isClient, setIsClient] = useState(false);
   
@@ -111,6 +116,13 @@ export const WishlistEditView: React.FC = () => {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Save view mode to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('wishlistViewMode', viewMode);
+    }
+  }, [viewMode]);
 
   // Cleanup URL preview timeout on unmount
   useEffect(() => {
@@ -141,7 +153,14 @@ export const WishlistEditView: React.FC = () => {
         shipping_zip: wishlistDoc.shipping_zip || ''
       });
 
-      const itemsResponse = await databases.listDocuments(databaseId, itemsCollectionId, [Query.equal('wishlist_id', id)]);
+      const itemsResponse = await databases.listDocuments(
+        databaseId,
+        itemsCollectionId,
+        [
+          Query.equal('wishlist_id', id),
+          Query.orderAsc('position')
+        ]
+      );
       setItems(itemsResponse.documents as unknown as (Models.Document & ItemDoc)[]);
 
       const suggestionsResponse = await databases.listDocuments(databaseId, suggestionsCollectionId, [Query.equal('wishlist_id', id)]);
@@ -347,9 +366,21 @@ export const WishlistEditView: React.FC = () => {
     const [removed] = reorderedItems.splice(source.index, 1);
     reorderedItems.splice(destination.index, 0, removed);
 
-    setItems(reorderedItems);
+    // Update position field for each item in the new order (sequentially, ensuring DB update)
+    (async () => {
+      for (let idx = 0; idx < reorderedItems.length; idx++) {
+        const item = reorderedItems[idx];
+        try {
+          await databases.updateDocument(databaseId, itemsCollectionId, item.$id, {
+            position: idx
+          });
+        } catch (error) {
+          // Optionally handle error (e.g., show notification)
+        }
+      }
+    })();
 
-    // Optionally, update the order in your database if you add a position field in the future
+    setItems(reorderedItems);
   };
 
   return (
