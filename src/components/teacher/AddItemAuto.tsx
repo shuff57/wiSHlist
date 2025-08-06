@@ -34,6 +34,7 @@ interface AddItemAutoProps {
 
 export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded, existingItems = [], suggestionMode = false }) => {
   const [url, setUrl] = useState('');
+  const [urlError, setUrlError] = useState<string | null>(null);
   const [urlPreviewTimeout, setUrlPreviewTimeout] = useState<NodeJS.Timeout | null>(null);
   const [editableData, setEditableData] = useState({
     name: '',
@@ -98,37 +99,51 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded,
     return null;
   };
 
+  function isValidUrl(url: string): boolean {
+    try {
+      const parsed = new URL(url.trim());
+      return ['http:', 'https:'].includes(parsed.protocol);
+    } catch {
+      return false;
+    }
+  }
+
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setUrl(value);
-    
+    setUrlError(null);
+
     // Clear existing timeout and warnings
     if (urlPreviewTimeout) {
       clearTimeout(urlPreviewTimeout);
     }
     setDuplicateWarning(null);
-    
-    if (value.trim() && value.startsWith('http')) {
-      // Check for duplicates IMMEDIATELY to prevent any loading state
-      const duplicateMessage = checkForDuplicateUrl(value.trim());
-      
-      if (duplicateMessage) {
-        setDuplicateWarning(duplicateMessage);
-        // Clear any existing preview since this is a duplicate
-        urlPreview.clearPreview();
-        return; // Exit early - no timeout needed for duplicates
-      }
-      
-      // Only set timeout for non-duplicate URLs
-      const timeout = setTimeout(() => {
-        urlPreview.previewUrl(value.trim());
-      }, 1000); // Wait 1 second after user stops typing
-      
-      setUrlPreviewTimeout(timeout);
-    } else {
-      // Clear preview if URL is removed or invalid
+
+    if (!value.trim()) {
       urlPreview.clearPreview();
+      return;
     }
+
+    if (!isValidUrl(value.trim())) {
+      setUrlError('Please enter a valid URL starting with http:// or https://');
+      urlPreview.clearPreview();
+      return;
+    }
+
+    // Check for duplicates IMMEDIATELY to prevent any loading state
+    const duplicateMessage = checkForDuplicateUrl(value.trim());
+    if (duplicateMessage) {
+      setDuplicateWarning(duplicateMessage);
+      urlPreview.clearPreview();
+      return; // Exit early - no timeout needed for duplicates
+    }
+
+    // Only set timeout for non-duplicate URLs
+    const timeout = setTimeout(() => {
+      urlPreview.previewUrl(value.trim());
+    }, 1000); // Wait 1 second after user stops typing
+
+    setUrlPreviewTimeout(timeout);
   };
 
   // Auto-populate editable data when preview loads
@@ -154,6 +169,12 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded,
     if (!urlPreview.data || !editableData.name.trim()) return;
     setIsSubmitting(true);
     try {
+      // Default values for missing fields
+      const defaultContributions = 0;
+      const defaultPosition = existingItems && existingItems.length > 0
+        ? Math.max(...existingItems.map(item => item.position ?? 0)) + 1
+        : 1;
+
       if (suggestionMode) {
         const itemData = {
           name: editableData.name,
@@ -161,6 +182,8 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded,
           cost: editableData.cost,
           store_link: url,
           image_url: urlPreview.data?.image || '',
+          contributions: defaultContributions,
+          position: defaultPosition
         };
         await onItemAdded(itemData);
       } else {
@@ -175,7 +198,8 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded,
             store_link: url,
             cost: editableData.cost,
             image_url: urlPreview.data.image || null, // Save the scraped image URL
-            contributions: 0
+            contributions: defaultContributions,
+            position: defaultPosition
           }
         );
         onItemAdded(newItemDoc as unknown as Models.Document & ItemDoc);
@@ -235,6 +259,22 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded,
             </button>
           )}
         </div>
+
+        {/* URL Error */}
+        {urlError && (
+          <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700">
+            <div className="flex items-center space-x-2">
+              <div className="text-red-600 dark:text-red-400">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <p className="text-sm text-red-800 dark:text-red-200">
+                {urlError}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Duplicate Warning */}
         {duplicateWarning && (

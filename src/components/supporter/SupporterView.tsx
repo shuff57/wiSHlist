@@ -25,12 +25,13 @@ interface WishlistDoc {
 }
 
 interface ItemDoc {
-  name: string;
-  description?: string;
-  store_link?: string;
-  cost?: string;
-  image_url?: string;
-  contributions: number;
+name: string;
+description?: string;
+store_link?: string;
+cost?: string;
+image_url?: string;
+contributions: number;
+position: number;
 }
 
 interface SuggestionForm {
@@ -184,6 +185,15 @@ export const SupporterView: React.FC = () => {
     );
   }
 
+  // Sort items by position before rendering
+  const getPosition = (item: any) => {
+    // Try to extract position as a number, fallback to 0
+    if (typeof item.position === 'number') return item.position;
+    if (typeof item.position === 'string' && !isNaN(Number(item.position))) return Number(item.position);
+    return 0;
+  };
+  const sortedItems = [...items].sort((a, b) => getPosition(a) - getPosition(b));
+
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
       <Header title={wishlist?.title_text || "wiSHlist"} showSettingsButton={false} showSignoutButton={false} showSearch={true} showInfoButton={true} isLoading={loading} />
@@ -211,8 +221,8 @@ export const SupporterView: React.FC = () => {
         
         <div className="space-y-8 bg-white dark:bg-neutral-900 rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Classroom Needs ({items.length} items)</h3>
-              <div className="flex items-center space-x-2">
+            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Classroom Needs ({sortedItems.length} items)</h3>
+            <div className="flex items-center space-x-2">
               <Tooltip text="List View">
                 <button
                   onClick={() => setViewMode('list')}
@@ -240,22 +250,21 @@ export const SupporterView: React.FC = () => {
             </div>
           </div>
           <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
-            {items.length > 0 ? items.map(item => (
-              <div key={item.$id} className={`bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between w-full ${viewMode === 'grid' ? 'min-h-[220px]' : 'min-h-[180px]'}`}>
-                {viewMode === 'grid' ? (
-                  // Grid view with hover card
-                  <HoverCard
-                    content={
-                      <div>
-                        <div className="font-bold text-base mb-1 text-gray-900 dark:text-white">{item.name}</div>
-                        {item.description && (
-                          <div className="text-sm text-gray-600 dark:text-gray-300">{item.description}</div>
-                        )}
-                      </div>
-                    }
-                  >
-                    <div className="flex flex-col h-full min-h-[220px]">
-                      {/* Centered image */}
+            {sortedItems.length > 0 ? (
+              sortedItems.map(item => (
+                <div key={item.$id} className={`bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between w-full ${viewMode === 'grid' ? 'min-h-[220px]' : 'min-h-[180px]'}`}>
+                  {viewMode === 'grid' ? (
+                    <HoverCard
+                      content={
+                        <div>
+                          <div className="font-bold text-base mb-1 text-gray-900 dark:text-white">{item.name}</div>
+                          {item.description && (
+                            <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">{item.description}</div>
+                          )}
+                          {/* Removed price and contributions from hover card */}
+                        </div>
+                      }
+                    >
                       <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full max-w-[160px] mx-auto flex items-center justify-center">
                         {item.image_url ? (
                           <img 
@@ -269,9 +278,7 @@ export const SupporterView: React.FC = () => {
                           </div>
                         )}
                       </div>
-                      {/* Bottom action bar with price/purchase and contributions/bought buttons */}
                       <div className="flex items-end justify-between pt-2">
-                        {/* Price and Purchase button */}
                         <div className="flex flex-col items-start space-y-2">
                           {item.cost ? (
                             <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>
@@ -289,7 +296,64 @@ export const SupporterView: React.FC = () => {
                             </a>
                           </Tooltip>
                         </div>
-                        {/* Contributions and I bought this button */}
+                        <div className="flex flex-col items-end space-y-2">
+                          <span className="text-blue-600 dark:text-blue-400 flex items-center text-sm">
+                            <Gift className="w-4 h-4 mr-1" />
+                            {item.contributions} contributions
+                          </span>
+                          <Tooltip text="Let the teacher know you've purchased this item">
+                            <button
+                              onClick={() => handleMarkContribution(item)}
+                              className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
+                            >
+                              <CheckCircle className="w-4 h-4 xs:mr-2" />
+                              <span className="hidden xs:inline">I bought this</span>
+                            </button>
+                          </Tooltip>
+                        </div>
+                      </div>
+                    </HoverCard>
+                  ) : (
+                    <div className="flex flex-col h-full min-h-[180px]">
+                      <div className="flex items-center justify-center flex-grow py-4">
+                        <div className="flex-shrink-0 mr-6 w-24 h-24">
+                          {item.image_url ? (
+                            <img
+                              src={item.image_url}
+                              alt={item.name}
+                              className="w-full h-full object-cover rounded"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
+                              <Gift className="w-12 h-12 text-gray-400" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">{item.name}</h3>
+                          {item.description && (
+                            <p className="text-base text-gray-600 dark:text-gray-400">{item.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-end justify-between pt-4">
+                        <div className="flex flex-col items-start space-y-2">
+                          {item.cost ? (
+                            <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>
+                          ) : (
+                            <span className="text-gray-400 text-sm">No price</span>
+                          )}
+                          <Tooltip text="Opens in a new tab">
+                            <a
+                              href={item.store_link || '#'}
+                              target={item.store_link ? "_blank" : undefined}
+                              rel={item.store_link ? "noopener noreferrer" : undefined}
+                              className={`${item.store_link ? 'bg-green-600 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'} text-white px-4 py-2 rounded-lg transition duration-200 flex items-center justify-center text-sm font-medium`}
+                            >
+                              <span className="hidden xs:inline">Purchase</span> <ExternalLink className="w-4 h-4 xs:ml-2" />
+                            </a>
+                          </Tooltip>
+                        </div>
                         <div className="flex flex-col items-end space-y-2">
                           <span className="text-blue-600 dark:text-blue-400 flex items-center text-sm">
                             <Gift className="w-4 h-4 mr-1" />
@@ -307,83 +371,15 @@ export const SupporterView: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                  </HoverCard>
-                ) : (
-                  // List view - centered content with bottom action bar
-                  <div className="flex flex-col h-full min-h-[180px]">
-                    {/* Centered image and item details */}
-                    <div className="flex items-center justify-center flex-grow py-4">
-                      {/* Image */}
-                      <div className="flex-shrink-0 mr-6 w-24 h-24">
-                        {item.image_url ? (
-                          <img
-                            src={item.image_url}
-                            alt={item.name}
-                            className="w-full h-full object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
-                            <Gift className="w-12 h-12 text-gray-400" />
-                          </div>
-                        )}
-                      </div>
-                      {/* Item details */}
-                      <div className="text-left">
-                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">{item.name}</h3>
-                        {item.description && (
-                          <p className="text-base text-gray-600 dark:text-gray-400">{item.description}</p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Bottom action bar with price/purchase and contributions/bought buttons */}
-                    <div className="flex items-end justify-between pt-4">
-                      {/* Price and Purchase button */}
-                      <div className="flex flex-col items-start space-y-2">
-                        {item.cost ? (
-                          <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>
-                        ) : (
-                          <span className="text-gray-400 text-sm">No price</span>
-                        )}
-                        <Tooltip text="Opens in a new tab">
-                          <a
-                            href={item.store_link || '#'}
-                            target={item.store_link ? "_blank" : undefined}
-                            rel={item.store_link ? "noopener noreferrer" : undefined}
-                            className={`${item.store_link ? 'bg-green-600 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'} text-white px-4 py-2 rounded-lg transition duration-200 flex items-center justify-center text-sm font-medium`}
-                          >
-                            <span className="hidden xs:inline">Purchase</span> <ExternalLink className="w-4 h-4 xs:ml-2" />
-                          </a>
-                        </Tooltip>
-                      </div>
-                      
-                      {/* Contributions and I bought this button */}
-                      <div className="flex flex-col items-end space-y-2">
-                        <span className="text-blue-600 dark:text-blue-400 flex items-center text-sm">
-                          <Gift className="w-4 h-4 mr-1" />
-                          {item.contributions} contributions
-                        </span>
-                        <Tooltip text="Let the teacher know you've purchased this item">
-                          <button
-                            onClick={() => handleMarkContribution(item)}
-                            className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
-                          >
-                            <CheckCircle className="w-4 h-4 xs:mr-2" />
-                            <span className="hidden xs:inline">I bought this</span>
-                          </button>
-                        </Tooltip>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )) : (
+                  )}
+                </div>
+              ))
+            ) : (
               <div className="text-center py-10 bg-white dark:bg-neutral-800 rounded-lg shadow">
                 <p className="text-gray-600 dark:text-gray-400">This wiSHlist is empty!</p>
               </div>
             )}
           </div>
-
           {/* Suggestion Section */}
           <div className="flex flex-col mt-8">
             <div className={`bg-white dark:bg-neutral-800 rounded-lg shadow transition-all duration-500 border-2 ${submissionSuccess ? 'border-purple-500' : 'border-purple-300 dark:border-purple-700'}`}>
