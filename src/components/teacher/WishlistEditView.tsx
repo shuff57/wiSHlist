@@ -4,6 +4,7 @@ import { account, databases, databaseId, wishlistsCollectionId, itemsCollectionI
 import { Models, ID, Query } from 'appwrite';
 import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save, Copy, Plus, Zap, Edit, Gift } from 'lucide-react';
 import { ExternalLink } from 'lucide-react';
+import { HoverCard } from '../common/HoverCard';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
 import { GoogleAddressAutocomplete } from '../common/GoogleAddressAutocomplete';
@@ -75,6 +76,7 @@ const ItemUrlPreview: React.FC<{ url: string }> = ({ url }) => {
 
 export const WishlistEditView: React.FC = () => {
   const [showShippingConfirmation, setShowShippingConfirmation] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
   const { wishlistId } = useParams<{ wishlistId: string }>();
   const [wishlist, setWishlist] = useState<Models.Document & WishlistDoc | null>(null);
   const [items, setItems] = useState<(Models.Document & ItemDoc)[]>([]);
@@ -173,13 +175,13 @@ export const WishlistEditView: React.FC = () => {
     e.preventDefault();
     if (!wishlist) return;
     try {
-      // Save both school name and full address to contact_info
       await databases.updateDocument(databaseId, wishlistsCollectionId, wishlist.$id, {
         wishlist_name: formData.wishlist_name,
         contact_info: formData.contact_info
       });
       setWishlist(prev => prev ? { ...prev, wishlist_name: formData.wishlist_name, contact_info: formData.contact_info } : null);
-      alert('Wishlist settings saved!');
+      setSettingsSaved(true);
+      setTimeout(() => setSettingsSaved(false), 3500);
     } catch (error) {
       alert('Failed to save settings.');
     }
@@ -441,7 +443,7 @@ export const WishlistEditView: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Your Items ({items.length})</h3>
-              <div className="hidden md:flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
                 <Tooltip text="List View">
                   <button
                     onClick={() => setViewMode('list')}
@@ -450,6 +452,7 @@ export const WishlistEditView: React.FC = () => {
                         ? 'bg-sky-600 text-white hover:bg-sky-800'
                         : 'bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-neutral-500'
                     }`}
+                    aria-label="List View"
                   >
                     <List className="w-5 h-5" />
                   </button>
@@ -462,6 +465,7 @@ export const WishlistEditView: React.FC = () => {
                         ? 'bg-sky-600 text-white hover:bg-sky-800'
                         : 'bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-neutral-500'
                     }`}
+                    aria-label="Grid View"
                   >
                     <Grid className="w-5 h-5" />
                   </button>
@@ -533,25 +537,34 @@ export const WishlistEditView: React.FC = () => {
                                       <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing">
                                         <GripVertical className="w-5 h-5 text-black dark:text-white" />
                                       </div>
-                                      
                                       {/* Image and price in center */}
                                       <div className="flex-grow">
-                                        <div className="aspect-square mb-3 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
-                                          {item.image_url ? (
-                                            <img 
-                                              src={item.image_url} 
-                                              alt={item.name}
-                                              className="w-full h-full object-cover"
-                                            />
-                                          ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
-                                              <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                                              </svg>
-                                            </div>
-                                          )}
-                                        </div>
-                                        
+                                        <HoverCard
+                                    content={
+                                      <div className="flex flex-col items-center justify-center">
+                                        <div className="font-bold text-base mb-1 text-gray-900 dark:text-white text-center">{item.name}</div>
+                                        {item.description && (
+                                          <div className="text-sm text-gray-600 dark:text-gray-300 text-center">{item.description}</div>
+                                        )}
+                                      </div>
+                                    }
+                                        >
+                                          <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full max-w-[160px] mx-auto flex items-center justify-center">
+                                            {item.image_url ? (
+                                              <img 
+                                                src={item.image_url} 
+                                                alt={item.name}
+                                                className="w-full h-full object-cover"
+                                              />
+                                            ) : (
+                                              <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
+                                                <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                                                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                                </svg>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </HoverCard>
                                         {/* Price centered below image */}
                                         <div className="text-center">
                                           <span className="text-xl font-semibold text-green-600 dark:text-green-400">
@@ -720,7 +733,7 @@ export const WishlistEditView: React.FC = () => {
                             <div className="flex items-start space-x-3">
                               {/* Image and price in center */}
                               <div className="flex-grow">
-                                <div className="aspect-square mb-3 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                                <div className="aspect-square mb-3 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full max-w-[160px] mx-auto">
                                   {item.image_url ? (
                                     <img 
                                       src={item.image_url} 
@@ -887,11 +900,26 @@ export const WishlistEditView: React.FC = () => {
                 </div>
               </div>
               <div>
-                <button type="submit" className="mt-1 w-full bg-sky-600 text-white py-2 px-4 rounded-lg hover:bg-sky-800 dark:hover:bg-sky-800 flex items-center justify-center">
-                  <Save className="w-4 h-4 mr-2" />
-                  <Tooltip text="Save changes to your wishlist settings">
-                    <span>Save Settings</span>
-                  </Tooltip>
+                <button
+                  type="submit"
+                  className={`mt-1 w-full py-2 px-4 rounded-lg flex items-center justify-center transition-colors
+                    ${settingsSaved ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800 dark:hover:bg-sky-800'}`}
+                  disabled={settingsSaved}
+                  onClick={() => setSettingsSaved(false)}
+                >
+                  {settingsSaved ? (
+                    <span className="flex items-center">
+                      <Check className="w-5 h-5 mr-2" />
+                      Added to Supporter View
+                    </span>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      <Tooltip text="Save changes to your wishlist settings">
+                        <span>Save Settings</span>
+                      </Tooltip>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

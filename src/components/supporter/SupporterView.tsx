@@ -4,6 +4,7 @@ import { databases, databaseId, wishlistsCollectionId, itemsCollectionId, sugges
 import { Models, Query, ID } from 'appwrite';
 import { ExternalLink, Gift, CheckCircle, Grid, List, Zap, Edit } from 'lucide-react';
 import { Tooltip } from '../common/Tooltip';
+import { HoverCard } from '../common/HoverCard';
 import { Header } from '../layout/Header';
 import { AddItemAuto } from '../teacher/AddItemAuto';
 import { AddItemManual } from '../teacher/AddItemManual';
@@ -209,7 +210,7 @@ export const SupporterView: React.FC = () => {
         <div className="space-y-8 bg-white dark:bg-neutral-900 rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Classroom Needs ({items.length} items)</h3>
-            <div className="hidden md:flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
               <Tooltip text="List View">
                 <button
                   onClick={() => setViewMode('list')}
@@ -240,63 +241,71 @@ export const SupporterView: React.FC = () => {
             {items.length > 0 ? items.map(item => (
               <div key={item.$id} className={`bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between w-full ${viewMode === 'grid' ? 'min-h-[220px]' : 'min-h-[180px]'}`}>
                 {viewMode === 'grid' ? (
-                  // Grid view with same structure as list view
-                  <div className="flex flex-col h-full min-h-[220px]">
-                    {/* Centered image */}
-                    <div className="flex items-center justify-center flex-grow px-4 py-2">
-                      {item.image_url ? (
-                        <img 
-                          src={item.image_url} 
-                          alt={item.name}
-                          className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg"
-                          style={{ maxHeight: '150px', maxWidth: '200px' }}
-                        />
-                      ) : (
-                        <div className="w-32 h-32 flex items-center justify-center text-gray-400 dark:text-gray-600">
-                          <Gift className="w-16 h-16" />
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Bottom action bar with price/purchase and contributions/bought buttons */}
-                    <div className="flex items-end justify-between pt-2">
-                      {/* Price and Purchase button */}
-                      <div className="flex flex-col items-start space-y-2">
-                        {item.cost ? (
-                          <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>
-                        ) : (
-                          <span className="text-gray-400 text-sm">No price</span>
+                  // Grid view with hover card
+                  <HoverCard
+                    content={
+                      <div>
+                        <div className="font-bold text-base mb-1 text-gray-900 dark:text-white">{item.name}</div>
+                        {item.description && (
+                          <div className="text-sm text-gray-600 dark:text-gray-300">{item.description}</div>
                         )}
-                        <Tooltip text="Opens in a new tab">
-                          <a
-                            href={item.store_link || '#'}
-                            target={item.store_link ? "_blank" : undefined}
-                            rel={item.store_link ? "noopener noreferrer" : undefined}
-                            className={`${item.store_link ? 'bg-green-600 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'} text-white px-4 py-2 rounded-lg transition duration-200 flex items-center justify-center text-sm font-medium`}
-                          >
-                            <span className="hidden xs:inline">Purchase</span> <ExternalLink className="w-4 h-4 xs:ml-2" />
-                          </a>
-                        </Tooltip>
                       </div>
-                      
-                      {/* Contributions and I bought this button */}
-                      <div className="flex flex-col items-end space-y-2">
-                        <span className="text-blue-600 dark:text-blue-400 flex items-center text-sm">
-                          <Gift className="w-4 h-4 mr-1" />
-                          {item.contributions} contributions
-                        </span>
-                        <Tooltip text="Let the teacher know you've purchased this item">
-                          <button
-                            onClick={() => handleMarkContribution(item)}
-                            className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
-                          >
-                            <CheckCircle className="w-4 h-4 xs:mr-2" />
-                            <span className="hidden xs:inline">I bought this</span>
-                          </button>
-                        </Tooltip>
+                    }
+                  >
+                    <div className="flex flex-col h-full min-h-[220px]">
+                      {/* Centered image */}
+                      <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full max-w-[160px] mx-auto flex items-center justify-center">
+                        {item.image_url ? (
+                          <img 
+                            src={item.image_url} 
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
+                            <Gift className="w-8 h-8" />
+                          </div>
+                        )}
+                      </div>
+                      {/* Bottom action bar with price/purchase and contributions/bought buttons */}
+                      <div className="flex items-end justify-between pt-2">
+                        {/* Price and Purchase button */}
+                        <div className="flex flex-col items-start space-y-2">
+                          {item.cost ? (
+                            <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>
+                          ) : (
+                            <span className="text-gray-400 text-sm">No price</span>
+                          )}
+                          <Tooltip text="Opens in a new tab">
+                            <a
+                              href={item.store_link || '#'}
+                              target={item.store_link ? "_blank" : undefined}
+                              rel={item.store_link ? "noopener noreferrer" : undefined}
+                              className={`${item.store_link ? 'bg-green-600 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'} text-white px-4 py-2 rounded-lg transition duration-200 flex items-center justify-center text-sm font-medium`}
+                            >
+                              <span className="hidden xs:inline">Purchase</span> <ExternalLink className="w-4 h-4 xs:ml-2" />
+                            </a>
+                          </Tooltip>
+                        </div>
+                        {/* Contributions and I bought this button */}
+                        <div className="flex flex-col items-end space-y-2">
+                          <span className="text-blue-600 dark:text-blue-400 flex items-center text-sm">
+                            <Gift className="w-4 h-4 mr-1" />
+                            {item.contributions} contributions
+                          </span>
+                          <Tooltip text="Let the teacher know you've purchased this item">
+                            <button
+                              onClick={() => handleMarkContribution(item)}
+                              className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
+                            >
+                              <CheckCircle className="w-4 h-4 xs:mr-2" />
+                              <span className="hidden xs:inline">I bought this</span>
+                            </button>
+                          </Tooltip>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </HoverCard>
                 ) : (
                   // List view - centered content with bottom action bar
                   <div className="flex flex-col h-full min-h-[180px]">

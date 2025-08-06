@@ -212,32 +212,34 @@ export const WishlistPreview: React.FC<WishlistPreviewProps> = ({ wishlistKey, e
         <div className="space-y-8 bg-white dark:bg-neutral-900 rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200">Classroom Needs ({items.length} items)</h3>
-            <div className="flex items-center space-x-2">
-              <Tooltip text="List View">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-sky-600 text-white hover:bg-sky-800'
-                      : 'bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-neutral-500'
-                  }`}
-                >
-                  <List className="w-5 h-5" />
-                </button>
-              </Tooltip>
-              <Tooltip text="Grid View">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-sky-600 text-white hover:bg-sky-800'
-                      : 'bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-neutral-500'
-                  }`}
-                >
-                  <Grid className="w-5 h-5" />
-                </button>
-              </Tooltip>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Tooltip text="List View">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-md transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-sky-600 text-white hover:bg-sky-800'
+                    : 'bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-neutral-500'
+                }`}
+                aria-label="List View"
+              >
+                <List className="w-5 h-5" />
+              </button>
+            </Tooltip>
+            <Tooltip text="Grid View">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-md transition-colors ${
+                  viewMode === 'grid'
+                    ? 'bg-sky-600 text-white hover:bg-sky-800'
+                    : 'bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-neutral-500'
+                }`}
+                aria-label="Grid View"
+              >
+                <Grid className="w-5 h-5" />
+              </button>
+            </Tooltip>
+          </div>
           </div>
           <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
             {viewMode === 'grid' ? (
