@@ -8,6 +8,9 @@ node_modules/
 .env.development
 .env.*
 
+# Explicitly ignore any environment files containing secrets
+.env*
+
 # Next.js build output
 .next/
 out/
