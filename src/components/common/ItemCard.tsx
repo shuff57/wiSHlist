@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { UrlPreview } from '../common/UrlPreview';
 import { useUrlPreview } from '../../hooks/useUrlPreview';
 import { Image as ImageIcon } from 'lucide-react';
@@ -10,13 +11,25 @@ interface ItemCardProps {
     description?: string;
     store_link?: string;
     cost?: string;
-    image_url?: string; // We'll add this field for cached images
+    image_url?: string;
   };
+  viewMode?: 'list' | 'grid';
   showUrlPreview?: boolean;
   className?: string;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
 }
 
-export const ItemCard: React.FC<ItemCardProps> = ({ item, showUrlPreview = true, className = '' }) => {
+export const ItemCard: React.FC<ItemCardProps> = ({ 
+  item, 
+  viewMode = 'list',
+  showUrlPreview = true, 
+  className = '',
+  onEdit,
+  onDelete,
+  onDuplicate
+}) => {
   const itemPreview = useUrlPreview();
   const [cachedImage, setCachedImage] = useState<string | null>(null);
   
@@ -32,7 +45,8 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, showUrlPreview = true,
     return () => {
       itemPreview.clearPreview();
     };
-  }, [item.image_url]); // Removed item.store_link dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.image_url]); // Intentionally removed itemPreview dependency as we only want to clear on unmount
 
   // For existing items, only use cached image (no URL preview needed)
   const displayImage = cachedImage || null;
@@ -44,14 +58,13 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, showUrlPreview = true,
           {/* Item Image */}
           {displayImage && (
             <div className="flex-shrink-0">
-              <img
+              <Image
                 src={displayImage}
                 alt={item.name}
+                width={64}
+                height={64}
                 className="w-16 h-16 object-cover rounded-lg border"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                }}
+                onError={() => setCachedImage(null)}
               />
             </div>
           )}
@@ -93,7 +106,35 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, showUrlPreview = true,
           </div>
         </div>
         
-        {/* No URL preview needed for existing items - they already have their data */}
+        {/* Action buttons */}
+        {(onEdit || onDelete || onDuplicate) && (
+          <div className={`flex ${viewMode === 'grid' ? 'justify-end mt-4' : 'justify-start mt-2'} space-x-2`}>
+            {onEdit && (
+              <button
+                onClick={onEdit}
+                className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Edit
+              </button>
+            )}
+            {onDuplicate && (
+              <button
+                onClick={onDuplicate}
+                className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700"
+              >
+                Duplicate
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={onDelete}
+                className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -274,13 +274,13 @@ export const GoogleAddressAutocomplete: React.FC<GoogleAddressAutocompleteProps>
       {showSuggestions && !loading && query.length >= 3 && suggestions.length === 0 && (
         <div className="absolute z-50 w-full mt-1 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg">
           <div className="px-3 py-3 text-gray-500 dark:text-gray-400 text-sm">
-            <div className="mb-2">No places found for "{query}"</div>
+            <div className="mb-2">No places found for &quot;{query}&quot;</div>
             <div className="text-xs text-gray-400">
               Try searching with:
               <ul className="mt-1 ml-2">
-                <li>• School name: "Lincoln Elementary School"</li>
-                <li>• Full address: "123 Main St, City, State"</li>
-                <li>• Business name: "Target Store"</li>
+                <li>• School name: &quot;Lincoln Elementary School&quot;</li>
+                <li>• Full address: &quot;123 Main St, City, State&quot;</li>
+                <li>• Business name: &quot;Target Store&quot;</li>
               </ul>
             </div>
           </div>
