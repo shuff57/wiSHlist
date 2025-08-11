@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { databases, databaseId, itemsCollectionId } from '../../appwriteConfig';
 import { Models, ID, Query } from 'appwrite';
 import { Search, Image as ImageIcon } from 'lucide-react';
+import Image from 'next/image';
 
 interface WishlistDoc {
   wishlist_name?: string;
@@ -230,15 +231,19 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
                 >
                   <div className="flex space-x-3">
                     {suggestion.image ? (
-                      <img
-                        src={suggestion.image}
-                        alt={suggestion.title}
-                        className="w-12 h-12 object-cover rounded border flex-shrink-0"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
-                      />
+                      <div className="relative w-12 h-12 flex-shrink-0">
+                        <Image
+                          src={suggestion.image}
+                          alt={suggestion.title}
+                          fill
+                          className="object-cover rounded border"
+                          sizes="48px"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
+                        />
+                      </div>
                     ) : (
                       <div className="w-12 h-12 bg-gray-200 dark:bg-neutral-600 rounded border flex-shrink-0 flex items-center justify-center">
                         <ImageIcon size={16} className="text-gray-400" />
@@ -277,15 +282,19 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
             </h4>
             <div className="flex space-x-3">
               {formData.image_url ? (
-                <img
-                  src={formData.image_url}
-                  alt={formData.name}
-                  className="w-16 h-16 object-cover rounded-lg border flex-shrink-0"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                  }}
-                />
+                <div className="relative w-16 h-16 flex-shrink-0">
+                  <Image
+                    src={formData.image_url}
+                    alt={formData.name}
+                    fill
+                    className="object-cover rounded-lg border"
+                    sizes="64px"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                </div>
               ) : (
                 <div className="w-16 h-16 bg-gray-200 dark:bg-neutral-600 rounded-lg border flex-shrink-0 flex items-center justify-center">
                   <ImageIcon size={20} className="text-gray-400" />

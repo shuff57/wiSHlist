@@ -74,6 +74,12 @@ export const useGooglePlacesAutocomplete = (options: UseGooglePlacesOptions = {}
     return cleanup;
   }, [cleanup]);
 
+  // Extract options values to constants to avoid complex expressions in dependency array
+  const userLat = options.userLatitude;
+  const userLng = options.userLongitude;
+  const placeTypes = options.types;
+  const countryRestriction = options.componentRestrictions?.country;
+
   const searchPlaces = useCallback(async (query: string, abortSignal: AbortSignal): Promise<PlaceSuggestion[]> => {
     if (query.length < 3) return [];
 
@@ -81,18 +87,18 @@ export const useGooglePlacesAutocomplete = (options: UseGooglePlacesOptions = {}
       // Build request parameters for our API route
       const params = new URLSearchParams({
         input: query,
-        components: options.componentRestrictions?.country ? `country:${options.componentRestrictions.country}` : '',
+        components: countryRestriction ? `country:${countryRestriction}` : '',
       });
 
       // Add location bias if user location is available
-      if (options.userLatitude && options.userLongitude) {
-        params.append('location', `${options.userLatitude},${options.userLongitude}`);
+      if (userLat && userLng) {
+        params.append('location', `${userLat},${userLng}`);
         params.append('radius', '50000'); // 50km radius
       }
 
       // Add place types if specified
-      if (options.types && options.types.length > 0) {
-        params.append('types', options.types.join('|'));
+      if (placeTypes && placeTypes.length > 0) {
+        params.append('types', placeTypes.join('|'));
       }
 
       const response = await fetch(
@@ -127,12 +133,7 @@ export const useGooglePlacesAutocomplete = (options: UseGooglePlacesOptions = {}
       }
       return [];
     }
-  }, [
-    options.userLatitude,
-    options.userLongitude,
-    options.types?.join(','),
-    options.componentRestrictions?.country
-  ]);
+  }, [userLat, userLng, placeTypes, countryRestriction]);
 
   const getPlaceDetails = useCallback(async (placeId: string): Promise<PlaceDetails | null> => {
     try {

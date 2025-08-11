@@ -6,6 +6,7 @@ import { ExternalLink, Gift, CheckCircle, Grid, List, Zap, Edit } from 'lucide-r
 import { Tooltip } from '../common/Tooltip';
 import { HoverCard } from '../common/HoverCard';
 import { Header } from '../layout/Header';
+import Image from 'next/image';
 import { AddItemAuto } from '../teacher/AddItemAuto';
 import { AddItemManual } from '../teacher/AddItemManual';
 
@@ -267,10 +268,12 @@ export const SupporterView: React.FC = () => {
                     >
                       <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full max-w-[160px] mx-auto flex items-center justify-center">
                         {item.image_url ? (
-                          <img 
+                          <Image 
                             src={item.image_url} 
                             alt={item.name}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 160px"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
@@ -318,11 +321,15 @@ export const SupporterView: React.FC = () => {
                       <div className="flex items-center justify-center flex-grow py-4">
                         <div className="flex-shrink-0 mr-6 w-24 h-24">
                           {item.image_url ? (
-                            <img
-                              src={item.image_url}
-                              alt={item.name}
-                              className="w-full h-full object-cover rounded"
-                            />
+                            <div className="relative w-full h-full">
+                              <Image
+                                src={item.image_url}
+                                alt={item.name}
+                                fill
+                                className="object-cover rounded"
+                                sizes="(max-width: 768px) 100vw, 96px"
+                              />
+                            </div>
                           ) : (
                             <div className="w-full h-full bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
                               <Gift className="w-12 h-12 text-gray-400" />

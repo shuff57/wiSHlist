@@ -1,4 +1,5 @@
 import React from 'react'
+import Image from 'next/image'
 
 interface UrlPreviewProps {
   data: {
@@ -90,9 +91,11 @@ export function UrlPreview({ data, loading, error, onRetry, className }: UrlPrev
           <div className="flex space-x-4 overflow-hidden max-w-full">
             {data?.image && (
               <div className="flex-shrink-0">
-                <img
-                  src={data?.image ?? undefined}
+                <Image
+                  src={data?.image ?? ''}
                   alt={data?.title ?? 'Preview'}
+                  width={80}
+                  height={80}
                   className="w-20 h-20 object-cover rounded border"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
