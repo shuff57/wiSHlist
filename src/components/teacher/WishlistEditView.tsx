@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Image from 'next/image';
 import { account, databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, ID, Query } from 'appwrite';
-import { Trash2, Check, X, GripVertical, Pencil, Grid, List, Save, Copy, Plus, Zap, Edit, Gift } from 'lucide-react';
+import { Trash2, Check, X, GripVertical, Pencil, Zap, Edit, Gift, ChevronDown, Plus, List, Grid, Copy, Save } from 'lucide-react';
 import { ExternalLink } from 'lucide-react';
 import { HoverCard } from '../common/HoverCard';
 import { Tooltip } from '../common/Tooltip';
@@ -78,7 +78,11 @@ export const WishlistEditView: React.FC = () => {
   const [isClient, setIsClient] = useState(false);
   
   const [addItemMode, setAddItemMode] = useState<'manual' | 'auto'>('auto');
-  const [isAddItemExpanded, setIsAddItemExpanded] = useState(true);
+  const [isSuggestionsExpanded, setIsSuggestionsExpanded] = useState(false);
+  const [isAddItemExpanded, setIsAddItemExpanded] = useState(false);
+  const [isNewMenuExpanded, setIsNewMenuExpanded] = useState(false);
+  const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
+  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
   
   const editItemPreview = useUrlPreview();
   const [urlPreviewTimeout, setUrlPreviewTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -336,55 +340,76 @@ export const WishlistEditView: React.FC = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-8">
 
-        <div className="flex flex-col">
-          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow overflow-hidden">
-            <div 
-              className="px-4 py-2.5 flex items-center min-h-[48px] cursor-pointer group relative"
-              onClick={() => setIsAddItemExpanded(prev => !prev)}
-            >
-              <div className="absolute inset-0 bg-gray-50 dark:bg-neutral-700 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <h3 className="text-lg font-semibold text-sky-600 dark:text-sky-600 relative">
-                Add New Item
-              </h3>
+        <div className="bg-white dark:bg-neutral-800 shadow-lg rounded-lg p-6">
+          <div
+            className="flex justify-between items-center cursor-pointer"
+            onClick={() => setIsAddItemExpanded(!isAddItemExpanded)}
+          >
+            <h3 className="text-lg font-semibold text-sky-600 dark:text-sky-600">
+              Add New Item
+            </h3>
+            <ChevronDown
+              className={`w-6 h-6 text-gray-600 dark:text-gray-300 transition-transform duration-300 ${
+                isAddItemExpanded ? "transform rotate-180" : ""
+              }`}
+            />
+          </div>
+          <div className={`transition-all duration-500 ease-in-out overflow-hidden ${isAddItemExpanded ? 'max-h-[1000px] opacity-100 pt-6' : 'max-h-0 opacity-0'}`}>
+            <div className="flex border-b border-neutral-200 dark:border-neutral-700 mb-4 bg-white dark:bg-neutral-900 rounded-t-lg">
+              <button
+                onClick={() => setAddItemMode('auto')}
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
+                  addItemMode === 'auto'
+                    ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
+                    : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
+                }`}
+              >
+                <Zap size={18} />
+                <span>Auto (URL)</span>
+              </button>
+              <button
+                onClick={() => setAddItemMode('manual')}
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
+                  addItemMode === 'manual'
+                    ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
+                    : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
+                }`}
+              >
+                <Edit size={18} />
+                <span>Manual</span>
+              </button>
             </div>
-            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isAddItemExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-              <div className="p-6">
-                <div className="flex border-b border-neutral-200 dark:border-neutral-700 mb-4 bg-white dark:bg-neutral-900 rounded-t-lg">
-                  <button
-                    onClick={() => setAddItemMode('auto')}
-                    className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
-                      addItemMode === 'auto'
-                        ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
-                        : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
-                    }`}
-                  >
-                    <Zap size={18} />
-                    <span>Auto (URL)</span>
-                  </button>
-                  <button
-                    onClick={() => setAddItemMode('manual')}
-                    className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
-                      addItemMode === 'manual'
-                        ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
-                        : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
-                    }`}
-                  >
-                    <Edit size={18} />
-                    <span>Manual</span>
-                  </button>
-                </div>
-                {addItemMode === 'auto' && wishlist && (
-                  <AddItemAuto 
-                    wishlist={wishlist} 
-                    onItemAdded={handleItemAdded} 
-                    existingItems={items}
-                  />
-                )}
-                {addItemMode === 'manual' && wishlist && (
-                  <AddItemManual wishlist={wishlist} onItemAdded={handleItemAdded} />
-                )}
-              </div>
-            </div>
+            {addItemMode === 'auto' && wishlist && (
+              <AddItemAuto 
+                wishlist={wishlist} 
+                onItemAdded={handleItemAdded} 
+                existingItems={items}
+              />
+            )}
+            {addItemMode === 'manual' && wishlist && (
+              <AddItemManual wishlist={wishlist} onItemAdded={handleItemAdded} />
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-neutral-800 shadow-lg rounded-lg p-6">
+          <div
+            className="flex justify-between items-center cursor-pointer"
+            onClick={() => setIsNewMenuExpanded(!isNewMenuExpanded)}
+          >
+            <h3 className="text-lg font-semibold text-sky-600 dark:text-sky-600 relative">wiSHlist Settings</h3>
+            <ChevronDown
+              className={`w-6 h-6 text-gray-600 dark:text-gray-300 transition-transform duration-300 ${
+                isNewMenuExpanded ? "transform rotate-180" : ""
+              }`}
+            />
+          </div>
+          <div
+            className={`transition-all duration-500 ease-in-out overflow-hidden ${
+              isNewMenuExpanded ? "max-h-[1000px] opacity-100 mt-6" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="h-[152px]"></div>
           </div>
         </div>
 
