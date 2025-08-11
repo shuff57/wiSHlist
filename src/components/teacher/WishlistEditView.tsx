@@ -105,6 +105,7 @@ export const WishlistEditView: React.FC = () => {
   
   // Add Item Mode - 'manual' or 'auto'
   const [addItemMode, setAddItemMode] = useState<'manual' | 'auto'>('auto');
+  const [isAddItemExpanded, setIsAddItemExpanded] = useState(true);
   
   // URL Preview functionality for editing items
   const editItemPreview = useUrlPreview();
@@ -391,45 +392,55 @@ export const WishlistEditView: React.FC = () => {
 
         {/* Merged Add New Item (Auto/Manual) section with bg-neutral and no border */}
         <div className="flex flex-col">
-          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow">
-            <div className="rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-sky-600 dark:text-sky-600 mb-4">Add New Item</h3>
-              {/* Tab Navigation */}
-              <div className="flex border-b border-neutral-200 dark:border-neutral-700 mb-4 bg-white dark:bg-neutral-900 rounded-t-lg">
-                <button
-                  onClick={() => setAddItemMode('auto')}
-                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
-                    addItemMode === 'auto'
-                      ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
-                      : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
-                  }`}
-                >
-                  <Zap size={18} />
-                  <span>Auto (URL)</span>
-                </button>
-                <button
-                  onClick={() => setAddItemMode('manual')}
-                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
-                    addItemMode === 'manual'
-                      ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
-                      : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
-                  }`}
-                >
-                  <Edit size={18} />
-                  <span>Manual</span>
-                </button>
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow overflow-hidden">
+            <div 
+              className="px-4 py-2.5 flex items-center min-h-[48px] cursor-pointer group relative"
+              onClick={() => setIsAddItemExpanded(prev => !prev)}
+            >
+              <div className="absolute inset-0 bg-gray-50 dark:bg-neutral-700 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <h3 className="text-lg font-semibold text-sky-600 dark:text-sky-600 relative">
+                Add New Item
+              </h3>
+            </div>
+            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isAddItemExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+              <div className="p-6">
+                {/* Tab Navigation */}
+                <div className="flex border-b border-neutral-200 dark:border-neutral-700 mb-4 bg-white dark:bg-neutral-900 rounded-t-lg">
+                  <button
+                    onClick={() => setAddItemMode('auto')}
+                    className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
+                      addItemMode === 'auto'
+                        ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
+                        : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
+                    }`}
+                  >
+                    <Zap size={18} />
+                    <span>Auto (URL)</span>
+                  </button>
+                  <button
+                    onClick={() => setAddItemMode('manual')}
+                    className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
+                      addItemMode === 'manual'
+                        ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
+                        : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
+                    }`}
+                  >
+                    <Edit size={18} />
+                    <span>Manual</span>
+                  </button>
+                </div>
+                {/* Tab Content */}
+                {addItemMode === 'auto' && wishlist && (
+                  <AddItemAuto 
+                    wishlist={wishlist} 
+                    onItemAdded={handleItemAdded} 
+                    existingItems={items}
+                  />
+                )}
+                {addItemMode === 'manual' && wishlist && (
+                  <AddItemManual wishlist={wishlist} onItemAdded={handleItemAdded} />
+                )}
               </div>
-              {/* Tab Content */}
-              {addItemMode === 'auto' && wishlist && (
-                <AddItemAuto 
-                  wishlist={wishlist} 
-                  onItemAdded={handleItemAdded} 
-                  existingItems={items}
-                />
-              )}
-              {addItemMode === 'manual' && wishlist && (
-                <AddItemManual wishlist={wishlist} onItemAdded={handleItemAdded} />
-              )}
             </div>
           </div>
         </div>
