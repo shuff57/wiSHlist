@@ -250,7 +250,7 @@ export const SupporterView: React.FC = () => {
               </Tooltip>
             </div>
           </div>
-          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1'}`}>
             {sortedItems.length > 0 ? (
               sortedItems.map(item => (
                 <div key={item.$id} className={`bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between w-full ${viewMode === 'grid' ? 'min-h-[220px]' : 'min-h-[180px]'}`}>
