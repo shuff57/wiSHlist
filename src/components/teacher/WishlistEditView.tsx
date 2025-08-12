@@ -347,10 +347,10 @@ export const WishlistEditView: React.FC = () => {
             />
           </div>
           <div className={`transition-all duration-500 ease-in-out overflow-hidden ${isAddItemExpanded ? 'max-h-[1000px] opacity-100 pt-6' : 'max-h-0 opacity-0'}`}>
-            <div className="flex border-b border-neutral-200 dark:border-neutral-700 mb-4 bg-white dark:bg-neutral-900 rounded-t-lg">
+            <div className="flex border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900">
               <button
                 onClick={() => setAddItemMode('auto')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-base font-medium transition-colors rounded-t-lg ${
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-base font-medium transition-colors ${
                   addItemMode === 'auto'
                     ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
                     : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
@@ -361,7 +361,7 @@ export const WishlistEditView: React.FC = () => {
               </button>
               <button
                 onClick={() => setAddItemMode('manual')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-base font-medium transition-colors rounded-t-lg ${
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-base font-medium transition-colors ${
                   addItemMode === 'manual'
                     ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
                     : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'

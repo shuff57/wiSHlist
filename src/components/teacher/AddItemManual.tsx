@@ -326,17 +326,9 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
           </div>
         )}
         
+        
+        
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Description (optional)
-            </label>
-            {formData.description && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {formData.description.length}/150 chars
-              </span>
-            )}
-          </div>
           <textarea
             name="description"
             placeholder="Description (optional) - suggestions may include AI-enhanced descriptions"
