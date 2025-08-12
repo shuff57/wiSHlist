@@ -6,7 +6,7 @@ import { AboutView } from './components/auth/AboutView';
 import PrivateRoute from './components/auth/PrivateRoute';
 import PublicRoute from './components/auth/PublicRoute';
 import { TeacherDashboard } from './components/teacher/TeacherDashboard';
-
+import Settings from './components/teacher/Settings';
 import { WishlistEditView } from './components/teacher/WishlistEditView';
 import { SupporterLanding } from './components/supporter/SupporterLanding';
 import { SupporterView } from './components/supporter/SupporterView';
@@ -75,7 +75,7 @@ const AppContent: React.FC = () => {
         {/* Protected Routes */}
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<TeacherDashboard />} />
-          
+          <Route path="/settings" element={<Settings />} />
           <Route path="/wishlist/:wishlistId/edit" element={<WishlistEditView />} />
         </Route>
       </Routes>

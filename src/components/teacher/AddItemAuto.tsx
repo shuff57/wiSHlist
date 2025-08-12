@@ -236,7 +236,7 @@ export const AddItemAuto: React.FC<AddItemAutoProps> = ({ wishlist, onItemAdded,
       <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
         Add New Item (Auto)
       </h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      <p className="text-base text-gray-600 dark:text-gray-400 mb-4">
         Paste a URL to automatically extract item details, then customize and add to your list
       </p>
       

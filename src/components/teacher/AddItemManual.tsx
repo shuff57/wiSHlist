@@ -195,7 +195,7 @@ export const AddItemManual: React.FC<AddItemManualProps> = ({ wishlist, onItemAd
       <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
         Add New Item (Manual)
       </h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      <p className="text-base text-gray-600 dark:text-gray-400 mb-4">
         Enter item details manually. Start typing an item name to see suggestions from cached items with AI-enhanced names and descriptions.
       </p>
       

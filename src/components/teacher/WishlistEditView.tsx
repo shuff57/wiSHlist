@@ -337,7 +337,7 @@ export const WishlistEditView: React.FC = () => {
             className="flex justify-between items-center cursor-pointer"
             onClick={() => setIsAddItemExpanded(!isAddItemExpanded)}
           >
-            <h3 className="text-lg font-semibold text-sky-600 dark:text-sky-600">
+            <h3 className="text-xl font-semibold text-sky-600 dark:text-sky-600">
               Add New Item
             </h3>
             <ChevronDown
@@ -350,7 +350,7 @@ export const WishlistEditView: React.FC = () => {
             <div className="flex border-b border-neutral-200 dark:border-neutral-700 mb-4 bg-white dark:bg-neutral-900 rounded-t-lg">
               <button
                 onClick={() => setAddItemMode('auto')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-base font-medium transition-colors rounded-t-lg ${
                   addItemMode === 'auto'
                     ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
                     : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
@@ -361,7 +361,7 @@ export const WishlistEditView: React.FC = () => {
               </button>
               <button
                 onClick={() => setAddItemMode('manual')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-sm font-medium transition-colors rounded-t-lg ${
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-6 text-base font-medium transition-colors rounded-t-lg ${
                   addItemMode === 'manual'
                     ? 'text-sky-600 dark:text-sky-600 border-b-2 border-sky-800 dark:border-sky-800 bg-white dark:bg-neutral-800 hover:text-sky-800 dark:hover:text-sky-800'
                     : 'text-sky-600 dark:text-sky-600 hover:text-sky-800 dark:hover:text-sky-800 bg-white dark:bg-neutral-800'
@@ -389,7 +389,7 @@ export const WishlistEditView: React.FC = () => {
             className="flex justify-between items-center cursor-pointer"
             onClick={() => setIsNewMenuExpanded(!isNewMenuExpanded)}
           >
-            <h3 className="text-lg font-semibold text-sky-600 dark:text-sky-600 relative">wiSHlist Settings</h3>
+            <h3 className="text-xl font-semibold text-sky-600 dark:text-sky-600 relative">wiSHlist Settings</h3>
             <ChevronDown
               className={`w-6 h-6 text-gray-600 dark:text-gray-300 transition-transform duration-300 ${
                 isNewMenuExpanded ? "transform rotate-180" : ""
@@ -403,16 +403,16 @@ export const WishlistEditView: React.FC = () => {
           >
             <form onSubmit={handleSettingsSave} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">wiSHlist Name</label>
+                <label className="block text-base font-medium text-gray-700 dark:text-gray-300">wiSHlist Name</label>
               <input type="text" value={formData.wishlist_name} onChange={e => setFormData({...formData, wishlist_name: e.target.value})} className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Info</label>
+                <label className="block text-base font-medium text-gray-700 dark:text-gray-300">Contact Info</label>
                 <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
               </div>
               
               <div>
-                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Shipping Info</h4>
+                <h4 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">Shipping Info</h4>
                 <div className="space-y-3">
                   <GoogleAddressAutocomplete
                     placeholder="Type school name or address..."
@@ -443,7 +443,7 @@ export const WishlistEditView: React.FC = () => {
                     }}
                     className="mt-1"
                   />
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">Selected School/Address</label>
+                  <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mt-2">Selected School/Address</label>
                   <input
                     type="text"
                     value={formData.shipping_name}
@@ -478,9 +478,9 @@ export const WishlistEditView: React.FC = () => {
               </div>
             </form>
             <div className="mt-6">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Key</h4>
+              <h4 className="text-base font-medium text-gray-700 dark:text-gray-300">Share Key</h4>
               <div className="mt-1 flex items-center space-x-2">
-                <input type="text" readOnly value={wishlist?.wishlist_key || ''} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 rounded text-gray-900 dark:text-gray-200 focus:outline-none" />
+                <input type="text" readOnly value={wishlist?.wishlist_key || ''} className="w-full text-base bg-gray-100 dark:bg-neutral-700 p-1 rounded text-gray-900 dark:text-gray-200 focus:outline-none" />
                 <Tooltip text="Copy share key">
                   <button 
                     onClick={() => handleCopy(wishlist?.wishlist_key || '', 'key')}
@@ -492,9 +492,9 @@ export const WishlistEditView: React.FC = () => {
               </div>
             </div>
             <div className="mt-4">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Link</h4>
+              <h4 className="text-base font-medium text-gray-700 dark:text-gray-300">Share Link</h4>
               <div className="mt-1 flex items-center space-x-2">
-                                <input type="text" readOnly value={`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 rounded text-gray-900 dark:text-gray-200 focus:outline-none" />
+                                <input type="text" readOnly value={`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`} className="w-full text-base bg-gray-100 dark:bg-neutral-700 p-1 rounded text-gray-900 dark:text-gray-200 focus:outline-none" />
                 <Tooltip text="Copy share link">
                   <button 
                     onClick={() => handleCopy(`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`, 'link')}
@@ -588,6 +588,7 @@ export const WishlistEditView: React.FC = () => {
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
+                              {...provided.dragHandleProps}
                               className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 flex flex-col justify-between transition-colors duration-200 group"
                             >
                               {editingItemId === item.$id ? (
@@ -636,10 +637,7 @@ export const WishlistEditView: React.FC = () => {
                                 <>
                                   {viewMode === 'grid' ? (
                                     <div className="flex items-center space-x-3">
-                                      <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing">
-                                        <GripVertical className="w-5 h-5 text-black dark:text-white" />
-                                      </div>
-                                      <div className="flex-grow">
+                                      <div className="flex-grow pl-4">
                                         <HoverCard
                                     content={
                                       <div className="flex flex-col items-center justify-center">
@@ -707,28 +705,25 @@ export const WishlistEditView: React.FC = () => {
                                     </div>
                                   ) : (
                                     <div className="flex items-center">
-                                      <div {...provided.dragHandleProps} className="p-2 cursor-grab active:cursor-grabbing">
-                                        <GripVertical className="w-5 h-5 text-black dark:text-white" />
-                                      </div>
                                       <div className="flex-shrink-0 mr-3">
                                         {item.image_url ? (
                                           <Image
                                             src={item.image_url}
                                             alt={item.name}
-                                            className="w-12 h-12 object-cover rounded"
-                                            width={48}
-                                            height={48}
+                                            className="w-32 h-32 object-cover rounded"
+                                            width={128}
+                                            height={128}
                                           />
                                         ) : (
-                                          <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
+                                          <div className="w-32 h-32 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
                                             <Gift className="w-6 h-6 text-gray-400" />
                                           </div>
                                         )}
                                       </div>
                                       <div className="flex-grow px-3">
-                                        <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-lg">{item.name}</h4>
+                                        <h4 className="font-semibold text-gray-900 dark:text-gray-200 text-xl">{item.name}</h4>
                                         {item.description && (
-                                          <p className="text-gray-600 dark:text-gray-400 text-sm mb-1">{item.description}</p>
+                                          <p className="text-gray-600 dark:text-gray-400 text-base mb-1">{item.description}</p>
                                         )}
                                         {item.cost && (
                                           <span className="text-green-600 dark:text-green-400 font-medium text-lg">{item.cost}</span>

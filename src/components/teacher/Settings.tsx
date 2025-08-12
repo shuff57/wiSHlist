@@ -709,8 +709,10 @@ export const Settings: React.FC = () => {
                                           className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-neutral-800"
                                         >
                                           <option value="all">All</option>
-                                          <option value="open">Open</option>
+                                          <option value="new">New</option>
+                                          <option value="in-progress">In Progress</option>
                                           <option value="resolved">Resolved</option>
+                                          <option value="closed">Closed</option>
                                         </select>
                                       </div>
                                       <div className="flex items-center space-x-2">
@@ -786,6 +788,13 @@ export const Settings: React.FC = () => {
                                               </p>
                                             </div>
                                             <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                                              <button
+                                                onClick={() => handleUpdateFeedbackStatus(item.$id, 'new')}
+                                                className="px-3 py-1 rounded-lg font-semibold text-sm bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
+                                                title="Mark as New"
+                                              >
+                                                New
+                                              </button>
                                               <button
                                                 onClick={() => handleUpdateFeedbackStatus(item.$id, 'in-progress')}
                                                 className="px-3 py-1 rounded-lg font-semibold text-sm bg-neutral-200 text-gray-800 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"

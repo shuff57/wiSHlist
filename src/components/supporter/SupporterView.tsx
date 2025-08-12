@@ -197,7 +197,7 @@ export const SupporterView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900">
-      <Header title={wishlist?.title_text || "wiSHlist"} showSettingsButton={false} showSignoutButton={false} showSearch={true} showInfoButton={true} isLoading={loading} />
+      <Header title={wishlist?.wishlist_name || `${wishlist?.teacher_name}'s List` || "wiSHlist"} showSettingsButton={false} showSignoutButton={false} showSearch={true} showInfoButton={true} isLoading={loading} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <div className="mb-4 bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
