@@ -3,14 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Image from 'next/image';
 import { account, databases, databaseId, wishlistsCollectionId, itemsCollectionId, suggestionsCollectionId } from '../../appwriteConfig';
 import { Models, ID, Query } from 'appwrite';
-import { Trash2, Check, X, GripVertical, Pencil, Zap, Edit, Gift, ChevronDown, Plus, List, Grid, Copy, Save } from 'lucide-react';
+import { Trash2, Check, X, GripVertical, Pencil, Zap, Edit, Gift, ChevronDown, List, Grid, Copy, Save } from 'lucide-react';
 import { ExternalLink } from 'lucide-react';
 import { HoverCard } from '../common/HoverCard';
 import { Tooltip } from '../common/Tooltip';
 import { Header } from '../layout/Header';
 import { GoogleAddressAutocomplete } from '../common/GoogleAddressAutocomplete';
 import { UrlPreview } from '../common/UrlPreview';
-import { ItemCard } from '../common/ItemCard';
 import { useUrlPreview } from '../../hooks/useUrlPreview';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useStrictDroppable } from '../../hooks/useStrictDroppable';
@@ -49,7 +48,6 @@ interface SuggestionDoc {
 }
 
 export const WishlistEditView: React.FC = () => {
-  const [showShippingConfirmation, setShowShippingConfirmation] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
   const { wishlistId } = useParams<{ wishlistId: string }>();
   const [wishlist, setWishlist] = useState<Models.Document & WishlistDoc | null>(null);
@@ -78,11 +76,8 @@ export const WishlistEditView: React.FC = () => {
   const [isClient, setIsClient] = useState(false);
   
   const [addItemMode, setAddItemMode] = useState<'manual' | 'auto'>('auto');
-  const [isSuggestionsExpanded, setIsSuggestionsExpanded] = useState(false);
   const [isAddItemExpanded, setIsAddItemExpanded] = useState(false);
-  const [isNewMenuExpanded, setIsNewMenuExpanded] = useState(false);
-  const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
-  const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+  const [isNewMenuExpanded, setIsNewMenuExpanded] = useState(true);
   
   const editItemPreview = useUrlPreview();
   const [urlPreviewTimeout, setUrlPreviewTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -190,8 +185,7 @@ export const WishlistEditView: React.FC = () => {
     editItemPreview.clearPreview();
     if (item.store_link && item.store_link.trim().startsWith('http')) {
       setTimeout(() => {
-        editItemPreview.previewUrl(item.store_link!);
-      }, 100);
+        editItemPreview.previewUrl(item.store_link!);}, 100);
     }
   };
 
@@ -337,9 +331,7 @@ export const WishlistEditView: React.FC = () => {
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
       <Header title="Manage wiSHlist" showBackButton={true} showInfoButton={true} isLoading={loading} />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-8">
-
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div className="bg-white dark:bg-neutral-800 shadow-lg rounded-lg p-6">
           <div
             className="flex justify-between items-center cursor-pointer"
@@ -409,7 +401,110 @@ export const WishlistEditView: React.FC = () => {
               isNewMenuExpanded ? "max-h-[1000px] opacity-100 mt-6" : "max-h-0 opacity-0"
             }`}
           >
-            <div className="h-[152px]"></div>
+            <form onSubmit={handleSettingsSave} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">wiSHlist Name</label>
+              <input type="text" value={formData.wishlist_name} onChange={e => setFormData({...formData, wishlist_name: e.target.value})} className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Info</label>
+                <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Shipping Info</h4>
+                <div className="space-y-3">
+                  <GoogleAddressAutocomplete
+                    placeholder="Type school name or address..."
+                    preferSchools={true}
+                    onAddressSelect={(address: {
+                      name: string;
+                      address: string;
+                      city?: string;
+                      state?: string;
+                      zip?: string;
+                    }) => {
+                      setFormData({
+                        ...formData,
+                        shipping_name: address.name || address.address || '',
+                        shipping_address: address.address || '',
+                        shipping_city: address.city || '',
+                        shipping_state: address.state || '',
+                        shipping_zip: address.zip || ''
+                      });
+                      const cityState = address.city && address.state ? `${address.city}, ${address.state}` : `${address.city || ''}${address.state ? address.state : ''}`;
+                      const shippingInfo = `${address.name || ''}\n${address.address || ''}\n${cityState}\n${address.zip || ''}`;
+                      if (wishlist) {
+                        databases.updateDocument(databaseId, wishlistsCollectionId, wishlist.$id, {
+                          shipping_info: shippingInfo
+                        });
+                        setWishlist(prev => prev ? { ...prev, shipping_info: shippingInfo } : null);
+                      }
+                    }}
+                    className="mt-1"
+                  />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">Selected School/Address</label>
+                  <input
+                    type="text"
+                    value={formData.shipping_name}
+                    onChange={e => setFormData({ ...formData, shipping_name: e.target.value })}
+                    placeholder="School or address name"
+                    className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none"
+                  />
+                </div>
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  className={`mt-1 w-full py-2 px-4 rounded-lg flex items-center justify-center transition-colors
+                    ${settingsSaved ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800 dark:hover:bg-sky-800'}`}
+                  disabled={settingsSaved}
+                  onClick={() => setSettingsSaved(false)}
+                >
+                  {settingsSaved ? (
+                    <span className="flex items-center">
+                      <Check className="w-5 h-5 mr-2" />
+                      Added to Supporter View
+                    </span>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      <Tooltip text="Save changes to your wishlist settings">
+                        <span>Save Settings</span>
+                      </Tooltip>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+            <div className="mt-6">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Key</h4>
+              <div className="mt-1 flex items-center space-x-2">
+                <input type="text" readOnly value={wishlist?.wishlist_key || ''} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 rounded text-gray-900 dark:text-gray-200 focus:outline-none" />
+                <Tooltip text="Copy share key">
+                  <button 
+                    onClick={() => handleCopy(wishlist?.wishlist_key || '', 'key')}
+                    className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'key' ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800'}`}
+                  >
+                    {copiedItem === 'key' ? <Check className="w-4 h-4" /> : 'Copy'}
+                  </button>
+                </Tooltip>
+              </div>
+            </div>
+            <div className="mt-4">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Link</h4>
+              <div className="mt-1 flex items-center space-x-2">
+                                <input type="text" readOnly value={`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 rounded text-gray-900 dark:text-gray-200 focus:outline-none" />
+                <Tooltip text="Copy share link">
+                  <button 
+                    onClick={() => handleCopy(`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`, 'link')}
+                    className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'link' ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800'}`}
+                  >
+                    {copiedItem === 'link' ? <Check className="w-4 h-4" /> : 'Copy'}
+                  </button>
+                </Tooltip>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -840,118 +935,7 @@ export const WishlistEditView: React.FC = () => {
               )}
             </DragDropContext>
           </div>
-        </div>
-
-        <div className="md:col-span-1">
-          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">wiSHlist Settings</h3>
-            <form onSubmit={handleSettingsSave} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">wiSHlist Name</label>
-              <input type="text" value={formData.wishlist_name} onChange={e => setFormData({...formData, wishlist_name: e.target.value})} className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Info</label>
-                <input type="text" value={formData.contact_info} onChange={e => setFormData({...formData, contact_info: e.target.value})} className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none" />
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Shipping Info</h4>
-                <div className="space-y-3">
-                  <GoogleAddressAutocomplete
-                    placeholder="Type school name or address..."
-                    preferSchools={true}
-                    onAddressSelect={(address: {
-                      name: string;
-                      address: string;
-                      city?: string;
-                      state?: string;
-                      zip?: string;
-                    }) => {
-                      setFormData({
-                        ...formData,
-                        shipping_name: address.name || address.address || '',
-                        shipping_address: address.address || '',
-                        shipping_city: address.city || '',
-                        shipping_state: address.state || '',
-                        shipping_zip: address.zip || ''
-                      });
-                      const cityState = address.city && address.state ? `${address.city}, ${address.state}` : `${address.city || ''}${address.state ? address.state : ''}`;
-                      const shippingInfo = `${address.name || ''}\n${address.address || ''}\n${cityState}\n${address.zip || ''}`;
-                      if (wishlist) {
-                        databases.updateDocument(databaseId, wishlistsCollectionId, wishlist.$id, {
-                          shipping_info: shippingInfo
-                        });
-                        setWishlist(prev => prev ? { ...prev, shipping_info: shippingInfo } : null);
-                      }
-                    }}
-                    className="mt-1"
-                  />
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">Selected School/Address</label>
-                  <input
-                    type="text"
-                    value={formData.shipping_name}
-                    onChange={e => setFormData({ ...formData, shipping_name: e.target.value })}
-                    placeholder="School or address name"
-                    className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none"
-                  />
-                </div>
-              </div>
-              <div>
-                <button
-                  type="submit"
-                  className={`mt-1 w-full py-2 px-4 rounded-lg flex items-center justify-center transition-colors
-                    ${settingsSaved ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800 dark:hover:bg-sky-800'}`}
-                  disabled={settingsSaved}
-                  onClick={() => setSettingsSaved(false)}
-                >
-                  {settingsSaved ? (
-                    <span className="flex items-center">
-                      <Check className="w-5 h-5 mr-2" />
-                      Added to Supporter View
-                    </span>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      <Tooltip text="Save changes to your wishlist settings">
-                        <span>Save Settings</span>
-                      </Tooltip>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-            <div className="mt-6">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Key</h4>
-              <div className="mt-1 flex items-center space-x-2">
-                <input type="text" readOnly value={wishlist?.wishlist_key || ''} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 rounded text-gray-900 dark:text-gray-200 focus:outline-none" />
-                <Tooltip text="Copy share key">
-                  <button 
-                    onClick={() => handleCopy(wishlist?.wishlist_key || '', 'key')}
-                    className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'key' ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800'}`}
-                  >
-                    {copiedItem === 'key' ? <Check className="w-4 h-4" /> : 'Copy'}
-                  </button>
-                </Tooltip>
-              </div>
-            </div>
-            <div className="mt-4">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Link</h4>
-              <div className="mt-1 flex items-center space-x-2">
-                                <input type="text" readOnly value={`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`} className="w-full text-sm bg-gray-100 dark:bg-neutral-700 p-1 rounded text-gray-900 dark:text-gray-200 focus:outline-none" />
-                <Tooltip text="Copy share link">
-                  <button 
-                    onClick={() => handleCopy(`${window.location.origin}/wishlist/${wishlist?.wishlist_key}`, 'link')}
-                    className={`px-3 py-1 text-sm rounded transition-colors ${copiedItem === 'link' ? 'bg-green-600 text-white' : 'bg-sky-600 text-white hover:bg-sky-800'}`}
-                  >
-                    {copiedItem === 'link' ? <Check className="w-4 h-4" /> : 'Copy'}
-                  </button>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+        </main>
     </div>
   );
 };
