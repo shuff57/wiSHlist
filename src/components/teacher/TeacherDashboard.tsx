@@ -315,7 +315,7 @@ export const TeacherDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
-      <Header title="Teacher Dashboard" showSettingsButton={true} showInfoButton={true} isLoading={false} />
+      <Header title="Dashboard" showSettingsButton={true} showInfoButton={true} isLoading={false} />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Your wiSHlists</h2>
@@ -376,7 +376,7 @@ export const TeacherDashboard: React.FC = () => {
                                 className={`px-3 py-1 text-sm rounded transition-colors flex items-center ${
                                   copiedKey === wishlist.wishlist_key 
                                     ? 'bg-green-600 text-white' 
-                                    : 'bg-transparent text-sky-600 hover:bg-neutral-100 dark:hover:bg-neutral-700 xs:bg-sky-600 xs:text-white xs:hover:bg-sky-800'
+                                    : 'bg-transparent text-sky-600 hover:bg-sky-800 dark:hover:bg-sky-800 xs:bg-sky-600 xs:text-white xs:hover:bg-sky-800'
                                 }`}
                               >
                                 {copiedKey === wishlist.wishlist_key ? <Check className="w-4 h-4 xs:mr-1" /> : <Share2 className="w-4 h-4 xs:mr-1" />}
