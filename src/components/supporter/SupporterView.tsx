@@ -266,14 +266,14 @@ export const SupporterView: React.FC = () => {
                         </div>
                       }
                     >
-                      <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full max-w-[160px] mx-auto flex items-center justify-center">
+                      <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full max-w-[120px] mx-auto flex items-center justify-center">
                         {item.image_url ? (
                           <Image 
                             src={item.image_url} 
                             alt={item.name}
                             fill
                             className="object-cover"
-                            sizes="(max-width: 768px) 100vw, 160px"
+                            sizes="(max-width: 768px) 100vw, 120px"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
@@ -293,9 +293,9 @@ export const SupporterView: React.FC = () => {
                               href={item.store_link || '#'}
                               target={item.store_link ? "_blank" : undefined}
                               rel={item.store_link ? "noopener noreferrer" : undefined}
-                              className={`${item.store_link ? 'bg-green-600 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'} text-white px-4 py-2 rounded-lg transition duration-200 flex items-center justify-center text-sm font-medium`}
+                              className={`${item.store_link ? 'bg-green-600 hover:bg-green-800' : 'bg-gray-400 cursor-not-allowed'} text-white p-2 rounded-lg transition duration-200 flex items-center justify-center text-sm font-medium`}
                             >
-                              <span className="hidden xs:inline">Purchase</span> <ExternalLink className="w-4 h-4 xs:ml-2" />
+                              <ExternalLink className="w-5 h-5" />
                             </a>
                           </Tooltip>
                         </div>
@@ -307,10 +307,9 @@ export const SupporterView: React.FC = () => {
                           <Tooltip text="Let the teacher know you've purchased this item">
                             <button
                               onClick={() => handleMarkContribution(item)}
-                              className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
+                              className="bg-sky-600 text-white p-2 rounded-lg hover:bg-sky-800 transition duration-200 flex items-center justify-center text-sm font-medium"
                             >
-                              <CheckCircle className="w-4 h-4 xs:mr-2" />
-                              <span className="hidden xs:inline">I bought this</span>
+                              <CheckCircle className="w-5 h-5" />
                             </button>
                           </Tooltip>
                         </div>
