@@ -589,7 +589,7 @@ export const WishlistEditView: React.FC = () => {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 flex flex-col justify-between transition-colors duration-200 group"
+                              className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4 flex flex-col justify-between transition-colors duration-200 group cursor-grab active:cursor-grabbing"
                             >
                               {editingItemId === item.$id ? (
                                 <form onSubmit={handleUpdateItem} className="space-y-4">
