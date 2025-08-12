@@ -253,7 +253,7 @@ export const SupporterView: React.FC = () => {
           <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1'}`}>
             {sortedItems.length > 0 ? (
               sortedItems.map(item => (
-                <div key={item.$id} className={`bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between w-full ${viewMode === 'grid' ? 'min-h-[220px]' : 'min-h-[180px]'}`}>
+                <div key={item.$id} className={`bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between w-full ${viewMode === 'grid' ? '' : 'min-h-[180px]'}`}>
                   {viewMode === 'grid' ? (
                     <HoverCard
                       content={
@@ -266,7 +266,7 @@ export const SupporterView: React.FC = () => {
                         </div>
                       }
                     >
-                      <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full max-w-[120px] mx-auto flex items-center justify-center">
+                      <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full max-w-[80px] mx-auto flex items-center justify-center">
                         {item.image_url ? (
                           <Image 
                             src={item.image_url} 
