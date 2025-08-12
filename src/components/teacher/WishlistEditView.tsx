@@ -581,7 +581,7 @@ export const WishlistEditView: React.FC = () => {
               {enabled && isClient && (
                 <Droppable droppableId="wishlist-items">
                   {(provided) => (
-                    <div {...provided.droppableProps} ref={provided.innerRef} className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+                    <div {...provided.droppableProps} ref={provided.innerRef} className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1'}`}>
                       {items.map((item, index) => (
                         <Draggable key={item.$id} draggableId={item.$id} index={index}>
                           {(provided) => (
@@ -777,7 +777,7 @@ export const WishlistEditView: React.FC = () => {
                 </Droppable>
               )}
               {(!enabled || !isClient) && (
-                <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+                <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1'}`}>
                   {items.map((item, index) => (
                     <div
                       key={item.$id}
