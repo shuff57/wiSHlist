@@ -253,7 +253,7 @@ export const SupporterView: React.FC = () => {
           <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1'}`}>
             {sortedItems.length > 0 ? (
               sortedItems.map(item => (
-                <div key={item.$id} className={`bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between w-full ${viewMode === 'grid' ? '' : 'min-h-[180px]'}`}>
+                <div key={item.$id} className={`bg-white dark:bg-neutral-800 rounded-lg shadow hover:shadow-md transition-shadow p-6 flex flex-col justify-between w-full`}>
                   {viewMode === 'grid' ? (
                     <HoverCard
                       content={
@@ -266,20 +266,21 @@ export const SupporterView: React.FC = () => {
                         </div>
                       }
                     >
-                      <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full max-w-[80px] mx-auto flex items-center justify-center">
+                      <div className="h-48 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full mx-auto flex items-center justify-center">
+                        <div className="relative w-full h-full">
                         {item.image_url ? (
                           <Image 
                             src={item.image_url} 
                             alt={item.name}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 768px) 100vw, 120px"
+                            layout="fill"
+                            objectFit="contain"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
                             <Gift className="w-8 h-8" />
                           </div>
                         )}
+                        </div>
                       </div>
                       <div className="flex items-end justify-between pt-2">
                         <div className="flex flex-col items-start space-y-2">
