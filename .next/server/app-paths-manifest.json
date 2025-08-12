@@ -1,13 +1,13 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/[...slug]/page": "app/[...slug]/page.js",
-  "/api/enhance-item/route": "app/api/enhance-item/route.js",
-  "/api/places/details/route": "app/api/places/details/route.js",
-  "/api/migrate-cache/route": "app/api/migrate-cache/route.js",
-  "/api/places/autocomplete/route": "app/api/places/autocomplete/route.js",
   "/api/admin/schema/route": "app/api/admin/schema/route.js",
+  "/api/enhance-item/route": "app/api/enhance-item/route.js",
+  "/api/migrate-cache/route": "app/api/migrate-cache/route.js",
+  "/api/places/details/route": "app/api/places/details/route.js",
   "/api/scrape/route": "app/api/scrape/route.js",
+  "/api/scrape/reset-rate-limit/route": "app/api/scrape/reset-rate-limit/route.js",
   "/page": "app/page.js",
   "/supporter/page": "app/supporter/page.js",
-  "/api/scrape/reset-rate-limit/route": "app/api/scrape/reset-rate-limit/route.js"
+  "/api/places/autocomplete/route": "app/api/places/autocomplete/route.js"
 }

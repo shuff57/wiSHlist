@@ -267,13 +267,14 @@ export const SupporterView: React.FC = () => {
                       }
                     >
                       <div className="h-48 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden w-full mx-auto flex items-center justify-center">
-                        <div className="relative w-full h-full">
+                        <div className="w-full h-full">
                         {item.image_url ? (
                           <Image 
                             src={item.image_url} 
                             alt={item.name}
-                            layout="fill"
-                            objectFit="contain"
+                            width={160}
+                            height={160}
+                            className="w-full h-full object-cover"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-600">
