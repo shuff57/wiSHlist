@@ -62,6 +62,7 @@ export const WishlistEditView: React.FC = () => {
     shipping_state: '',
     shipping_zip: ''
   });
+  const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const [editedItemData, setEditedItemData] = useState<ItemDoc | null>(null);
@@ -417,40 +418,48 @@ export const WishlistEditView: React.FC = () => {
                   <GoogleAddressAutocomplete
                     placeholder="Type school name or address..."
                     preferSchools={true}
-                    onAddressSelect={(address: {
-                      name: string;
-                      address: string;
-                      city?: string;
-                      state?: string;
-                      zip?: string;
-                    }) => {
+                    onAddressSelect={(address) => {
+                      setSelectedAddress(address);
+                      const extractNumeric = (str: string) => str.replace(/[^0-9]/g, '');
+                      const shippingName = address.name || '';
+                      let shippingInfo = '';
+                      if (shippingName && extractNumeric(shippingName) !== extractNumeric(address.address)) {
+                        shippingInfo += `${shippingName}
+`;
+                      }
+                      shippingInfo += `${address.address}`;
+                      const cityState = address.city && address.state ? `${address.city}, ${address.state}` : `${address.city || ''}${address.state ? address.state : ''}`;
+                      shippingInfo += `
+${cityState} ${address.zip || ''}`;
+
                       setFormData({
                         ...formData,
-                        shipping_name: address.name || address.address || '',
-                        shipping_address: address.address || '',
+                        shipping_name: shippingName,
+                        shipping_address: address.address,
                         shipping_city: address.city || '',
                         shipping_state: address.state || '',
                         shipping_zip: address.zip || ''
                       });
-                      const cityState = address.city && address.state ? `${address.city}, ${address.state}` : `${address.city || ''}${address.state ? address.state : ''}`;
-                      const shippingInfo = `${address.name || ''}\n${address.address || ''}\n${cityState}\n${address.zip || ''}`;
+
                       if (wishlist) {
                         databases.updateDocument(databaseId, wishlistsCollectionId, wishlist.$id, {
-                          shipping_info: shippingInfo
+                          shipping_info: shippingInfo.trim()
                         });
-                        setWishlist(prev => prev ? { ...prev, shipping_info: shippingInfo } : null);
+                        setWishlist(prev => prev ? { ...prev, shipping_info: shippingInfo.trim() } : null);
                       }
                     }}
                     className="mt-1"
                   />
-                  <label className="block text-base font-medium text-gray-700 dark:text-gray-300 mt-2">Selected School/Address</label>
-                  <input
-                    type="text"
-                    value={formData.shipping_name}
-                    onChange={e => setFormData({ ...formData, shipping_name: e.target.value })}
-                    placeholder="School or address name"
-                    className="mt-1 w-full p-2 rounded bg-neutral-200 dark:bg-neutral-700 text-gray-900 dark:text-gray-200 focus:outline-none"
-                  />
+                  {selectedAddress && (
+                    <div className="mt-2 p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Selected Address:</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {selectedAddress.name && selectedAddress.name.replace(/[^0-9]/g, '') !== selectedAddress.address.replace(/[^0-9]/g, '') && <div>{selectedAddress.name}</div>}
+                        <div>{selectedAddress.address}</div>
+                        <div>{`${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.zip}`}</div>
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
               <div>

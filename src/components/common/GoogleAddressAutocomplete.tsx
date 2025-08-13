@@ -42,19 +42,21 @@ export const GoogleAddressAutocomplete: React.FC<GoogleAddressAutocompleteProps>
   } = useGeolocation();
   
   // Memoize the options to prevent unnecessary re-renders
+  const [searchType, setSearchType] = useState(preferSchools ? 'school' : 'establishment');
+
   const placesOptions = useMemo(() => ({
     userLatitude: latitude || undefined,
     userLongitude: longitude || undefined,
-    types: preferSchools ? ['school'] : ['establishment'],
+    types: [searchType],
     componentRestrictions: { country: 'us' }
-  }), [latitude, longitude, preferSchools]);
-  
-  const { 
-    suggestions, 
-    loading, 
-    debouncedSearch, 
+  }), [latitude, longitude, searchType]);
+
+  const {
+    suggestions,
+    loading,
+    debouncedSearch,
     getPlaceDetails,
-    parseAddress, 
+    parseAddress,
     clearSuggestions,
     isConfigured
   } = useGooglePlacesAutocomplete(placesOptions);
@@ -74,10 +76,16 @@ export const GoogleAddressAutocomplete: React.FC<GoogleAddressAutocompleteProps>
     const newValue = e.target.value;
     setQuery(newValue);
     setSelectedIndex(-1);
-    
+
     // If input is cleared, immediately hide suggestions
     if (newValue.length === 0) {
       setShowSuggestions(false);
+    }
+
+    // Fallback logic
+    if (preferSchools) {
+      const hasNumber = /\d/.test(newValue);
+      setSearchType(hasNumber ? 'geocode' : 'school');
     }
   };
 

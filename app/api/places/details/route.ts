@@ -28,6 +28,7 @@ function cleanSchoolName(name: string): string {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const placeId = searchParams.get('place_id');
+  const session_token = searchParams.get('session_token');
 
   if (!placeId) {
     return NextResponse.json(
@@ -46,9 +47,12 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(
-      `https://places.googleapis.com/v1/places/${placeId}`,
-      {
+    const url = new URL(`https://places.googleapis.com/v1/places/${placeId}`);
+    if (session_token) {
+      url.searchParams.append('sessionToken', session_token);
+    }
+
+    const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
           'X-Goog-Api-Key': apiKey,

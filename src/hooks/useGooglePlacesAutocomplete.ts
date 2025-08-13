@@ -56,6 +56,14 @@ export const useGooglePlacesAutocomplete = (options: UseGooglePlacesOptions = {}
   const debounceRef = useRef<NodeJS.Timeout>();
   const abortControllerRef = useRef<AbortController>();
   const currentSearchRef = useRef<string>('');
+  const sessionTokenRef = useRef<string>();
+
+  useEffect(() => {
+    // Generate a new session token when the hook is first used.
+    if (!sessionTokenRef.current) {
+      sessionTokenRef.current = crypto.randomUUID();
+    }
+  }, []);
 
   // Cleanup function to cancel pending requests and timeouts
   const cleanup = useCallback(() => {
@@ -88,6 +96,7 @@ export const useGooglePlacesAutocomplete = (options: UseGooglePlacesOptions = {}
       const params = new URLSearchParams({
         input: query,
         components: countryRestriction ? `country:${countryRestriction}` : '',
+        session_token: sessionTokenRef.current || '',
       });
 
       // Add location bias if user location is available
@@ -98,7 +107,7 @@ export const useGooglePlacesAutocomplete = (options: UseGooglePlacesOptions = {}
 
       // Add place types if specified
       if (placeTypes && placeTypes.length > 0) {
-        params.append('types', placeTypes.join('|'));
+        params.append('types', placeTypes.join(','));
       }
 
       const response = await fetch(
@@ -139,7 +148,11 @@ export const useGooglePlacesAutocomplete = (options: UseGooglePlacesOptions = {}
     try {
       const params = new URLSearchParams({
         place_id: placeId,
+        session_token: sessionTokenRef.current || '',
       });
+
+      // After getting details, the session is over. Clear the token.
+      sessionTokenRef.current = undefined;
 
       const response = await fetch(
         `/api/places/details?${params.toString()}`
@@ -219,7 +232,6 @@ export const useGooglePlacesAutocomplete = (options: UseGooglePlacesOptions = {}
   const parseAddress = useCallback((placeDetails: PlaceDetails): ParsedAddress => {
     const components = placeDetails.address_components;
     
-    // Extract address components
     const getComponent = (types: string[]) => {
       const component = components.find(comp => 
         types.some(type => comp.types.includes(type))
@@ -234,13 +246,26 @@ export const useGooglePlacesAutocomplete = (options: UseGooglePlacesOptions = {}
       return component?.short_name || '';
     };
 
-    // Build street address
     const streetNumber = getComponent(['street_number']);
     const route = getComponent(['route']);
-    const address = [streetNumber, route].filter(Boolean).join(' ') || placeDetails.formatted_address;
+    const subpremise = getComponent(['subpremise']);
+    
+    let address = [streetNumber, route].filter(Boolean).join(' ');
+    if (subpremise) {
+      address += `, ${subpremise}`;
+    }
+
+    if (!address) {
+      address = placeDetails.formatted_address.split(',')[0];
+    }
+
+    let name = placeDetails.name || '';
+    if (address.toLowerCase().includes(name.toLowerCase())) {
+      name = '';
+    }
 
     return {
-      name: placeDetails.name || '',
+      name,
       address,
       city: getComponent(['locality', 'sublocality']),
       state: getComponentShort(['administrative_area_level_1']),

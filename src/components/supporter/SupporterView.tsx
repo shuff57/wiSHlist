@@ -54,6 +54,15 @@ export const SupporterView: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const navigate = useNavigate();
 
+  const formatShippingInfo = (shippingInfo: string | undefined) => {
+    if (!shippingInfo) return '';
+    const parts = shippingInfo.split('\n');
+    if (parts.length > 1 && parts[0].toLowerCase() === parts[1].toLowerCase().split(',')[0]) {
+      return parts.slice(1).join('\n');
+    }
+    return shippingInfo;
+  };
+
   const fetchWishlistData = useCallback(async (key: string) => {
     const processedKey = key.trim(); // Normalize the key
     setError(''); // Clear any previous errors
@@ -213,7 +222,7 @@ export const SupporterView: React.FC = () => {
                 </div>
                 <div className="w-full md:w-1/2 bg-white dark:bg-neutral-800 rounded-lg shadow p-6 flex flex-col items-center justify-center h-full min-h-[180px]">
                   <span className="text-xl text-gray-700 dark:text-gray-200 font-semibold mb-1">Shipping Info:</span>
-                  <span className="text-lg text-gray-700 dark:text-gray-200 whitespace-pre-line mb-0">{wishlist.shipping_info}</span>
+                  <span className="text-lg text-gray-700 dark:text-gray-200 whitespace-pre-line mb-0">{formatShippingInfo(wishlist.shipping_info)}</span>
                 </div>
               </div>
             )}

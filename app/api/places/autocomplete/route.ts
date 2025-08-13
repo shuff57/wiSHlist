@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
   const radius = searchParams.get('radius');
   const types = searchParams.get('types');
   const components = searchParams.get('components');
+  const session_token = searchParams.get('session_token');
 
   if (!input || input.length < 3) {
     return NextResponse.json({ predictions: [] });
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
       requestBody.locationBias = {
         circle: {
           center: { latitude: lat, longitude: lng },
-          radius: parseInt(radius)
+          radius: parseFloat(radius)
         }
       };
     }
@@ -75,6 +76,10 @@ export async function GET(request: NextRequest) {
       if (countryMatch) {
         requestBody.regionCode = countryMatch[1].toUpperCase();
       }
+    }
+
+    if (session_token) {
+      requestBody.sessionToken = session_token;
     }
 
     const response = await fetch(
