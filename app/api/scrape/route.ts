@@ -268,8 +268,9 @@ async function enhanceItemWithAI(metadata: any, searchContext?: string): Promise
     }
 
     // Dynamic import for server-side usage
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const geminiModelId = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+  const model = genAI.getGenerativeModel({ model: geminiModelId });
 
     const prompt = `
 You are an AI assistant helping parents understand classroom supply needs. Your goal is to create clear, brand-independent item names and practical descriptions for educational materials.
